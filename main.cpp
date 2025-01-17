@@ -3,6 +3,8 @@
 
 #include "gameConst.h"
 
+Font codingfont;
+Font codingfontbold;
 
 enum sidebarstate {
 	Code,
@@ -12,6 +14,9 @@ enum sidebarstate {
 
 std::vector<char*> textboxes;
 
+Vector2 mousepos;
+
+
 void DrawCodeTab()
 {
 	static bool editing = false;
@@ -19,9 +24,9 @@ void DrawCodeTab()
 	static short int startpos = 0;
 	static short int chosenblock = 0;
 	static short int chosentext = 0;
-	static float codeblockheight = (windowheight - sidebarbuttonheight - textinputheight) / codeblocks;
+	static double codeblockheight = (windowheight - sidebarbuttonheight - textinputheight) / (double)codeblocks;
 
-
+	
 	//CODE SUBMISSION
 	if (GuiTextBox({ windowwidth - sidebarwidth,windowheight - textinputheight,sidebarwidth,textinputheight }, text, textinputsize, true))
 	{
@@ -63,6 +68,7 @@ void DrawCodeTab()
 		}
 	}
 
+	//EDITING MODE TOGGLE
 	if (editing == false)
 	{
 		if (chosentext < textboxes.size())
@@ -117,12 +123,19 @@ void DrawCodeTab()
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
 		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight + i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);
+		DrawRectangle(codeblock.x, codeblock.y, 65, codeblockheight, { 255, 71, 26,255});
 		DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
 		if (textboxes.size() > startpos + i)
 		{
-			DrawText(textboxes[startpos + i], codeblock.x + sidebarwidth/10, codeblock.y + 5, textinputfontsize, BLACK);
+			DrawTextEx(codingfontbold, textboxes[startpos + i], { codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight*0.4) }, textinputfontsize,3, WHITE);
 		}
-		DrawText(TextFormat("%d",(startpos + i)),codeblock.x+10, codeblock.y+codeblockheight/3, textinputfontsize / 2, WHITE);
+		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 3) }, textinputfontsize,3, WHITE);
+
+		if (CheckCollisionPointRec(mousepos, codeblock) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			chosenblock = i;
+			chosentext = i + startpos;
+		}
 	}
 
 }
@@ -151,9 +164,16 @@ int main()
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
 	SetTargetFPS(144);
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
+	GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 1);
+
+	codingfont = LoadFont("./fonts/dina10px.ttf");
+	codingfontbold = LoadFont("./fonts/dina10pxbold.ttf");
+	GuiSetFont(codingfont);
 
 	while (!WindowShouldClose())
 	{
+		mousepos = GetMousePosition();
 		BeginDrawing();
 		ClearBackground(WHITE);
 
