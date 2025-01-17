@@ -2672,8 +2672,8 @@ int GuiTextBox(Rectangle bounds, char* text, int bufferSize, bool editMode)
             //if (multiline) cursor.y = GetTextLines()
 
             // Finish text editing on ENTER or mouse click outside bounds
-            if ((!multiline && IsKeyPressed(KEY_ENTER)) ||
-                (!CheckCollisionPointRec(mousePosition, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
+            if ((!multiline && IsKeyPressed(KEY_ENTER))) 
+                // ||(!CheckCollisionPointRec(mousePosition, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)))
             {
                 textBoxCursorIndex = 0;     // GLOBAL: Reset the shared cursor index
                 result = 1;
