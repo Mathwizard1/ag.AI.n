@@ -1,4 +1,6 @@
 #pragma once
+#define windowwidth 1600
+#define windowheight 800
 
-constexpr int screenWidth = 800;
-constexpr int screenHeight = 450;
+#define sidebarwidth 400
+#define sidebarbuttonheight 50
