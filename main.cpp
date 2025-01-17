@@ -1,5 +1,3 @@
-#include <iostream>
-#include <vector>
 #include <raylib.h>
 #include "Raygui.h"
 
@@ -16,6 +14,7 @@ std::vector<char*> textboxes;
 
 void DrawCodeTab()
 {
+	static bool editing = false;
 	static char text[textinputsize] = "";
 	static short int startpos = 0;
 	static short int chosenblock = 0;
@@ -52,13 +51,27 @@ void DrawCodeTab()
 		//Iterate Codeblocks
 		if (chosenblock < codeblocks - 1)
 		{
+			editing = false;
 			chosentext++;
 			chosenblock++;
 		}
 		else if (textboxes.size() + 1 > codeblocks)
 		{
+			editing = false;
 			chosentext++;
 			startpos++;
+		}
+	}
+
+	if (editing == false)
+	{
+		if (chosentext < textboxes.size())
+		{
+			for (int x = 0; x < textinputsize; x++)
+			{
+				text[x] = textboxes[chosentext][x];
+			}
+			editing = true;
 		}
 	}
 
@@ -67,11 +80,15 @@ void DrawCodeTab()
 	{
 		if (chosenblock == 0 && startpos > 0)
 		{
+			text[0] = '\0';
+			editing = false;
 			startpos -= 1;
 			chosentext--;
 		}
 		else if (chosenblock > 0)
 		{
+			text[0] = '\0';
+			editing = false;
 			chosentext--;
 			chosenblock--;
 		}
@@ -80,11 +97,15 @@ void DrawCodeTab()
 	{
 		if (chosenblock == codeblocks - 1)
 		{
+			text[0] = '\0';
+			editing = false;
 			chosentext++;
 			startpos += 1;
 		}
 		else
 		{
+			text[0] = '\0';
+			editing = false;
 			chosentext++;
 			chosenblock++;
 		}
@@ -103,6 +124,7 @@ void DrawCodeTab()
 		}
 		DrawText(TextFormat("%d",(startpos + i)),codeblock.x+10, codeblock.y+codeblockheight/3, textinputfontsize / 2, WHITE);
 	}
+
 }
 
 void DrawSidebar()

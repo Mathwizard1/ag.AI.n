@@ -1,12 +1,14 @@
 #pragma once
-#define windowwidth 1600
-#define windowheight 800
 
-#define sidebarwidth 550
-#define sidebarbuttonheight 50
+#include <iostream>
+#include <vector>
 
-#define textinputheight 50
 
-#define codeblocks 20
-#define textinputsize 100
-#define textinputfontsize 25
+constexpr int windowwidth = 1600;
+constexpr int windowheight = 800;
+constexpr int sidebarwidth = 550;
+constexpr int sidebarbuttonheight = 50;
+constexpr int textinputheight = 50;
+constexpr int codeblocks = 20;
+constexpr int textinputsize = 100;
+constexpr int textinputfontsize = 25;
