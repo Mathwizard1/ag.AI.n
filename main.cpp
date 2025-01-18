@@ -1,8 +1,7 @@
 #include <raylib.h>
 #include "Raygui.h"
-
 #include "gameConst.h"
-
+using namespace std;
 Font codingfont;
 Font codingfontbold;
 
@@ -296,4 +295,5 @@ int main()
 
 		EndDrawing();
 	}
+
 }

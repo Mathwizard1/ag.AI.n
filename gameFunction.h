@@ -3,5 +3,7 @@
 
 class gameFunction
 {
+public:
+	pair<bool, string> NameGenerator();
 };
 

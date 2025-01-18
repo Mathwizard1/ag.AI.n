@@ -1,7 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include<fstream>
+#include<stdlib.h>
 #include <vector>
+#include<string>
 
 
 constexpr int windowwidth = 1600;
