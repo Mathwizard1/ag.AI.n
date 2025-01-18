@@ -25,6 +25,7 @@ public:
 	pair<short int, short int> pos;
 
 	vector<char*> code;
+	vector<short int> linesize;
 
 	char* name;
 

@@ -170,6 +170,7 @@ void DrawCodeTab()
 		chosentext = 0;
 		chosencode = chosenperson;
 		textboxes = workers[chosenperson].code;
+		textsizes = workers[chosenperson].linesize;
 	}
 	
 	//CODE SUBMISSION
@@ -298,6 +299,7 @@ void DrawCodeTab()
 	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
 	{
 		workers[chosenperson].code = textboxes;
+		workers[chosenperson].linesize = textsizes;
 	}
 
 	//DRAWING NAME BANNER
