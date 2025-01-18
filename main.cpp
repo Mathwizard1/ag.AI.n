@@ -13,9 +13,118 @@ enum sidebarstate {
 } SidebarState;
 
 std::vector<char*> textboxes;
+std::vector<std::vector<short int>> grid;
 
 Vector2 mousepos;
 
+/*
+Colors:
+1->Lunch Area (Yellow)
+2->Work Area (Green)
+3->Reception (Blue)
+4->Boss (Red)
+
+*/
+
+void InitializeGrid(short int width, short int height)
+{
+	for (int y = 0; y < height; y++)
+	{
+		std::vector<short int> row;
+		for (int x = 0; x < width; x++)
+		{
+			if (x >0.05 * width && x < 0.5 * width)
+			{
+				if (y < 0.2 * height)
+				{
+					row.push_back(1);
+					continue;
+				}
+				if (y > 0.5 * height)
+				{
+					row.push_back(2);
+					continue;
+				}
+			}
+
+			else if (x > 0.6 * width && x < 0.9 * width)
+			{
+				if (y < 0.2 * height)
+				{
+					row.push_back(3);
+					continue;
+				}
+
+				if (y > 0.7 * height)
+				{
+					row.push_back(4);
+					continue;
+				}
+			}
+
+			
+			row.push_back(0);
+		}
+		grid.push_back(row);
+	}
+}
+
+void DrawMainScreen()
+{
+	static short int gridheight = grid.size()+2;
+	static short int gridwidth = grid[0].size()+2;
+	static float linewidth = (windowwidth - sidebarwidth) / (float)gridwidth;
+	static float lineheight = (windowheight) / (float)gridheight;
+
+	//Draw Cells
+	Color color=WHITE;
+	for (int y = 0; y < gridheight; y++)
+	{
+		for (int x = 0; x < gridwidth; x++)
+		{
+			if (x == 0 || x == gridwidth - 1 || y == 0 || y == gridheight - 1)
+				color = BROWN;
+			else
+			switch (grid[y-1][x-1])
+			{
+			case 0:
+				color = WHITE;
+				break;
+			case 1:
+				color = YELLOW;
+				break;
+			case 2:
+				color = GREEN;
+				break;
+			case 3:
+				color = BLUE;
+				break;
+			case 4:
+				color = RED;
+				break;
+			}
+
+			if ((x == 0 || x == gridwidth - 1) && y > (int)(gridheight * 0.3) && y < (int)(gridheight * 0.6))
+				color = {0,205,255,255};
+
+			DrawRectangleRec({ x * linewidth, y * lineheight, linewidth, lineheight }, color);
+		}
+	}
+
+	
+
+
+	//Draw Grid
+	for (int x = 0; x < gridwidth; x++)
+	{
+		DrawLineEx({ x * linewidth, 0 }, { x * linewidth, windowheight }, 2, BLACK);
+	}
+	for (int y = 0; y < gridheight; y++)
+	{
+		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth,y * lineheight }, 2, BLACK);
+	}
+
+}
 
 void DrawCodeTab()
 {
@@ -123,13 +232,13 @@ void DrawCodeTab()
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
 		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight + i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);
-		DrawRectangle(codeblock.x, codeblock.y, 65, codeblockheight, { 255, 71, 26,255});
+		DrawRectangle(codeblock.x, codeblock.y, 55, codeblockheight, GRAY);
 		DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
 		if (textboxes.size() > startpos + i)
 		{
 			DrawTextEx(codingfontbold, textboxes[startpos + i], { codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight*0.4) }, textinputfontsize,3, WHITE);
 		}
-		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 3) }, textinputfontsize,3, WHITE);
+		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 2.5) }, textinputfontsize-5,3, WHITE);
 
 		if (CheckCollisionPointRec(mousepos, codeblock) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
@@ -163,13 +272,18 @@ int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
 	SetTargetFPS(144);
+
+	//Flags
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
 	GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 1);
 
+	//Set Font
 	codingfont = LoadFont("./fonts/dina10px.ttf");
 	codingfontbold = LoadFont("./fonts/dina10pxbold.ttf");
 	GuiSetFont(codingfont);
+
+	InitializeGrid(20,20);
 
 	while (!WindowShouldClose())
 	{
@@ -178,7 +292,7 @@ int main()
 		ClearBackground(WHITE);
 
 		DrawSidebar();
-
+		DrawMainScreen();
 
 		EndDrawing();
 	}
