@@ -1,43 +1,111 @@
 #include "gameMaster.h"
 
-#include <ctype.h>
-
 void gameMaster::tokenPrinter(std::vector<std::string>& tokens)
 {
 	for (auto &token : tokens)
 	{
-		std::cout << token << "|";
+		std::cout << token << "/";
+	}
+	std::cout << " size:" << tokens.size() << '\n';
+	if (nonPairedEntity)
+	{
+		std::cout << "Not paired brackets\n";
 	}
 	std::cout << '\n';
-	std::cout << tokens.size() << '\n';
 }
 
-void gameMaster::tokenizer(std::string& instruction, std::vector<std::string>& tokensList)
+void gameMaster::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
 {
-	std::string cleanInstruction = "";
-	for (char &c : instruction)
+	std::string cleanString = "";
+	std::string specialString = "";
+
+	std::string paired_paran = "";
+	nonPairedEntity = false;
+
+
+	for (int i = 0; i < instructionSize; i++)
 	{
-		if (c != delimiter)
+		char c = instruction[i];
+
+		// delimiter not there
+		if(delimiter.find(c) == delimiter.end())
 		{
-			if (invalidChar.find(c) == invalidChar.end())
+			// not special characters
+			if (specialOp.find(c) == specialOp.end())
 			{
-				cleanInstruction += tolower(c);
+				// Add the previous specialString first
+				if (! specialString.empty())
+				{
+					tokensList.push_back(specialString);
+					specialString.clear();
+				}
+
+				cleanString += std::tolower(c);
+			}
+			else
+			{
+				// Add the previous cleanString first
+				if (! cleanString.empty())
+				{
+					tokensList.push_back(cleanString);
+					cleanString.clear();
+				}
+
+				specialString += c;
 			}
 		}
+		// delimiter there
 		else
 		{
-			std::cout << "\n";
-			if (! cleanInstruction.empty())
+			// only check for '(', ')'
+			if (c == paran_smooth.second)
 			{
-				tokensList.push_back(cleanInstruction);
-				cleanInstruction = "";
+				int count = paired_paran.size();
+				if (count > 0 && paired_paran.back() == paran_smooth.first)
+				{
+					paired_paran.pop_back();
+				}
+				else if (count == 0)
+				{
+					nonPairedEntity = true;
+				}
+			}
+			else if(c == paran_smooth.first)
+			{
+				paired_paran += c;
+			}
+
+			if (! specialString.empty())
+			{
+				tokensList.push_back(specialString);
+				specialString.clear();
+			}
+
+			if (! cleanString.empty())
+			{
+				tokensList.push_back(cleanString);
+				cleanString.clear();
 			}
 		}
 	}
 
-	if (! cleanInstruction.empty())
+	if (paired_paran.size() > 0) 
+	{ 
+		nonPairedEntity = true; 
+	}
+
+	// Comparator will be in between
+	if (! specialString.empty())
 	{
-		tokensList.push_back(cleanInstruction);
+		tokensList.push_back(specialString);
+		specialString.clear();
+	}
+
+	// others
+	if (! cleanString.empty())
+	{
+		tokensList.push_back(cleanString);
+		cleanString.clear();
 	}
 }
 
@@ -46,15 +114,17 @@ gameMaster::gameMaster()
 
 }
 
-void gameMaster::getCode(std::vector<std::string> InstructionList)
+void gameMaster::getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes)
 {
-	for (auto &instruction : InstructionList)
+	std::vector<std::string> tokens;
+
+	for (int i = 0; i < listSize; i++)
 	{
-		std::vector<std::string> tokens;
 
-		tokenizer(instruction, tokens);
+		tokenizer(instructionList[i], instructionSizes[i], tokens);
+
 		tokenPrinter(tokens);
-
+		tokens.clear();
 	}
 }
 
