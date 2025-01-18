@@ -1387,7 +1387,7 @@ static int autoCursorDelayCounter = 0;          // Delay frame counter for autom
 //
 // guiStyle size is by default: 16*(16 + 8) = 384*4 = 1536 bytes = 1.5 KB
 //----------------------------------------------------------------------------------
-static unsigned int guiStyle[RAYGUI_MAX_CONTROLS * (RAYGUI_MAX_PROPS_BASE + RAYGUI_MAX_PROPS_EXTENDED)] = { 0 };
+static unsigned int guiStyle[RAYGUI_MAX_CONTROLS * (RAYGUI_MAX_PROPS_BASE + RAYGUI_MAX_PROPS_EXTENDED)] = { 0};
 
 static bool guiStyleLoaded = false;         // Style loaded flag for lazy style initialization
 
