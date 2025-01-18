@@ -42,4 +42,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="malenames.txt" />
+    <Text Include="femalenames.txt" />
+  </ItemGroup>
 </Project>
