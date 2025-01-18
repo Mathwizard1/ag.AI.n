@@ -3,7 +3,7 @@
 
 #include "worker.h"
 #include "gameConst.h"
-
+using namespace std;
 Font codingfont;
 Font codingfontbold;
 
@@ -325,4 +325,5 @@ int main()
 
 		EndDrawing();
 	}
+
 }
