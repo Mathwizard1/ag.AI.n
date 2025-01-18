@@ -1,5 +1,4 @@
 #include "gameFunction.h"
-using namespace std;
 
 
 pair<bool, string> gameFunction::NameGenerator() {
@@ -11,10 +10,11 @@ pair<bool, string> gameFunction::NameGenerator() {
 		malenames.push_back(name);
 	}
 	file.close();
-	ifstream file("femalenames.txt");
-	while (getline(file, name)) {
+	ifstream file2("femalenames.txt");
+	while (getline(file2, name)) {
 		femalenames.push_back(name);
 	}
+	file2.close();
 	if (rand() / (float)(RAND_MAX) > 0.5) {
 		int ind = (int)(rand() / (double)RAND_MAX * femalenames.size());
 		return { 1, femalenames[ind] };

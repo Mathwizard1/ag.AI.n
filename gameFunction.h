@@ -1,5 +1,6 @@
 #pragma once
 #include "gameConst.h"
+using namespace std;
 
 class gameFunction
 {

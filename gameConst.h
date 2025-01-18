@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include <vector>
 #include<string>
+#include<math.h>
 
 
 constexpr int windowwidth = 1600;
