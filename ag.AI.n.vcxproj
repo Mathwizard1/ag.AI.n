@@ -141,12 +141,9 @@
     <ClInclude Include="food.h" />
     <ClInclude Include="gameConst.h" />
     <ClInclude Include="gameFunction.h" />
+    <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="worker.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="femalenames.txt" />
-    <Text Include="malenames.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
