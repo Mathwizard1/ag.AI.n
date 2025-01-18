@@ -4,6 +4,9 @@
 #include "worker.h"
 #include "gameConst.h"
 using namespace std;
+
+short int chosenperson = 0;
+
 Font codingfont;
 Font codingfontbold;
 
@@ -80,7 +83,14 @@ void DrawWorkers(float linewidth,float lineheight)
 	{
 		Vector2 workerpos = { (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2) };
 		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
-		DrawTextEx(codingfontbold, TextFormat("%s", workers[x].name), { workerpos.x+linewidth/3,workerpos.y - lineheight*0.5f-10.0f }, 18, 3, BLACK);
+		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[x].name,workers[x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
+
+		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth / 2, lineheight / 2) - 2))
+		{
+			DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 200,100,255,255 });
+			if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			chosenperson = x;
+		}
 	}
 }
 
@@ -119,7 +129,7 @@ void DrawMainScreen()
 				break;
 			}
 
-			if ((x == 0 || x == gridwidth - 1) && y > (int)(gridheight * 0.3) && y < (int)(gridheight * 0.6))
+			if ((x == 0 || x == gridwidth - 1) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
 				color = {0,205,255,255};
 
 			DrawRectangleRec({ x * linewidth, y * lineheight, linewidth, lineheight }, color);
@@ -149,8 +159,18 @@ void DrawCodeTab()
 	static short int startpos = 0;
 	static short int chosenblock = 0;
 	static short int chosentext = 0;
-	static double codeblockheight = (windowheight - sidebarbuttonheight - textinputheight) / (double)codeblocks;
+	static short int chosencode = 0;
+	static double codeblockheight = (windowheight - sidebarbuttonheight - textinputheight-textsavebuttonheight-namebannersize) / (double)codeblocks;
 
+	//CODE CHANGE FOR DIFFERENT PERSON
+	if (chosencode != chosenperson)
+	{
+		chosenblock = 0;
+		startpos = 0;
+		chosentext = 0;
+		chosencode = chosenperson;
+		textboxes = workers[chosenperson].code;
+	}
 	
 	//CODE SUBMISSION
 	if (GuiTextBox({ windowwidth - sidebarwidth,windowheight - textinputheight,sidebarwidth,textinputheight }, text, textinputsize, true))
@@ -256,7 +276,7 @@ void DrawCodeTab()
 	for (int i = 0; i < codeblocks; i++)
 	{
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
-		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight + i * codeblockheight, sidebarwidth, codeblockheight };
+		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight +namebannersize+ i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);
 		DrawRectangle(codeblock.x, codeblock.y, 55, codeblockheight, GRAY);
 		DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
@@ -273,6 +293,15 @@ void DrawCodeTab()
 		}
 	}
 
+	//DRAWING SAVE BUTTON
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
+	{
+		workers[chosenperson].code = textboxes;
+	}
+
+	//DRAWING NAME BANNER
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight, sidebarwidth, namebannersize, DARKGRAY);
+	DrawTextEx(codingfontbold, workers[chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
 }
 
 void DrawSidebar()
@@ -315,7 +344,7 @@ int main()
 	InitializeGrid(20,20);
 
 	//Add 10 random workers
-	for (int x = 0; x < 10; x++)
+	for (int x = 0; x < 20; x++)
 	{
 		workers.push_back(Worker(rand() * 18 / RAND_MAX + 1, rand() * 18 / RAND_MAX + 1));
 	}

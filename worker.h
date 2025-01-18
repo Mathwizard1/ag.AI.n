@@ -7,6 +7,7 @@
 class Worker
 {
 public:
+
 	double energy;
 	double productivity;
 	double mood;
@@ -23,10 +24,13 @@ public:
 
 	pair<short int, short int> pos;
 
+	vector<char*> code;
+
 	char* name;
 
 	bool gender;
 
+	//Constructors
 	Worker(short int x = 0, short int y = 0) {
 		this->energy = 50;
 		this->productivity = 80;
@@ -39,7 +43,6 @@ public:
 		this->mood = (3 * energy + 5 * health) / 8;
 		this->pos = { x,y };
 	}
-
 	Worker(bool gender, char* name, short int x=0, short int y=0) {
 		this->energy = 50;
 		this->productivity = 80;
@@ -51,6 +54,10 @@ public:
 		this->mood = (3 * energy + 5 * health) / 8;
 		this->pos = { x,y };
 	}
+
+
+
+	//Functions
 	void eat(Food food);
 	void pathfind();
 	void give();
