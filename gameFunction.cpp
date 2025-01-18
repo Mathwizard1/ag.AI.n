@@ -1,24 +1,31 @@
 #include "gameFunction.h"
 
+vector<string> malenames;
+vector<string> femalenames;
 
-pair<bool, string> gameFunction::NameGenerator() {
-	static vector<string> malenames;
-	static vector<string> femalenames;
-	string name;
-	ifstream file("malenames.txt");
-	while (getline(file, name)) {
-		malenames.push_back(name);
+pair<bool, char*> gameFunction::NameGenerator() {
+	if (malenames.size() == 0)
+	{
+		string name;
+		ifstream file("./names/malenames.txt");
+		while (getline(file, name)) {
+			malenames.push_back(name);
+		}
+		file.close();
+		ifstream file2("./names/femalenames.txt");
+		while (getline(file2, name)) {
+			femalenames.push_back(name);
+		}
+		file2.close();
+
 	}
-	file.close();
-	ifstream file2("femalenames.txt");
-	while (getline(file2, name)) {
-		femalenames.push_back(name);
-	}
-	file2.close();
+
+	char* name = (char*)malloc(sizeof(char) * 20);
+
 	if (rand() / (float)(RAND_MAX) > 0.5) {
-		int ind = (int)(rand() / (double)RAND_MAX * femalenames.size());
-		return { 1, femalenames[ind] };
+		int ind =rand()%femalenames.size();
+		return { 1, strcpy(name, femalenames[ind].c_str()) };
 	}
-	int ind = (int)(rand() / (double)RAND_MAX * malenames.size());
-	return { 0, malenames[ind] };
+	int ind = rand() % malenames.size();
+	return { 0, strcpy(name, malenames[ind].c_str()) };
 }

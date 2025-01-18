@@ -74,10 +74,14 @@ void InitializeGrid(short int width, short int height)
 	}
 }
 
-void DrawWorkers(double linewidth,double lineheight)
+void DrawWorkers(float linewidth,float lineheight)
 {
-	for(int x=0;x<workers.size();x++)
-		DrawCircleV({ (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2 )}, min(linewidth / 2, lineheight / 2) - 2, {100,100,255,255});
+	for (int x = 0; x < workers.size(); x++)
+	{
+		Vector2 workerpos = { (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2) };
+		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
+		DrawTextEx(codingfontbold, TextFormat("%s", workers[x].name), { workerpos.x+linewidth/3,workerpos.y - lineheight*0.5f-10.0f }, 18, 3, BLACK);
+	}
 }
 
 void DrawMainScreen()
@@ -126,11 +130,11 @@ void DrawMainScreen()
 	//Draw Grid
 	for (int x = 0; x < gridwidth; x++)
 	{
-		DrawLineEx({ x * linewidth, 0 }, { x * linewidth, windowheight }, 2, BLACK);
+		DrawLineEx({ x * linewidth, 0 }, { x * linewidth, windowheight }, 1, BLACK);
 	}
 	for (int y = 0; y < gridheight; y++)
 	{
-		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth,y * lineheight }, 2, BLACK);
+		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth,y * lineheight }, 1, BLACK);
 	}
 
 	DrawWorkers(linewidth,lineheight);
@@ -311,8 +315,10 @@ int main()
 	InitializeGrid(20,20);
 
 	//Add 10 random workers
-	for(int x=0;x<10;x++)
-	workers.push_back(Worker("Rahul", "Male", rand()*18/RAND_MAX+1, rand()*18/RAND_MAX+1));
+	for (int x = 0; x < 10; x++)
+	{
+		workers.push_back(Worker(rand() * 18 / RAND_MAX + 1, rand() * 18 / RAND_MAX + 1));
+	}
 
 	while (!WindowShouldClose())
 	{
