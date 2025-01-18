@@ -11,6 +11,7 @@
 constexpr int windowwidth = 1600;
 constexpr int windowheight = 800;
 
+constexpr int screenbuffer = 2;
 constexpr int sidebarwidth = 550;
 constexpr int sidebarbuttonheight = 50;
 
