@@ -290,6 +290,7 @@ void DrawCodeTab()
 		{
 			chosenblock = i;
 			chosentext = i + startpos;
+			editing = false;
 		}
 	}
 
@@ -357,6 +358,7 @@ int main()
 
 		DrawSidebar();
 		DrawMainScreen();
+		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
 
 		EndDrawing();
 	}
