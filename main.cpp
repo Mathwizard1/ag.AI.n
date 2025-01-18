@@ -1,5 +1,7 @@
 #include <raylib.h>
 #include "Raygui.h"
+
+#include "worker.h"
 #include "gameConst.h"
 using namespace std;
 Font codingfont;
@@ -12,7 +14,11 @@ enum sidebarstate {
 } SidebarState;
 
 std::vector<char*> textboxes;
+std::vector<short int> textsizes;
 std::vector<std::vector<short int>> grid;
+std::vector<Worker> workers;
+std::vector<Worker> bosses;
+std::vector<Worker> receptionists;
 
 Vector2 mousepos;
 
@@ -68,6 +74,12 @@ void InitializeGrid(short int width, short int height)
 	}
 }
 
+void DrawWorkers(double linewidth,double lineheight)
+{
+	for(int x=0;x<workers.size();x++)
+		DrawCircleV({ (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2 )}, min(linewidth / 2, lineheight / 2) - 2, {100,100,255,255});
+}
+
 void DrawMainScreen()
 {
 	static short int gridheight = grid.size()+2;
@@ -110,8 +122,6 @@ void DrawMainScreen()
 		}
 	}
 
-	
-
 
 	//Draw Grid
 	for (int x = 0; x < gridwidth; x++)
@@ -123,12 +133,15 @@ void DrawMainScreen()
 		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth,y * lineheight }, 2, BLACK);
 	}
 
+	DrawWorkers(linewidth,lineheight);
+
 }
 
 void DrawCodeTab()
 {
 	static bool editing = false;
 	static char text[textinputsize] = "";
+	static short int textsize = 0;
 	static short int startpos = 0;
 	static short int chosenblock = 0;
 	static short int chosentext = 0;
@@ -144,12 +157,20 @@ void DrawCodeTab()
 		for (int x = 0; x < textinputsize; x++)
 		{
 			sendtext[x] = text[x];
+			if (text[x] == NULL)
+			{
+				textsize = x;
+				break;
+			}
 			text[x] = NULL;
 		}
 
 		//Choose to edit text or enter new text
 		if (chosentext < textboxes.size())
+		{
 			textboxes[chosentext] = sendtext;
+			textsizes[chosentext] = textsize;
+		}
 		else
 		{
 			for (int x = textboxes.size(); x <=chosentext; x++)
@@ -157,8 +178,10 @@ void DrawCodeTab()
 				char* temptext = (char*)malloc(sizeof(char) * textinputsize);
 				temptext[0]='\0';
 				textboxes.push_back(temptext);
+				textsizes.push_back(0);
 			}
 			textboxes[chosentext] = sendtext;
+			textsizes[chosentext] = textsize;
 		}
 
 		//Iterate Codeblocks
@@ -235,7 +258,7 @@ void DrawCodeTab()
 		DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
 		if (textboxes.size() > startpos + i)
 		{
-			DrawTextEx(codingfontbold, textboxes[startpos + i], { codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight*0.4) }, textinputfontsize,3, WHITE);
+			DrawTextEx(codingfontbold, textboxes[startpos + i], { codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight*0.4) }, textinputfontsize-2*(textsizes[startpos+i]/12), 3, WHITE);
 		}
 		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 2.5) }, textinputfontsize-5,3, WHITE);
 
@@ -272,6 +295,8 @@ int main()
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
 	SetTargetFPS(144);
 
+	srand(time(NULL));
+
 	//Flags
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
@@ -281,8 +306,13 @@ int main()
 	codingfont = LoadFont("./fonts/dina10px.ttf");
 	codingfontbold = LoadFont("./fonts/dina10pxbold.ttf");
 	GuiSetFont(codingfont);
-
+	
+	//Initialize Grid
 	InitializeGrid(20,20);
+
+	//Add 10 random workers
+	for(int x=0;x<10;x++)
+	workers.push_back(Worker("Rahul", "Male", rand()*18/RAND_MAX+1, rand()*18/RAND_MAX+1));
 
 	while (!WindowShouldClose())
 	{
