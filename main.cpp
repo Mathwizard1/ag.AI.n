@@ -14,7 +14,7 @@ enum sidebarstate {
 } SidebarState;
 
 std::vector<char*> textboxes;
-std::vector<int> textsizes;
+std::vector<short int> textsizes;
 std::vector<std::vector<short int>> grid;
 std::vector<Worker> workers;
 std::vector<Worker> bosses;
