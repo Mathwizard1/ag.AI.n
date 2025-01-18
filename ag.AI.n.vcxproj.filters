@@ -41,6 +41,9 @@
     <ClInclude Include="food.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pathfinding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="malenames.txt" />
