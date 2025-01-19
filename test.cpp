@@ -5,18 +5,19 @@ int main()
 	gameMaster gm;
 
 	std::vector<const char*> stringList = {
-		//"work 10",
-		"if($rahul.working ==) {",
-		"if =true) ",
-		"Goto ( 10 )",
-		"Zone $ lunch)",
-		"break ( 5"
+		"work",
+		"if $me.energy < 30 {",
+		"goto $zone.lunch ",
+		"eat",
+		"goto $me.workplace }",
+		"jump !somewhere"
 	};
 
-	std::vector<short int> listSize = { 29, 13, 12, 13, 10 };
+	std::vector<short int> listSize = {5, 21, 18, 4, 21, 16};
 	int Lsize = listSize.size();
 
 	gm.getCode(stringList, Lsize, listSize);
+	//gm.processCode();
 
 	return 0;
 }
