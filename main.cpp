@@ -50,6 +50,7 @@ Colors:
 4->Boss (Red)
 
 */
+
 void ChangeWorkerPositions()
 {
 	for (int x = 0; x < workers.size(); x++)
@@ -582,8 +583,6 @@ int main()
 	codingfontbold = LoadFont("./fonts/dina10pxbold.ttf");
 	GuiSetFont(codingfont);
 
-	SidebarState = Shop;
-	
 	//Initialize Grid
 	InitializeGrid(40,40,0);
 	InitializeShop();
@@ -609,13 +608,12 @@ int main()
 			ChangeWorkerPositions();
 		}
 
-
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-
 		DrawMainScreen();
 		DrawSidebar();
+		DrawTextEx(codingfontbold, TextFormat("$%d",totalmoney), { windowwidth *0.25,20 }, 30, 4, GREEN);
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
 
 		EndDrawing();
