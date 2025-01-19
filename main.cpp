@@ -46,6 +46,8 @@ void ChangeWorkerPositions()
 	{
 		if (workers[x].path.size() > 0)
 		{
+
+			//the last part about adding a statement for handling the situation for if the obstacle being present is left; rest is done		
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
