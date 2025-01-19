@@ -33,10 +33,6 @@ std::vector<char*> textboxes;
 std::vector<short int> textsizes;
 std::vector<std::vector<short int>> grid;
 
-std::vector<Worker> workers;
-std::vector<Worker> bosses;
-std::vector<Worker> receptionists;
-
 std::vector<tuple<Color, char*, int>> areaitems;
 std::vector<short int> areacolors;
 
@@ -60,6 +56,8 @@ void ChangeWorkerPositions()
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
+
+		workers[x].callFunction();
 	}
 }
 
@@ -588,10 +586,10 @@ int main()
 	InitializeShop();
 
 	//Add random workers
-	for (int x = 0; x < 20; x++)
+	for (int x = 0; x < 1; x++)
 	{
 		workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
-		workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
+		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	}
 
 	//SET GAMETIME

@@ -1,4 +1,5 @@
 #include "gameMaster.h"
+#include <stdexcept>
 
 void gameMaster::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
 {
@@ -108,18 +109,84 @@ void gameMaster::getCode(std::vector<const char*> instructionList, int listSize,
 	}
 }
 
-int gameMaster::process(int tokenS, int tokenE)
+int gameMaster::genericProcess(std::string genericVal)
 {
-	gameLexers expectToken = gameLexers::none;
+	std::string value = "";
+	std::string attribute = "";
 
-	for (int t = tokenS; t < tokenE; t++)
+	bool attributePresent = false;
+
+	for (int c = 0; c < genericVal.size(); c++)
 	{
-
+		if (!attributePresent && genericVal[c] == genericAttribute)
+		{
+			attributePresent = true;
+		}
+		else if (attributePresent)
+		{
+			attribute += genericVal[c];
+		}
+		else
+		{
+			value += genericVal[c];
+		}
 	}
+
+
+
+	
+	return 0;
 }
 
-void gameMaster::processCode()
+int gameMaster::expressionProcess(int lhs, int rhs, std::string Opr)
 {
-	int tokenE = parsedTokens.size();
-	process(0, tokenE);
+	if (Opr == "==")
+	{
+		return (lhs == rhs);
+	}
+	else if (Opr == "!=")
+	{
+		return (lhs != rhs);
+	}
+	else if (Opr == "<=")
+	{
+		return (lhs <= rhs);
+	}
+	else if (Opr == ">=")
+	{
+		return (lhs >= rhs);
+	}
+	else if (Opr == "<")
+	{
+		return (lhs < rhs);
+	}
+	else if (Opr == ">")
+	{
+		return (lhs > rhs);
+	}
+
+	return -1;
+}
+
+int gameMaster::literalProcess(std::string intLiteral)
+{
+	try {
+		size_t pos;
+		int num = std::stoi(intLiteral, &pos);  // Convert string to int
+
+		// Check if there are any leftover characters after the integer
+		if (pos != intLiteral.length()) {
+			throw std::invalid_argument("Extra characters after number");
+		}
+
+		return num;
+	}
+	catch (const std::invalid_argument& e) {
+		std::cerr << "Invalid input: " << e.what() << std::endl;
+	}
+	catch (const std::out_of_range& e) {
+		std::cerr << "Out of range: " << e.what() << std::endl;
+	}
+
+	return -1;  // Return 0 or handle as needed
 }

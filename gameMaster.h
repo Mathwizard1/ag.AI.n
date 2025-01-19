@@ -3,23 +3,29 @@
 
 class gameMaster
 {
-private:
+protected:
+	std::string genericIdentifier = "$";
+	std::string labelIdentifier = "!";
+
+	std::pair<std::string, std::string> paranFlower = { "{", "}" };
+
 	std::unordered_set<char> delimiter = { ' ', '\n', '\r', '\t' , '(', ')' , '\0' };
 	bool nonPairedEntity = false;
 
-	std::unordered_set<char> specialOp = { '=', '>', '<', '!', '$', '{' ,'}' , '.'};
+	std::unordered_set<char> specialOp = { '=', '>', '<', '!', '$', '{' ,'}' };
+	char genericAttribute = '.';
 
 	std::pair<char, char> paranSmooth = { '(', ')' };
-	std::pair<char, char> paranFlower = { '{', '}' };
 
+public:
 	std::vector<std::string> parsedTokens;
 
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
-public:
 	void getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes);
 
-	int process(int tokenS, int tokenE);
-	void processCode();
+	int genericProcess(std::string genericVal);
+	int expressionProcess(int lhs, int rhs, std::string Opr);
+	int literalProcess(std::string intLiteral);
 };
 
