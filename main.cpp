@@ -7,8 +7,8 @@ using namespace std;
 
 short int chosenperson = 0;
 long long int gametime;
-long long int totalmoney = 100000;
-
+long long int totalmoney = 0;
+long long int quota = 10000;
 
 short int gridheight;
 short int gridwidth;
@@ -69,7 +69,7 @@ void InitializeShop()
 	areacolors.push_back(1);
 	areaitems.push_back({ RED,(char*)"Boss Area",100 });
 	areacolors.push_back(4);
-	areaitems.push_back({ GREEN,(char*)"Work Area",10 });
+	areaitems.push_back({ GREEN,(char*)"Work Area",10});
 	areacolors.push_back(2);
 	areaitems.push_back({ BLUE,(char*)"Reception Area",50 });
 	areacolors.push_back(3);
@@ -128,7 +128,7 @@ void InitializeGrid(short int width, short int height, int type)
 
 	gridheight = grid.size() + 2 * screenbuffer;
 	gridwidth = grid[0].size() + 2 * screenbuffer;
-	linewidth = (windowwidth - sidebarwidth) / (float)gridwidth;
+	linewidth = (windowwidth - sidebarwidth-moneybarwidth) / (float)gridwidth;
 	lineheight = (windowheight) / (float)gridheight;
 }
 
@@ -148,6 +148,20 @@ void DrawWorkers(float linewidth,float lineheight)
 			chosenperson = x;
 		}
 	}
+}
+
+void DrawProgressBar()
+{
+	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+35, 50,50,700 };
+	float fraction = totalmoney/ (float)quota;
+	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
+
+	DrawRectangleRec({ windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight }, DARKGRAY);
+
+	DrawRectangleRounded(outerrect,10,10,BLACK);
+	DrawRectangleRounded(innerrect, 10, 10, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("$%d", totalmoney), { outerrect.x-15,outerrect.y+outerrect.height+10 }, 20, 4, YELLOW);
+	DrawTextEx(codingfontbold, TextFormat("$%d", quota), { outerrect.x-20 ,outerrect.y - 20 }, 20, 4, YELLOW);
 }
 
 void DrawMainScreen()
@@ -195,7 +209,7 @@ void DrawMainScreen()
 	}
 	for (int y = 0; y < gridheight; y++)
 	{
-		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth,y * lineheight }, 1, BLACK);
+		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth-moneybarwidth,y * lineheight }, 1, BLACK);
 	}
 
 	DrawWorkers(linewidth,lineheight);
@@ -371,8 +385,8 @@ void DrawAreaTab()
 	static int buttonnum = areaitems.size();
 	static vector<float> buttondims = { sidebarwidth,(windowheight - shopbuttonheight - sidebarbuttonheight) / (float)buttonnum };
 
-	static Rectangle CancelButton = { windowwidth - sidebarwidth - 180,10,150,60 };
-	static Rectangle AcceptButton = { windowwidth - sidebarwidth - 380,10,150,60 };
+	static Rectangle CancelButton = { windowwidth - sidebarwidth -moneybarwidth- 180,10,150,60 };
+	static Rectangle AcceptButton = { windowwidth - sidebarwidth-moneybarwidth - 380,10,150,60 };
 
 	//BOUNDARY
 	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight),{0,121,181,255});
@@ -584,7 +598,7 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(40,40,0);
+	InitializeGrid(20,20,0);
 	InitializeShop();
 
 	//Add random workers
@@ -606,6 +620,13 @@ int main()
 
 			//Tick Functions
 			ChangeWorkerPositions();
+			if (totalmoney < quota)
+			{
+				if (totalmoney + 300 > quota)
+					totalmoney = quota;
+				else
+					totalmoney += 300;
+			}
 		}
 
 		BeginDrawing();
@@ -613,7 +634,7 @@ int main()
 
 		DrawMainScreen();
 		DrawSidebar();
-		DrawTextEx(codingfontbold, TextFormat("$%d",totalmoney), { windowwidth *0.25,20 }, 30, 4, GREEN);
+		DrawProgressBar();
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
 
 		EndDrawing();

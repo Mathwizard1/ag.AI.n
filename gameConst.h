@@ -10,12 +10,14 @@
 #include <unordered_map>
 
 
-constexpr int windowwidth = 1600;
+constexpr int windowwidth = 1800;
 constexpr int windowheight = 800;
 
-constexpr int screenbuffer = 5;
+constexpr int screenbuffer = 2;
 constexpr int sidebarwidth =550;
 constexpr int sidebarbuttonheight = 50;
+
+constexpr int moneybarwidth=120;
 
 constexpr int namebannersize = 30;
 constexpr int textinputheight = 60;
