@@ -3,6 +3,7 @@
 
 #include "worker.h"
 #include "gameConst.h"
+#include "w_grid.h"
 using namespace std;
 
 short int chosenperson = 0;
@@ -23,7 +24,7 @@ std::vector<std::vector<short int>> grid;
 std::vector<Worker> workers;
 std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
-std::vector<std::vector<short int>> worker_pos; //we are making a grid for workers
+
 
 
 
@@ -50,6 +51,18 @@ void ChangeWorkerPositions()
 		}
 	}
 }
+
+
+void update_global_worker_grid() {
+	for (int i = 0; i < workers.size(); i++)
+	{
+		pair<short int, short int> current_w_pos = workers[i].pos;
+		worker_pos[current_w_pos.first][current_w_pos.second] = 1;
+	}
+
+
+}
+
 
 void InitializeGrid(short int width, short int height)
 {
