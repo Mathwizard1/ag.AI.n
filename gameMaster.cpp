@@ -116,6 +116,7 @@ int gameMaster::process(int tokenS, int tokenE)
 	{
 
 	}
+	return 0;
 }
 
 void gameMaster::processCode()
