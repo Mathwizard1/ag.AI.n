@@ -145,6 +145,7 @@
     <ClInclude Include="gameConst.h" />
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="gameMaster.h" />
+    <ClInclude Include="inventory.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="worker.h" />
