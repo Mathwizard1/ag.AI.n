@@ -16,7 +16,7 @@ int main()
 	std::vector<short int> listSize = {5, 21, 18, 4, 21, 16};
 	int Lsize = listSize.size();
 
-	gm.getCode(stringList, Lsize, listSize);
+	//gm.getCode(stringList, Lsize, listSize);
 	//gm.processCode();
 
 	return 0;

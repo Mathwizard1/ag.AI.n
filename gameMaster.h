@@ -17,10 +17,9 @@ private:
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
 public:
-	gameMaster();
 	void getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes);
 
-	void process(int tokenS, int tokenE);
+	int process(int tokenS, int tokenE);
 	void processCode();
 };
 

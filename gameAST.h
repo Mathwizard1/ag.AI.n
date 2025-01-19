@@ -9,6 +9,7 @@ enum class gameLexers
 	label,
 	expression,
 	generic,
+	literal,
 };
 
 typedef struct gameGrammar
@@ -22,4 +23,3 @@ typedef struct gameGrammar
 
 // language
 extern std::unordered_map<std::string, gameGrammar>  gameLanguage;
-
