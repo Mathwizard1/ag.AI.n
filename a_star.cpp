@@ -3,6 +3,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "w_grid.h"
+
 a_star::a_star(const vector<vector<int>>& grid) : grid(grid) {
     directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 }
