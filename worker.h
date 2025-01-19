@@ -25,6 +25,8 @@ public:
 	pair<short int, short int> pos;
 
 	vector<char*> code;
+	vector<short int> linesize;
+	vector<pair<short int, short int>> path;
 
 	char* name;
 
@@ -59,7 +61,7 @@ public:
 
 	//Functions
 	void eat(Food food);
-	void pathfind();
+	void pathfind( pair<short int, short int> end);
 	void give();
 	void take();
 };

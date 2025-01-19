@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="gameFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gameFunction.cpp">
+    <ClCompile Include="gameMaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="worker.cpp">
@@ -35,18 +38,17 @@
     <ClInclude Include="Raygui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="worker.h">
+    <ClInclude Include="food.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="food.h">
+    <ClInclude Include="gameMaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pathfinding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="malenames.txt" />
-    <Text Include="femalenames.txt" />
   </ItemGroup>
 </Project>

@@ -6,6 +6,7 @@
 using namespace std;
 
 short int chosenperson = 0;
+long long int gametime;
 
 Font codingfont;
 Font codingfontbold;
@@ -33,6 +34,17 @@ Colors:
 4->Boss (Red)
 
 */
+void ChangeWorkerPositions()
+{
+	for (int x = 0; x < workers.size(); x++)
+	{
+		if (workers[x].path.size() > 0)
+		{
+			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
+			workers[x].path.pop_back();
+		}
+	}
+}
 
 void InitializeGrid(short int width, short int height)
 {
@@ -83,9 +95,10 @@ void DrawWorkers(float linewidth,float lineheight)
 	{
 		Vector2 workerpos = { (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2) };
 		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
+		DrawCircleLinesV(workerpos, min(linewidth / 2, lineheight / 2) - 2, BLACK);
 		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[x].name,workers[x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
 
-		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth / 2, lineheight / 2) - 2))
+		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
 			DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 200,100,255,255 });
 			if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -96,8 +109,8 @@ void DrawWorkers(float linewidth,float lineheight)
 
 void DrawMainScreen()
 {
-	static short int gridheight = grid.size()+2;
-	static short int gridwidth = grid[0].size()+2;
+	static short int gridheight = grid.size()+2*screenbuffer;
+	static short int gridwidth = grid[0].size()+2*screenbuffer;
 	static float linewidth = (windowwidth - sidebarwidth) / (float)gridwidth;
 	static float lineheight = (windowheight) / (float)gridheight;
 
@@ -107,10 +120,10 @@ void DrawMainScreen()
 	{
 		for (int x = 0; x < gridwidth; x++)
 		{
-			if (x == 0 || x == gridwidth - 1 || y == 0 || y == gridheight - 1)
+			if ((x >= 0&&x<screenbuffer) || (x >= gridwidth-screenbuffer&&x<gridwidth) || (y >= 0 && y < screenbuffer) || (y >= gridheight -screenbuffer&&y<gridheight))
 				color = BROWN;
 			else
-			switch (grid[y-1][x-1])
+			switch (grid[y-screenbuffer][x-screenbuffer])
 			{
 			case 0:
 				color = WHITE;
@@ -129,7 +142,7 @@ void DrawMainScreen()
 				break;
 			}
 
-			if ((x == 0 || x == gridwidth - 1) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
+			if (((x >= 0 && x < screenbuffer)|| (x >= gridwidth - screenbuffer && x < gridwidth)) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
 				color = {0,205,255,255};
 
 			DrawRectangleRec({ x * linewidth, y * lineheight, linewidth, lineheight }, color);
@@ -170,6 +183,7 @@ void DrawCodeTab()
 		chosentext = 0;
 		chosencode = chosenperson;
 		textboxes = workers[chosenperson].code;
+		textsizes = workers[chosenperson].linesize;
 	}
 	
 	//CODE SUBMISSION
@@ -288,6 +302,7 @@ void DrawCodeTab()
 
 		if (CheckCollisionPointRec(mousepos, codeblock) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
+			text[0] = '\0';
 			chosenblock = i;
 			chosentext = i + startpos;
 			editing = false;
@@ -298,6 +313,7 @@ void DrawCodeTab()
 	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
 	{
 		workers[chosenperson].code = textboxes;
+		workers[chosenperson].linesize = textsizes;
 	}
 
 	//DRAWING NAME BANNER
@@ -323,13 +339,12 @@ void DrawSidebar()
 	}
 }
 
-
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
 	SetTargetFPS(144);
 
-	srand(time(NULL));
+	srand(42);
 
 	//Flags
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -342,22 +357,34 @@ int main()
 	GuiSetFont(codingfont);
 	
 	//Initialize Grid
-	InitializeGrid(20,20);
+	InitializeGrid(60,60);
 
-	//Add 10 random workers
+	//Add random workers
 	for (int x = 0; x < 20; x++)
 	{
-		workers.push_back(Worker(rand() * 18 / RAND_MAX + 1, rand() * 18 / RAND_MAX + 1));
+		workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
+		workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	}
+
+	//SET GAMETIME
+	gametime = time(NULL);
 
 	while (!WindowShouldClose())
 	{
 		mousepos = GetMousePosition();
+		if (time(NULL)!=gametime)
+		{
+			gametime = time(NULL);
+			ChangeWorkerPositions();
+		}
+
+
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		DrawSidebar();
+
 		DrawMainScreen();
+		DrawSidebar();
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
 
 		EndDrawing();
