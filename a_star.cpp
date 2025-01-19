@@ -14,7 +14,8 @@ bool a_star::isValid(int x, int y) {
 double a_star::heuristic(int x1, int y1, int x2, int y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
-
+//global worker grid 
+//local worker grid
 vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goal) {
     int rows = grid.size(), cols = grid[0].size();
     priority_queue<Node> front;
