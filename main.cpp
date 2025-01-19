@@ -394,6 +394,7 @@ int main()
 		{
 			gametime = time(NULL);
 			ChangeWorkerPositions();
+			update_global_worker_grid();
 		}
 
 
