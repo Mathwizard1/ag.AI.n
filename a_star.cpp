@@ -5,21 +5,21 @@
 
 #include "w_grid.h"
 
-a_star::a_star(const vector<vector<int>>& grid) : grid(grid) {
+a_star::a_star(const vector<vector<short>>& grid) : grid(grid) {
     directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 }
 
-bool a_star::isValid(int x, int y) {
+bool a_star::isValid(short x, short y) {
     return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 0;
 }
 
-double a_star::heuristic(int x1, int y1, int x2, int y2) {
+double a_star::heuristic(short x1, short y1, short x2, short y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 //global worker grid 
 //local worker grid
-vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goal) {
-    int rows = grid.size(), cols = grid[0].size();
+vector<pair<short, short>> a_star::findPath(pair<short,short>start,pair<short, short> goal) {
+    short rows = grid.size(), cols = grid[0].size();
     priority_queue<Node> front;
     vector<vector<bool>> visited(rows, vector<bool>(cols, false));
     front.push(Node(start.first, start.second, 0, heuristic(start.first, start.second, goal.first, goal.second)));
@@ -29,7 +29,7 @@ vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goa
         front.pop();
 
         if (current.x == goal.first && current.y == goal.second) {
-            vector<pair<int, int>> path;
+            vector<pair<short, short>> path;
             while (current.parent != nullptr) {
                 path.push_back({ current.x, current.y });
                 current = *current.parent;
@@ -43,7 +43,7 @@ vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goa
         visited[current.x][current.y] = true;
 
         for (const auto& dir : directions) {
-            int nx = current.x + dir.first, ny = current.y + dir.second;
+            short nx = current.x + dir.first, ny = current.y + dir.second;
             if (isValid(nx, ny) && !visited[nx][ny]) {
                 double gCost = current.gCost + 1;
                 if (dir.first != 0 && dir.second != 0) {
