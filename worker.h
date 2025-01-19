@@ -2,7 +2,7 @@
 #include "gameconst.h"
 #include "food.h"
 #include "gameFunction.h"
-
+#include "inventory.h"
 
 class Worker
 {
@@ -13,7 +13,7 @@ public:
 	double mood;
 	double health;
 	double money;
-
+	Inventory inventory;
 	enum zone {
 		Office,
 		Lunch,
@@ -44,6 +44,7 @@ public:
 		this->money = 0;
 		this->mood = (3 * energy + 5 * health) / 8;
 		this->pos = { x,y };
+
 	}
 	Worker(bool gender, char* name, short int x=0, short int y=0) {
 		this->energy = 50;
