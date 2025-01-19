@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="gameAST.cpp" />
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="main.cpp" />
@@ -140,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="food.h" />
+    <ClInclude Include="gameAST.h" />
     <ClInclude Include="gameConst.h" />
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="gameMaster.h" />
