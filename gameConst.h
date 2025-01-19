@@ -6,7 +6,8 @@
 #include <vector>
 #include<string>
 #include<math.h>
-
+#include <unordered_set>
+#include <unordered_map>
 
 constexpr int windowwidth = 1600;
 constexpr int windowheight = 800;

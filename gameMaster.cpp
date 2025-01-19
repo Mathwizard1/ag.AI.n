@@ -1,19 +1,5 @@
 #include "gameMaster.h"
 
-void gameMaster::tokenPrinter(std::vector<std::string>& tokens)
-{
-	for (auto& token : tokens)
-	{
-		std::cout << token << "/";
-	}
-	std::cout << " size:" << tokens.size() << '\n';
-	if (nonPairedEntity)
-	{
-		std::cout << "Not paired brackets" << '\n';
-	}
-	std::cout << '\n';
-}
-
 void gameMaster::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
 {
 	std::string cleanString = "";
@@ -58,10 +44,10 @@ void gameMaster::tokenizer(const char* instruction, short int instructionSize, s
 		else
 		{
 			// only check for '(', ')'
-			if (c == paran_smooth.second)
+			if (c == paranSmooth.second)
 			{
 				int count = paired_paran.size();
-				if (count > 0 && paired_paran.back() == paran_smooth.first)
+				if (count > 0 && paired_paran.back() == paranSmooth.first)
 				{
 					paired_paran.pop_back();
 				}
@@ -70,7 +56,7 @@ void gameMaster::tokenizer(const char* instruction, short int instructionSize, s
 					nonPairedEntity = true;
 				}
 			}
-			else if (c == paran_smooth.first)
+			else if (c == paranSmooth.first)
 			{
 				paired_paran += c;
 			}
@@ -116,19 +102,74 @@ gameMaster::gameMaster()
 
 void gameMaster::getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes)
 {
-	std::vector<std::string> tokens;
-
 	for (int i = 0; i < listSize; i++)
 	{
-
-		tokenizer(instructionList[i], instructionSizes[i], tokens);
-
-		tokenPrinter(tokens);
-		tokens.clear();
+		tokenizer(instructionList[i], instructionSizes[i], parsedTokens);
+		if (nonPairedEntity)
+		{
+			std::cout << "non paired brackets on " << i << '\n';
+			nonPairedEntity = false;
+		}
 	}
 }
 
-void gameMaster::transfer()
+void gameMaster::process(int tokenS, int tokenE)
 {
+	gameLexers expectToken = gameLexers::none;
 
+	for (int t = 0; t < tokenE; t++)
+	{
+		if (gameLanguage.find(parsedTokens[t]) != gameLanguage.end())
+		{
+			std::cout << parsedTokens[t] + ": keyword\n";
+			expectToken = gameLanguage[parsedTokens[t]].expected;
+		}
+		else
+		{
+			if (parsedTokens[t] == "{")
+			{
+
+			}
+			else if (parsedTokens[t] == "$" && expectToken == gameLexers::generic)
+			{
+				t++;
+				std::cout << "$" + parsedTokens[t];
+				std::cout << ": generic\n";
+			}
+			else if (parsedTokens[t] == "!" && expectToken == gameLexers::label)
+			{
+				t++;
+				std::cout << "!" + parsedTokens[t];
+				std::cout << ": label\n";
+			}
+			else if (expectToken == gameLexers::expression)
+			{
+				std::vector<std::string> expressionTokens;
+				int breakPoint = t;
+
+				while (t < tokenE && parsedTokens[t] != "{")
+				{
+					expressionTokens.push_back(parsedTokens[t]);
+					t++;
+				}
+
+				if (t == tokenE)
+				{
+					std::cout << "error in token ->" << parsedTokens[breakPoint] << '\n';
+					return;
+				}
+			}
+			else
+			{
+				std::cout << "error in token ->" << parsedTokens[t] << '\n';
+				return;
+			}
+		}
+	}
+}
+
+void gameMaster::processCode()
+{
+	int tokenE = parsedTokens.size();
+	process(0, tokenE);
 }
