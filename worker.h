@@ -13,7 +13,9 @@ public:
 	double mood;
 	double health;
 	double money;
+
 	Inventory inventory;
+
 	enum zone {
 		Office,
 		Lunch,

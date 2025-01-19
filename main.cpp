@@ -3,6 +3,8 @@
 
 #include "worker.h"
 #include "gameConst.h"
+#include "inventory.h"
+
 using namespace std;
 
 short int chosenperson = 0;
@@ -25,6 +27,7 @@ std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
 
 Vector2 mousepos;
+
 
 /*
 Colors:
@@ -360,7 +363,7 @@ int main()
 	InitializeGrid(60,60);
 
 	//Add random workers
-	for (int x = 0; x < 20; x++)
+	for (int x = 0; x < 2; x++)
 	{
 		workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
 		workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });

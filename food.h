@@ -1,8 +1,20 @@
 #pragma once
+#include "gameConst.h"
+
 class Food {
 public:
-	double energy;
+	int energy;
 	double productivity;
-	double cost;
-	enum foodstuff food;
+	int cost;
+	int id;
+	Food()
+	{
+
+	}
+	Food(int energy, double productivity, int cost, int id) {
+		this->energy = energy;
+		this->productivity = productivity;
+		this->cost = cost;
+		this->id = id;
+	}
 };
