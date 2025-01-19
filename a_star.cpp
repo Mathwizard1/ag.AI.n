@@ -2,12 +2,14 @@
 #include <queue>
 #include <cmath>
 #include <algorithm>
+#include "worker.h"
 
 #include "w_grid.h"
 
 a_star::a_star(const vector<vector<int>>& grid) : grid(grid) {
     directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 }
+
 
 bool a_star::isValid(int x, int y) {
     return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 0;
@@ -17,7 +19,7 @@ double a_star::heuristic(int x1, int y1, int x2, int y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 //global worker grid 
-//local worker grid
+//local worker grid     
 vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goal) {
     int rows = grid.size(), cols = grid[0].size();
     priority_queue<Node> front;
