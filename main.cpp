@@ -23,6 +23,9 @@ std::vector<std::vector<short int>> grid;
 std::vector<Worker> workers;
 std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
+std::vector<std::vector<short int>> worker_pos;
+
+
 
 Vector2 mousepos;
 
