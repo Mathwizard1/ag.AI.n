@@ -13,7 +13,6 @@ public:
 	double mood;
 	double health;
 	double money;
-	Inventory inventory;
 	enum zone {
 		Office,
 		Lunch,
@@ -61,7 +60,7 @@ public:
 
 
 	//Functions
-	void eat(Food food);
+	void eat();
 	void pathfind( pair<short int, short int> end);
 	void give();
 	void take();

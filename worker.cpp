@@ -16,10 +16,7 @@ void Worker::pathfind(pair<short int,short int> end)
 	path = temppath;
 }
 
-void Worker::eat(Food food) {
-	this->energy += food.energy;
-	this->productivity += food.productivity;
-	this->money -= food.cost;
+void Worker::eat() {
 }
 
 void Worker::give() {

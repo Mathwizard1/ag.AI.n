@@ -7,7 +7,7 @@ using namespace std;
 
 short int chosenperson = 0;
 long long int gametime;
-long long int totalmoney = 1000;
+long long int totalmoney = 100000;
 
 
 short int gridheight;
