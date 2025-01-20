@@ -49,11 +49,45 @@ void Worker::eat() {
 }
 
 void Worker::give() {
-
+	
 }
 
 void Worker::take() {
 
+}
+
+void Worker::getCode()
+{
+	std::vector<std::string> tokens;
+
+	int codeSize = code.size();
+	for (int i = 0; i < codeSize; i++)
+	{
+		tokenizer(code[i], linesize[i], tokens);
+		if (nonPairedEntity)
+		{
+			std::cout << "non paired brackets on " << i << '\n';
+			nonPairedEntity = false;
+		}
+
+
+		if (!tokens.empty() && tokens[0] == labelIdentifier)
+		{
+			if (labelMap.find(tokens[1]) == labelMap.end())
+			{
+				labelMap[tokens[1]] = i;
+				std::cout << code[i] << "," << i << " token\n";
+			}
+			else
+			{
+				// idle call
+				std::cout << code[i] << " common time\n";
+				return;
+			}
+		}
+
+		tokens.clear();
+	}
 }
 
 void Worker::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
@@ -191,9 +225,9 @@ int Worker::getExpression(const std::string& var, const std::string& atr)
 	else if (var == "work")
 	{
 		// check in work
-		for (int i = 0; i < work.size(); i++)
+		for (int i = 0; i < workProp.size(); i++)
 		{
-			if (work[i] == atr)
+			if (workProp[i] == atr)
 			{
 				foundValue = true;
 				foundIndex = i;
@@ -206,9 +240,9 @@ int Worker::getExpression(const std::string& var, const std::string& atr)
 			switch (foundIndex)
 			{
 			case 0:
-				return workProp[0];
+				return work[0];
 			case 1:
-				return workProp[1];
+				return work[1];
 			default:
 				break;
 			}
@@ -269,6 +303,12 @@ int Worker::genericProcess(std::string genericVal)
 
 int Worker::expressionProcess(int lhs, int rhs, std::string Opr)
 {
+	if (lhs == -1 || rhs == -1)
+	{
+		return -1;
+	}
+
+
 	if (Opr == "==")
 	{
 		return (lhs == rhs);
@@ -343,10 +383,10 @@ void Worker::callFunction()
 			bracketCheck = gameLanguage[tokens[0]].bracketd;
 			actionCheck = gameLanguage[tokens[0]].action;
 		}
-		else
+		else if(tokens[0] == labelIdentifier)
 		{
 			// idle call
-			return;
+			tempVal = 0;
 		}
 
 		if (expectToken != gameLexers::none)
@@ -357,6 +397,7 @@ void Worker::callFunction()
 				if (tcount < 3)
 				{
 					// idle call
+					std::cout << "error in expression\n";
 					return;
 				}
 				tempVal = genericProcess(tokens[2]);
@@ -367,7 +408,14 @@ void Worker::callFunction()
 			}
 			else if (expectToken == gameLexers::label && tokens[1] == "!")
 			{
-				tempVal = 9696;
+				if (labelMap.find(tokens[2]) != labelMap.end())
+				{
+					tempVal = labelMap[tokens[2]];
+				}
+				else
+				{
+					tempVal = -1;
+				}
 			}
 			else if (expectToken == gameLexers::expression)
 			{
@@ -377,6 +425,7 @@ void Worker::callFunction()
 				if (tcount <= 3)
 				{
 					// idle call
+					std::cout << "error in expression\n";
 					return;
 				}
 
@@ -391,6 +440,7 @@ void Worker::callFunction()
 					if (tcount <= 4)
 					{
 						// idle call
+						std::cout << "error in expression\n";
 						return;
 					}
 
@@ -408,7 +458,7 @@ void Worker::callFunction()
 					}
 					else if (tokens[1] == "$" && tokens[4] == "$")
 					{
-						lhs = literalProcess(tokens[2]);
+						lhs = genericProcess(tokens[2]);
 						tempToken = tokens[3];
 						rhs = genericProcess(tokens[5]);
 					}
@@ -419,12 +469,6 @@ void Worker::callFunction()
 					lhs = rhs = -1;
 				}
 
-				if (lhs == -1 || rhs == -1)
-				{
-					// idle call
-					return;
-				}
-
 				tempVal = expressionProcess(lhs, rhs, tempToken);
 			}
 
@@ -432,7 +476,7 @@ void Worker::callFunction()
 			if (tempVal == -1)
 			{
 				// idle call
-				std::cout << "error in expression\n";
+				std::cout << code[linecounter] << " error in expression\n";
 				return;
 			}
 			else
@@ -460,13 +504,58 @@ void Worker::callFunction()
 		{
 			std::cout << "break" << tempVal << '\n';
 		}
+		else if (tokens[0] == "if")
+		{
+			std::string paired_paran = "{";
+			nonPairedEntity = true;
+
+			tcount = linecounter;
+			std::cout << "if : " << tempVal << '\n';
+			
+			if (tempVal == 0)
+			{
+				linecounter++; // start from next line
+
+				while (linecounter < codeSize)
+				{
+					std::cout << linecounter << '\n';
+
+					tokens.clear();
+					tokenizer(code[linecounter], linesize[linecounter], tokens);
+
+					for (auto& token : tokens)
+					{
+						if (paired_paran.empty())
+						{
+							return;
+						}
+						else if (token == paranFlower.second)
+						{
+							paired_paran.pop_back();
+						}
+						else if (token == paranFlower.first)
+						{
+							paired_paran += token;
+						}
+					}
+
+					linecounter++;
+				}
+
+				// idle call
+				if (linecounter == codeSize)
+				{
+					std::cout << tcount << " No brackets found matching\n";
+				}
+			}
+		}
 		else if (tokens[0] == "work")
 		{
 			std::cout << "work" << '\n';
 		}
 		else if (tokens[0] == "talk")
 		{
-			//std::cout << "talk" << '\n';
+			std::cout << "talk" << '\n';
 		}
 		else if (tokens[0] == "submit")
 		{
@@ -488,11 +577,14 @@ void Worker::callFunction()
 		{
 
 		}
-
+		else if (tokens[0] == "jump")
+		{
+			std::cout << "jump" << '\n';
+			linecounter = tempVal;
+			return;
+		}
 
 		linecounter++;
-		return;
 	}
-
 	//linecounter = 0;
 }

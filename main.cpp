@@ -364,6 +364,7 @@ void DrawCodeTab()
 	{
 		workers[chosenperson].code = textboxes;
 		workers[chosenperson].linesize = textsizes;
+		workers[chosenperson].getCode();
 	}
 
 	//DRAWING NAME BANNER
