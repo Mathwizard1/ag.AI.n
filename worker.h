@@ -23,6 +23,8 @@ protected:
 
 public:
 
+	std::unordered_map<std::string, int> labelMap;
+
 	int index;
 	int energy;
 	int productivity;
@@ -41,12 +43,15 @@ public:
 
 	pair<short int, short int> pos;
 
-	short int linecounter = 0;
+
+	short int lag = -1;
+	int linecounter = 0;
+
 	vector<char*> code;
 	vector<short int> linesize;
 	vector<pair<short int, short int>> path;
 
-	int workProp[2] = {10, 0};
+	int work[2] = {10, 0};
 
 	std::vector<std::string> me = {
 		"energy",
@@ -56,7 +61,7 @@ public:
 		"money"
 	};
 
-	std::vector<std::string> work = {
+	std::vector<std::string> workProp = {
 		"number",
 		"pending",
 	};
@@ -83,6 +88,7 @@ public:
 	bool take(int index, int fid, int fq, int wid, int wq);
 	int buy(Food food, int q);
 
+	void getCode();
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
 	int getExpression(const std::string& var, const std::string& atr);
