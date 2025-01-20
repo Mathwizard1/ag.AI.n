@@ -56,8 +56,6 @@ void ChangeWorkerPositions()
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
-
-		workers[x].callFunction();
 	}
 }
 
@@ -151,13 +149,20 @@ void DrawWorkers(float linewidth,float lineheight)
 void DrawProgressBar()
 {
 	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+35, 50,50,700 };
+	static Rectangle boundary = { windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight };
 	float fraction = totalmoney/ (float)quota;
 	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
+	Rectangle shinerect = { outerrect.x +15,outerrect.y + (outerrect.height * (1 - fraction)) + 20,innerrect.width/10 ,outerrect.height * fraction - 40 };
 
-	DrawRectangleRec({ windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight }, DARKGRAY);
+	DrawRectangleRec(boundary, DARKGRAY);
 
 	DrawRectangleRounded(outerrect,10,10,BLACK);
 	DrawRectangleRounded(innerrect, 10, 10, GREEN);
+	DrawRectangleRounded(shinerect, 10, 10, WHITE);
+	DrawCircle(boundary.x + 10, boundary.y + 10, 5, GRAY);
+	DrawCircle(boundary.x +moneybarwidth- 10, boundary.y + 10, 5, GRAY);
+	DrawCircle(boundary.x + 10, windowheight - 10, 5, GRAY);
+	DrawCircle(boundary.x + moneybarwidth - 10, windowheight- 10, 5, GRAY);
 	DrawTextEx(codingfontbold, TextFormat("$%d", totalmoney), { outerrect.x-15,outerrect.y+outerrect.height+10 }, 20, 4, YELLOW);
 	DrawTextEx(codingfontbold, TextFormat("$%d", quota), { outerrect.x-20 ,outerrect.y - 20 }, 20, 4, YELLOW);
 }

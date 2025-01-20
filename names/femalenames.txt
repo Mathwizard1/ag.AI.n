@@ -1,9 +1,3 @@
-# List of common female names.
-# Copyright (c) January 1991 by Mark Kantrowitz.
-# 4987 names
-# Thanks to Bill.Ross for about 1000 additional names.
-# Version 1.3 (29-MAR-94)
-
 Abagael
 Abagail
 Abbe

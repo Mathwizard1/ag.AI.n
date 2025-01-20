@@ -13,7 +13,7 @@ Worker::Worker(short int x, short int y) {
 	pair<bool, char*> p = gameFunction().NameGenerator();
 	this->name = p.second;
 	this->gender = p.first;
-	this->money = 0;
+	this->money = 100;
 	this->mood = (3 * energy + 5 * health) / 8;
 	this->pos = { x,y };
 }
@@ -48,12 +48,40 @@ void Worker::pathfind(pair<short int,short int> end)
 void Worker::eat() {
 }
 
-void Worker::give() {
-	
+bool Worker::give(int index, int fid, int fq, int wid, int wq) {
+	if (fq > 0) {
+		if (inventory.foodinv[fid] >= fq) {
+			if (workers[index].inventory.foodcount + fq <= 10) {
+				inventory.food_from_inventory(fid, fq);
+				workers[index].inventory.food_into_inventory(fid, fq);
+				return 1;
+			}
+			else return 0;
+		}
+		else return 0;
+	}
+	else {
+		if (inventory.workinv[wid] >= wq) {
+			if (workers[index].inventory.workcount + wq <= 10) {
+				inventory.work_from_inventory(wid, wq);
+				workers[index].inventory.work_into_inventory(wid, wq);
+				return 1;
+			}
+			else return 0;
+		}
+		else return 0;
+	}
+
 }
 
 void Worker::take() {
 
+}
+
+int Worker::buy(Food food, int q) {
+	bool b = inventory.food_into_inventory(food.id, q);
+	if (!b) return 0;
+	return q*food.cost;
 }
 
 void Worker::getCode()
