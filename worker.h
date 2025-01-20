@@ -23,11 +23,16 @@ protected:
 
 public:
 
+	std::unordered_map<std::string, int> labelMap;
+
+	int index;
 	int energy;
 	int productivity;
 	int mood;
 	int health;
 	int money;
+
+	Inventory inventory;
 
 	enum zone {
 		Office,
@@ -38,12 +43,15 @@ public:
 
 	pair<short int, short int> pos;
 
-	short int linecounter = 0;
+
+	short int lag = -1;
+	int linecounter = 0;
+
 	vector<char*> code;
 	vector<short int> linesize;
 	vector<pair<short int, short int>> path;
 
-	int workProp[2] = {10, 0};
+	int work[2] = {10, 0};
 
 	std::vector<std::string> me = {
 		"energy",
@@ -53,7 +61,7 @@ public:
 		"money"
 	};
 
-	std::vector<std::string> work = {
+	std::vector<std::string> workProp = {
 		"number",
 		"pending",
 	};
@@ -70,15 +78,17 @@ public:
 	bool gender;
 
 	//Constructors
-	Worker(short int x = 0, short int y = 0);
-	Worker(bool gender, char* name, short int x = 0, short int y = 0);
+	Worker(int index, short int x = 0, short int y = 0);
+	Worker(int index, bool gender, char* name, short int x = 0, short int y = 0);
 
 	//Functions
 	void eat();
 	void pathfind( pair<short int, short int> end);
-	void give();
-	void take();
+	bool give(int index, int fid, int fq, int wid, int wq);
+	bool take(int index, int fid, int fq, int wid, int wq);
+	int buy(Food food, int q);
 
+	void getCode();
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
 	int getExpression(const std::string& var, const std::string& atr);

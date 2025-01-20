@@ -109,6 +109,8 @@ void gameMaster::getCode(std::vector<const char*> instructionList, int listSize,
 	}
 }
 
+
+
 int gameMaster::genericProcess(std::string genericVal)
 {
 	std::string value = "";

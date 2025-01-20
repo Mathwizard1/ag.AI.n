@@ -24,6 +24,8 @@ public:
 
 	void getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes);
 
+	//int getExpression(const std::string& var, const std::string& atr);
+
 	int genericProcess(std::string genericVal);
 	int expressionProcess(int lhs, int rhs, std::string Opr);
 	int literalProcess(std::string intLiteral);

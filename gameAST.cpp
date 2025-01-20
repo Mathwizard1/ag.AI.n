@@ -10,8 +10,8 @@ gameGrammar::gameGrammar(gameLexers expected, bool bracketed, bool action)
 
 // Definition and initialization of the language
 std::unordered_map<std::string, gameGrammar> gameLanguage = {
-    //{"if", gameGrammar(gameLexers::expression, true, false)},
-    //{"jump", gameGrammar(gameLexers::label, false, false)},
+    {"if", gameGrammar(gameLexers::expression, true, false)},
+    {"jump", gameGrammar(gameLexers::label, false, false)},
    
     {"submit", gameGrammar()},
     {"exit", gameGrammar()},

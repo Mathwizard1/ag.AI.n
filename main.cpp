@@ -65,8 +65,6 @@ void ChangeWorkerPositions()
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
-
-		workers[x].callFunction();
 	}
 }
 
@@ -403,6 +401,7 @@ void DrawCodeTab()
 	{
 		workers[chosenperson].code = textboxes;
 		workers[chosenperson].linesize = textsizes;
+		workers[chosenperson].getCode();
 	}
 
 	//DRAWING NAME BANNER
