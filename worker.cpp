@@ -48,7 +48,29 @@ void Worker::pathfind(pair<short int,short int> end)
 void Worker::eat() {
 }
 
-void Worker::give() {
+bool Worker::give(int index, int fid, int fq, int wid, int wq) {
+	if (fq > 0) {
+		if (inventory.foodinv[fid] >= fq) {
+			if (workers[index].inventory.foodcount + fq <= 10) {
+				inventory.food_from_inventory(fid, fq);
+				workers[index].inventory.food_into_inventory(fid, fq);
+				return 1;
+			}
+			else return 0;
+		}
+		else return 0;
+	}
+	else {
+		if (inventory.workinv[wid] >= wq) {
+			if (workers[index].inventory.workcount + wq <= 10) {
+				inventory.work_from_inventory(wid, wq);
+				workers[index].inventory.work_into_inventory(wid, wq);
+				return 1;
+			}
+			else return 0;
+		}
+		else return 0;
+	}
 
 }
 
