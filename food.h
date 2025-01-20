@@ -3,10 +3,10 @@
 
 class Food {
 public:
-	int energy;
-	double productivity;
-	int cost;
-	int id;
+	int energy=0;
+	double productivity=0;
+	int cost=0;
+	int id=-1;
 	Food()
 	{
 

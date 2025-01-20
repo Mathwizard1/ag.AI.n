@@ -29,6 +29,8 @@ public:
 	int health;
 	int money;
 
+	Inventory inventory;
+
 	enum zone {
 		Office,
 		Lunch,
@@ -78,6 +80,7 @@ public:
 	void pathfind( pair<short int, short int> end);
 	void give();
 	void take();
+	int buy(Food food, int q);
 
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 

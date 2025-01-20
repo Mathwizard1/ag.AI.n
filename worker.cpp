@@ -13,7 +13,7 @@ Worker::Worker(short int x, short int y) {
 	pair<bool, char*> p = gameFunction().NameGenerator();
 	this->name = p.second;
 	this->gender = p.first;
-	this->money = 0;
+	this->money = 100;
 	this->mood = (3 * energy + 5 * health) / 8;
 	this->pos = { x,y };
 }
@@ -54,6 +54,12 @@ void Worker::give() {
 
 void Worker::take() {
 
+}
+
+int Worker::buy(Food food, int q) {
+	bool b = inventory.food_into_inventory(food.id, q);
+	if (!b) return 0;
+	return q*food.cost;
 }
 
 void Worker::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
