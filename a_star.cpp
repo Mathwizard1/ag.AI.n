@@ -15,7 +15,7 @@ a_star::a_star(const vector<vector<short int>>& grid) : grid(grid) {
 }
 
 bool a_star::isValid(short int x, short int y) {
-    return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 0;
+    return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] >= 0;
 }
 
 double a_star::heuristic(short x1, short y1, short x2, short y2) {
