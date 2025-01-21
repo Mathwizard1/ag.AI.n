@@ -5,13 +5,14 @@
 #include "gameConst.h"
 using namespace std;
 
-short int chosenperson = 0;
 long long int gametime;
 float totalmoney = 0;
-float moneyincrement = 0;
+float moneyincrement = 2000;
 float frametime;
-long long int quota = 10000;
 
+short int chosengrid = 0;
+long long int quota = 10000;
+short int chosenperson = 0;
 short int gridheight;
 short int gridwidth;
 float linewidth;
@@ -31,10 +32,18 @@ enum shopstate {
 	Misc
 } ShopState;
 
+enum screenmode {
+	View,
+	Map
+} ScreenMode;
+
+std::vector<vector<char*>> textboxesnetwork;
+std::vector<vector<short int>> textsizesnetwork;
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
 
-std::vector<std::vector<vector<short int>>> gridnetwork;
+std::vector < std::vector<std::vector<short int>>> pooledgridnetwork;
+std::vector<std::vector<std::vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
 
 std::vector<tuple<Color, char*, int>> areaitems;
@@ -110,15 +119,129 @@ void InitializeGrid(short int width, short int height, int type)
 		grid.push_back(row);
 	}
 
-	for (int z = 0; z < 4; z++)
+	for (int z = 0; z < 25; z++)
 	{
+		vector<char*> textboxes;
+		vector<short int> textsizes;
 		gridnetwork.push_back(grid);
+		textboxesnetwork.push_back(textboxes);
+		textsizesnetwork.push_back(textsizes);
+
+		 
+		vector<vector<short int>> pooledgrid;
+		for (int y = 0; y < grid.size() - 1; y += grid.size()/mapdims)
+		{
+			vector<short int> row;
+			for (int x = 0; x <grid[0].size() -1; x += grid[0].size() / mapdims)
+			{
+				int* numarray = (int*)malloc(sizeof(int) * 6);
+
+				for (int q = 0; q < grid.size() / mapdims; q++)
+				{
+					for (int r = 0; r < grid[0].size() / mapdims; r++)
+					{
+						//cout << grid[y + q][x + r] << endl;
+						if(grid[y+q][x+r]>-2)
+						numarray[grid[y+q][x+r]+1]++;
+					}
+				}
+				
+				int max = 0;
+				for (int q = 0; q < 6; q++)
+				{
+					if (numarray[q] > numarray[max])
+						max = q;
+				}
+				row.push_back(max-1);
+				free(numarray);
+			}
+
+			pooledgrid.push_back(row);
+		}
+		pooledgridnetwork.push_back(pooledgrid);
 	}
 
 	gridheight = grid.size() + 2 * screenbuffer;
 	gridwidth = grid[0].size() + 2 * screenbuffer;
 	linewidth = (windowwidth - sidebarwidth-moneybarwidth) / (float)gridwidth;
 	lineheight = (windowheight) / (float)gridheight;
+}
+
+void DrawMap()
+{
+	static int mapnumber = gridnetwork.size();
+	static int dims = sqrt(mapnumber);
+
+	//Draw Boundary
+	DrawRectangleLinesEx({ 0, 0, windowwidth, windowheight },20, GRAY);
+
+	//Draw Lines
+	for (int y = 0; y < dims; y++)
+	{
+		DrawLineEx({ windowwidth / 6,windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, { 5 * windowwidth / 6, windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, 5, BLUE);
+		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 5, BLUE);
+	}
+
+	//Draw Circles and Grids
+	for (int y = 0; y < dims; y++)
+	{
+		for (int x = 0; x < dims; x++)
+		{
+			float xpoint = windowwidth / 6 + x * (2 * windowwidth / 3) / (dims - 1);
+			float ypoint = windowheight / 6 + y * (2 * windowheight / 3) / (dims - 1);
+			float rad = (windowheight - 200) / (2 * dims);
+
+			//CIRCLES
+			DrawCircle(xpoint,ypoint,rad, BLUE);
+			DrawCircle(xpoint,ypoint,rad-5, LIGHTGRAY);
+			if (CheckCollisionPointCircle(mousepos, {xpoint,ypoint },rad))
+			{
+				DrawCircle(xpoint,ypoint,rad-5, {220,220,220,255});
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+				{
+					grid = gridnetwork[x + y * dims];
+					textboxes = textboxesnetwork[x + y * dims];
+					textsizes = textsizesnetwork[x + y * dims];
+					chosengrid = x + y * dims;
+					ScreenMode = View;
+				}
+			}
+
+			//GRIDS
+			Color blockcolor = WHITE;
+			for (int j = 0; j < mapdims;j++)
+			{
+				for (int i = 0; i <mapdims;i++)
+				{
+					
+					switch (pooledgridnetwork[x+y*dims][j][i])
+					{
+					case -1:
+						blockcolor = BLACK;
+						break;
+					case 0:
+						blockcolor = WHITE;
+						break;
+					case 1:
+						blockcolor = YELLOW;
+						break;
+					case 2:
+						blockcolor = GREEN;
+						break;
+					case 3:
+						blockcolor = BLUE;
+						break;
+					case 4:
+						blockcolor = RED;
+						break;
+					}
+					DrawRectangle(xpoint-rad/2+i*rad/mapdims,ypoint-rad/2+j*rad/mapdims,rad/mapdims,rad/mapdims,blockcolor);
+				}
+			}
+		}
+	}
+
+
 }
 
 void DrawWorkers(float linewidth,float lineheight)
@@ -216,7 +339,59 @@ void DrawMainScreen()
 
 	DrawWorkers(linewidth,lineheight);
 
-	//DrawCircle(70,70, 50,BLACK);
+	DrawCircle(70, 70, 50, BLACK);
+	if (mousepos.x < 120 && mousepos.y < 120)
+		if (CheckCollisionPointCircle(mousepos, { 70,70 }, 50))
+		{
+			DrawCircle(70, 70, 45, { 0,171,255,255 });
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				gridnetwork[chosengrid] = grid;
+
+				//RECREATE POOLED MAP
+				
+				vector<vector<short int>> pooledgrid;
+				for (int l = 0; l < grid.size() -1; l += grid.size() / mapdims)
+				{
+					vector<short int> row;
+					for (int m = 0; m < grid[0].size()-1 ; m += grid[0].size() / mapdims)
+					{
+						//UPDATE
+						int* numarray = (int*)malloc(sizeof(int) * 6);
+
+						for (int q = 0; q < grid.size() / mapdims; q++)
+						{
+							for (int r = 0; r < grid[0].size() / mapdims; r++)
+							{
+								if(grid[l + q][m + r]>-2)
+								numarray[grid[l + q][m + r]+1]++;
+							}
+						}
+
+						int min = 0;
+						for (int q = 0; q < 6; q++)
+						{
+							if (numarray[q] > numarray[min])
+								min = q;
+						}
+						row.push_back(min-1);
+						free(numarray);
+					}
+					pooledgrid.push_back(row);
+				}
+				pooledgridnetwork[chosengrid] = pooledgrid;
+				textboxesnetwork[chosengrid]=textboxes;
+				textsizesnetwork[chosengrid] = textsizes;
+				ScreenMode = Map;
+				return;
+			}
+		}
+		else
+		DrawCircle(70, 70, 45, { 0,151,241,255 });
+	else
+	DrawCircle(70, 70, 45, { 0,151,241,255 });
+
+	GuiDrawIcon(ICON_EXIT, 38, 38, 4, WHITE);
 
 }
 
@@ -770,13 +945,13 @@ int main()
 	InitializeHire();
 
 	//Add random workers
-	for (int x = 0; x < 5; x++)
-	{
+	//for (int x = 0; x < 5; x++)
+	//{
 		//workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
-	}
+	//}
 
-
+	//ScreenMode = Map;
 	//SET GAMETIME
 	gametime = time(NULL);
 
@@ -805,9 +980,17 @@ int main()
 				totalmoney += moneyincrement * frametime;
 		}
 		
-		DrawMainScreen();
-		DrawSidebar();
-		DrawProgressBar();
+		switch (ScreenMode)
+		{
+		case View:
+			DrawMainScreen();
+			DrawSidebar();
+			DrawProgressBar();
+			break;
+		case Map:
+			DrawMap();
+			break;
+		}
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
 
 		EndDrawing();
