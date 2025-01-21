@@ -96,17 +96,40 @@ void gameMaster::tokenizer(const char* instruction, short int instructionSize, s
 	}
 }
 
-void gameMaster::getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes)
+int gameMaster::getCode(std::vector<char*>& instructionList, int listSize, std::vector<short int>& instructionSizes)
 {
-	for (int i = 0; i < listSize; i++)
+	if (listSize > 0)
 	{
-		tokenizer(instructionList[i], instructionSizes[i], parsedTokens);
-		if (nonPairedEntity)
+		int errorCodes = 0;
+
+		std::vector<std::string> parsedTokens;
+		std::vector<int> TokenCount_lineWise;
+
+		TokenCount_lineWise.resize(listSize);
+
+		for (int i = 0; i < listSize; i++)
 		{
-			std::cout << "non paired brackets on " << i << '\n';
-			nonPairedEntity = false;
+			tokenizer(instructionList[i], instructionSizes[i], parsedTokens);
+			TokenCount_lineWise[i] = parsedTokens.size();
+
+			if (nonPairedEntity)
+			{
+				errorCodes += 1;
+				nonPairedEntity = false;
+			}
 		}
+
+		int tcount = TokenCount_lineWise[listSize - 1];
+		for (int t = 0; t < tcount; t++)
+		{
+			std::cout << parsedTokens[t] << ' : ' << t;
+			std::cout << '\n';
+		}
+
+		return errorCodes;
 	}
+
+	return 0;
 }
 
 
@@ -137,11 +160,16 @@ int gameMaster::genericProcess(std::string genericVal)
 
 
 	
-	return 0;
+	return -1;
 }
 
 int gameMaster::expressionProcess(int lhs, int rhs, std::string Opr)
 {
+	if (lhs == -1 || rhs == -1)
+	{
+		return -1;
+	}
+
 	if (Opr == "==")
 	{
 		return (lhs == rhs);
