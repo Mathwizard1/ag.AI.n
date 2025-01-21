@@ -7,7 +7,9 @@ using namespace std;
 
 short int chosenperson = 0;
 long long int gametime;
-long long int totalmoney = 0;
+float totalmoney = 0;
+float moneyincrement = 0;
+float frametime;
 long long int quota = 10000;
 
 short int gridheight;
@@ -31,10 +33,17 @@ enum shopstate {
 
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
+
+std::vector<std::vector<vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
 
 std::vector<tuple<Color, char*, int>> areaitems;
 std::vector<short int> areacolors;
+
+std:: vector<tuple< Color,char*, int>> workertypes;
+
+short int workbenchsize;
+Color workbenchcolor;
 
 Vector2 mousepos;
 
@@ -45,6 +54,8 @@ Colors:
 3->Reception (Blue)
 4->Boss (Red)
 
+-1->Boundary
+-2->Workspace
 */
 
 void ChangeWorkerPositions()
@@ -63,6 +74,13 @@ void ChangeWorkerPositions()
 	}
 }
 
+void InitializeHire()
+{
+	workertypes.push_back({ DARKPURPLE,(char*)"Software Developer",20 });
+	workertypes.push_back({ DARKGREEN,(char*)"Hardware Developer",30 });
+	workertypes.push_back({ ORANGE,(char*)"Network Engineer",50 });
+}
+
 void InitializeShop()
 {
 	areaitems.push_back({ YELLOW,(char*)"Lunch Area",30 });
@@ -77,53 +95,24 @@ void InitializeShop()
 
 void InitializeGrid(short int width, short int height, int type)
 {
+	workbenchcolor = { 120,255,120,255 };
+	workbenchsize = 3;
+
+	//Create Grid Network
 	for (int y = 0; y < height; y++)
 	{
 		std::vector<short int> row;
 
 		for (int x = 0; x < width; x++)
 		{
-
-			if (type == 0)
-			{
 				row.push_back(0);
-			}
-			else if (type == 1)
-			{
-				if (x > 0.05 * width && x < 0.5 * width)
-				{
-					if (y < 0.2 * height)
-					{
-						row.push_back(1);
-						continue;
-					}
-					if (y > 0.5 * height)
-					{
-						row.push_back(2);
-						continue;
-					}
-				}
-
-				else if (x > 0.6 * width && x < 0.9 * width)
-				{
-					if (y < 0.2 * height)
-					{
-						row.push_back(3);
-						continue;
-					}
-
-					if (y > 0.7 * height)
-					{
-						row.push_back(4);
-						continue;
-					}
-				}
-				row.push_back(0);
-			}
-
-
 		}
 		grid.push_back(row);
+	}
+
+	for (int z = 0; z < 4; z++)
+	{
+		gridnetwork.push_back(grid);
 	}
 
 	gridheight = grid.size() + 2 * screenbuffer;
@@ -144,8 +133,11 @@ void DrawWorkers(float linewidth,float lineheight)
 		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
 			DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 200,100,255,255 });
-			if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-			chosenperson = x;
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				chosenperson = x;
+				SidebarState = Code;
+			}
 		}
 	}
 }
@@ -167,7 +159,7 @@ void DrawProgressBar()
 	DrawCircle(boundary.x +moneybarwidth- 10, boundary.y + 10, 5, GRAY);
 	DrawCircle(boundary.x + 10, windowheight - 10, 5, GRAY);
 	DrawCircle(boundary.x + moneybarwidth - 10, windowheight- 10, 5, GRAY);
-	DrawTextEx(codingfontbold, TextFormat("$%d", totalmoney), { outerrect.x-15,outerrect.y+outerrect.height+10 }, 20, 4, YELLOW);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", totalmoney), { outerrect.x-15,outerrect.y+outerrect.height+10 }, 20, 4, YELLOW);
 	DrawTextEx(codingfontbold, TextFormat("$%d", quota), { outerrect.x-20 ,outerrect.y - 20 }, 20, 4, YELLOW);
 }
 
@@ -199,6 +191,9 @@ void DrawMainScreen()
 			case 4:
 				color = RED;
 				break;
+			case -2:
+				color = workbenchcolor;
+				break;
 			}
 
 			if (((x >= 0 && x < screenbuffer)|| (x >= gridwidth - screenbuffer && x < gridwidth)) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
@@ -221,10 +216,21 @@ void DrawMainScreen()
 
 	DrawWorkers(linewidth,lineheight);
 
+	//DrawCircle(70,70, 50,BLACK);
+
 }
 
 void DrawCodeTab()
 {
+	if (workers.empty())
+	{
+		DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), GRAY);
+		DrawRectangle(windowwidth - sidebarwidth + 80, windowheight * 0.43, sidebarwidth - 160, 130, BLACK);
+		DrawRectangle(windowwidth - sidebarwidth + 100, windowheight*0.45, sidebarwidth - 200, 100, RED);
+		DrawTextEx(codingfontbold, "NO CODE SELECTED", { windowwidth - sidebarwidth + 120, windowheight * 0.5 }, 30, 2, WHITE);
+		return;
+	}
+
 	static bool editing = false;
 	static char text[textinputsize] = "";
 	static short int textsize = 0;
@@ -567,6 +573,156 @@ void DrawShopTab()
 
 }
 
+void DrawHireTab()
+{
+	static short int workernum = workertypes.size();
+	static short int iconsize = (workernum < 4) ? 5 : 3;
+	static float iconspacing = (workernum < 4) ? 0.28 : 0.36;
+	static float bannerheight = (workernum < 4) ? 0.5 : 0.47;
+	static bool drawmode = false;
+	static short int chosenworkertype = 0;
+	static short int chosenposition = 0;
+	static Rectangle CancelButton = { windowwidth - sidebarwidth - moneybarwidth - 180,10,150,60 };
+
+	//BackGround
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight, sidebarwidth, windowheight - sidebarbuttonheight, BLUE);
+
+	Vector2 buttondims = { sidebarwidth /3, (windowheight - sidebarbuttonheight) /workernum};
+	for (int x = 0; x < workernum; x++)
+	{
+		for (int y = 3; y >=1; y--)
+		{
+			int cost=0;
+			Rectangle button = { windowwidth - y * buttondims.x + 6, sidebarbuttonheight + x * buttondims.y + 15, buttondims.x - 12, buttondims.y - 30 };
+			
+			//DRAW BUTTON AND BOUNDARIES
+			if (CheckCollisionPointRec(mousepos, button)&&drawmode==false)
+			{
+				DrawRectangleRec(button, {0,131,255,255});
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+				{
+					drawmode = true;
+					chosenworkertype = x;
+					chosenposition = y;
+				}
+			}
+			else
+			DrawRectangleRec(button, DARKBLUE);
+			DrawRectangleLinesEx(button, 4, WHITE);
+
+
+			//DRAW MONEY AND POSITION
+			Color iconcolor = WHITE;
+			if (y == 3)
+			{
+				iconcolor = { 180,180,180,255 };
+				cost = get<2>(workertypes[workernum-1 - x]);
+				DrawTextEx(codingfontbold, "Junior", { button.x + button.width * 0.33f,button.y + button.height * bannerheight }, 15, 1, iconcolor);
+			}
+			else if (y == 2)
+			{
+				iconcolor = { 220,220,0,255 };
+				cost = get<2>(workertypes[workernum-1 - x]) * 20;
+				DrawTextEx(codingfontbold, "Senior", { button.x + button.width * 0.33f,button.y + button.height * bannerheight }, 15, 1, iconcolor);
+			}
+			else if (y == 1)
+			{
+				iconcolor = PURPLE;
+				cost = get<2>(workertypes[workernum-1 - x]) * 80;
+				DrawTextEx(codingfontbold, "Specialist", { button.x + button.width * 0.23f,button.y + button.height * bannerheight }, 15, 1, iconcolor);
+			}
+			DrawTextEx(codingfontbold, TextFormat("$%d", cost), { button.x + button.width * 0.3f,button.y + button.height * 0.8f }, 25, 1, GREEN);
+
+			
+			//DRAW NAME AND ICON
+			switch (x)
+			{
+			case 0:
+				GuiDrawIcon(ICON_MONITOR, button.x + button.width *iconspacing, button.y + button.height/15, iconsize, iconcolor);
+				DrawTextEx(codingfontbold, "Software", { button.x + button.width*0.13f,button.y + button.height *0.6f }, 22, 3, WHITE);
+				break;
+			case 1:
+				GuiDrawIcon(ICON_GEAR, button.x + button.width *iconspacing, button.y + button.height / 15, iconsize, iconcolor);
+				DrawTextEx(codingfontbold, "Hardware", { button.x + button.width * 0.13f,button.y + button.height * 0.6f }, 22, 3, WHITE);
+				break;
+			case 2:
+				GuiDrawIcon(ICON_WAVE, button.x + button.width *iconspacing, button.y + button.height / 15, iconsize, iconcolor);
+				DrawTextEx(codingfontbold, "Network", { button.x + button.width * 0.18f,button.y + button.height * 0.6f }, 22, 3, WHITE);
+				break;
+			default:break;
+			}
+		}
+	}
+
+	if (drawmode == true)
+	{
+		//CANCEL BUTTON
+		DrawRectangleRounded(CancelButton, 5, 10, MAROON);
+		DrawRectangleRoundedLinesEx(CancelButton, 5, 10, 5, WHITE);
+		DrawTextEx(codingfontbold, "Exit", { CancelButton.x + CancelButton.width / 3,CancelButton.y + CancelButton.height / 3 }, 23, 2, WHITE);
+		if (CheckCollisionPointRec(mousepos, CancelButton))
+		{
+			DrawRectangleRounded(CancelButton, 5, 10, RED);
+			DrawTextEx(codingfontbold, "Exit", { CancelButton.x + CancelButton.width / 3,CancelButton.y + CancelButton.height / 3 }, 23, 2, WHITE);
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				drawmode = false;
+				return;
+			}
+		}
+
+		for (int y = workbenchsize/2; y < grid.size()-workbenchsize/2; y++)
+		{
+			for (int x = workbenchsize/2; x < grid[0].size()-workbenchsize/2; x++)
+			{
+				Rectangle chosenblock = { (x + screenbuffer) * linewidth,(y + screenbuffer) * lineheight,linewidth,lineheight };
+				Rectangle block = { (x + screenbuffer- workbenchsize / 2) * linewidth,(y + screenbuffer- workbenchsize / 2) * lineheight,linewidth*(workbenchsize),lineheight*(workbenchsize)};
+				if (CheckCollisionPointRec(mousepos, chosenblock))
+				{
+					DrawRectangleRec(block, workbenchcolor);
+					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+					{
+						for (int i = y - workbenchsize / 2; i < y + workbenchsize / 2; i++)
+						{
+							for (int j = x - workbenchsize / 2; j < x + workbenchsize / 2; j++)
+							{
+								if (grid[i][j] != 2||grid[i][j]<0)
+								{
+									drawmode = false;
+									return;
+								}
+							}
+						}
+
+						//TODO:::IMPLEMENT WORKERPOSITIONS
+						for (int i = y - workbenchsize / 2; i < y + workbenchsize-1; i++)
+						{
+							for (int j = x - workbenchsize / 2; j < x + workbenchsize-1; j++)
+							{
+								grid[i][j] = -2;
+							}
+						}
+
+						//Calculate Cost
+						int workernetcost=0;
+						if (chosenposition == 3)workernetcost= get<2>(workertypes[workernum-1-chosenworkertype]);
+						else if (chosenposition == 2)workernetcost= get<2>(workertypes[workernum-1-chosenworkertype])*20;
+						else if (chosenposition == 1)workernetcost= get<2>(workertypes[workernum-1-chosenworkertype])*80;
+
+						//Subtract Cost
+						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
+
+						//Spawn Worker
+						workers.push_back(Worker(0,screenbuffer, gridheight/2));
+						workers[workers.size() - 1].pathfind({x+workbenchsize/2+1,y+workbenchsize/2+1});
+					}
+				}
+			}
+		}
+	}
+
+}
+
 void DrawSidebar()
 {
 	//Drawing 3 Sidebar Buttons
@@ -585,6 +741,9 @@ void DrawSidebar()
 		break;
 	case Shop:
 		DrawShopTab();
+		break;
+	case Hire:
+		DrawHireTab();
 	}
 }
 
@@ -606,15 +765,17 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(20,20,0);
+	InitializeGrid(50,50,0);
 	InitializeShop();
+	InitializeHire();
 
 	//Add random workers
-	for (int x = 0; x < 1; x++)
+	for (int x = 0; x < 5; x++)
 	{
-		workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
+		//workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	}
+
 
 	//SET GAMETIME
 	gametime = time(NULL);
@@ -622,24 +783,28 @@ int main()
 	while (!WindowShouldClose())
 	{
 		mousepos = GetMousePosition();
+		frametime = GetFrameTime();
+
 		if (time(NULL)!=gametime)
 		{
 			gametime = time(NULL);
 
 			//Tick Functions
 			ChangeWorkerPositions();
-			if (totalmoney < quota)
-			{
-				if (totalmoney + 300 > quota)
-					totalmoney = quota;
-				else
-					totalmoney += 300;
-			}
+
 		}
 
 		BeginDrawing();
 		ClearBackground(WHITE);
 
+		if (totalmoney < quota)
+		{
+			if (totalmoney + moneyincrement * frametime > quota)
+				totalmoney = quota;
+			else
+				totalmoney += moneyincrement * frametime;
+		}
+		
 		DrawMainScreen();
 		DrawSidebar();
 		DrawProgressBar();

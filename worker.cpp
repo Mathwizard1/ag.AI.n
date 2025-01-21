@@ -5,7 +5,8 @@ std::vector<Worker> workers;
 std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
 
-Worker::Worker(short int x, short int y) {
+Worker::Worker(int index, short int x, short int y) {
+	this->index = index;
 	this->energy = 50;
 	this->productivity = 80;
 	this->health = 100;
@@ -18,7 +19,8 @@ Worker::Worker(short int x, short int y) {
 	this->pos = { x,y };
 }
 
-Worker::Worker(bool gender, char* name, short int x, short int y) {
+Worker::Worker(int index, bool gender, char* name, short int x, short int y) {
+	this->index = index;
 	this->energy = 50;
 	this->productivity = 80;
 	this->health = 100;
@@ -74,8 +76,8 @@ bool Worker::give(int index, int fid, int fq, int wid, int wq) {
 
 }
 
-void Worker::take() {
-
+bool Worker::take(int index, int fid, int fq, int wid, int wq) {
+	return workers[index].give(this->index, fid, fq, wid, wq);
 }
 
 int Worker::buy(Food food, int q) {

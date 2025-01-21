@@ -27,6 +27,7 @@ public:
 
 	std::unordered_map<std::string, int> labelMap;
 
+	int index;
 	int energy;
 	int productivity;
 	int mood;
@@ -79,14 +80,14 @@ public:
 	bool gender;
 
 	//Constructors
-	Worker(short int x = 0, short int y = 0);
-	Worker(bool gender, char* name, short int x = 0, short int y = 0);
+	Worker(int index, short int x = 0, short int y = 0);
+	Worker(int index, bool gender, char* name, short int x = 0, short int y = 0);
 
 	//Functions
 	void eat();
 	void pathfind( pair<short int, short int> end);
 	bool give(int index, int fid, int fq, int wid, int wq);
-	void take();
+	bool take(int index, int fid, int fq, int wid, int wq);
 	int buy(Food food, int q);
 
 	void getCode();
