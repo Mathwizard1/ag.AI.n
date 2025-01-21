@@ -27,6 +27,15 @@
     <ClCompile Include="worker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="a_star.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gameAST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="w_grid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gameConst.h">
@@ -48,6 +57,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pathfinding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="a_star.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gameAST.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="w_grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

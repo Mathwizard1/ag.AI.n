@@ -56,3 +56,8 @@ vector<pair<short int, short int>> a_star::findPath(pair<short int, short int> s
     }
     return {};
 }
+
+
+bool operator==(const pair<short int, short int>& a, const pair<short int, short int>& b) {
+    return a.first == b.first && a.second == b.second;
+}

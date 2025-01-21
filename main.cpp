@@ -47,9 +47,12 @@ void ChangeWorkerPositions()
 		if (workers[x].path.size() > 0)
 		{
 
-			if()
-			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
-			workers[x].path.pop_back();
+			if (!is_0bstacle(workers[x].path[workers[x].path.size() - 1])) {
+				workers[x].pos = workers[x].path[workers[x].path.size() - 1];
+				workers[x].path.pop_back();
+			}
+			else
+				workers[x].pathfind();
 		}
 	}
 }
@@ -383,7 +386,7 @@ int main()
 	for (int x = 0; x < 20; x++)
 	{
 		workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
-		workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
+		workers[x].end_point={ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer };
 	}
 
 	//SET GAMETIME

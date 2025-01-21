@@ -139,6 +139,7 @@
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="worker.cpp" />
+    <ClCompile Include="w_grid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_star.h" />

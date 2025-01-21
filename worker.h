@@ -13,6 +13,7 @@ public:
 	double mood;
 	double health;
 	double money;
+	pair<short int, short int> end_point;
 
 	enum zone {
 		Office,
@@ -61,7 +62,7 @@ public:
 
 	//Functions
 	void eat(Food food);
-	void pathfind( pair<short int, short int> end);
+	void pathfind();
 	void give();
 	void take();
 };
