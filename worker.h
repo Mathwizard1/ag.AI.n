@@ -2,12 +2,14 @@
 #include "gameFunction.h"
 #include "food.h"
 #include "inventory.h"
-
 #include "gameAST.h"
+
+#include "gameMaster.h"
 
 class Worker
 {
 protected:
+	gameMaster gM;
 	std::string genericIdentifier = "$";
 	std::string labelIdentifier = "!";
 
@@ -88,7 +90,7 @@ public:
 	int buy(Food food, int q);
 
 	void getCode();
-	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
+	void tokenizer(char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
 	int getExpression(const std::string& var, const std::string& atr);
 

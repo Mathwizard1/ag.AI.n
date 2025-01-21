@@ -56,6 +56,10 @@ void ChangeWorkerPositions()
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
+		else
+		{
+			workers[x].callFunction();
+		}
 	}
 }
 

@@ -1,6 +1,21 @@
 #pragma once
 #include "gameAST.h"
 
+enum class Errorcodes
+{
+
+};
+
+class protoAST
+{
+
+};
+
+class expressionAST : public protoAST
+{
+
+};
+
 class gameMaster
 {
 protected:
@@ -18,11 +33,9 @@ protected:
 	std::pair<char, char> paranSmooth = { '(', ')' };
 
 public:
-	std::vector<std::string> parsedTokens;
-
 	void tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
-	void getCode(std::vector<const char*> instructionList, int listSize, std::vector<short int> instructionSizes);
+	int getCode(std::vector<char*>& instructionList, int listSize, std::vector<short int>& instructionSizes);
 
 	//int getExpression(const std::string& var, const std::string& atr);
 

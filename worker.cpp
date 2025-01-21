@@ -86,6 +86,7 @@ int Worker::buy(Food food, int q) {
 
 void Worker::getCode()
 {
+	linecounter = 0;
 	std::vector<std::string> tokens;
 
 	int codeSize = code.size();
@@ -118,7 +119,7 @@ void Worker::getCode()
 	}
 }
 
-void Worker::tokenizer(const char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
+void Worker::tokenizer(char* instruction, short int instructionSize, std::vector<std::string>& tokensList)
 {
 	std::string cleanString = "";
 	std::string specialString = "";
@@ -391,6 +392,12 @@ int Worker::literalProcess(std::string intLiteral)
 void Worker::callFunction()
 {
 	int codeSize = code.size();
+
+	if (! code.empty())
+	{
+		gM.getCode(code, codeSize, linesize);
+	}
+
 	if (linecounter < codeSize)
 	{
 		std::vector<std::string> tokens;
