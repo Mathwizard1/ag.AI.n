@@ -14,6 +14,7 @@ public:
 	double health;
 	double money;
 	pair<short int, short int> end_point;
+	pair<short int, short int> pos;
 
 	enum zone {
 		Office,
@@ -23,7 +24,7 @@ public:
 		Boss,
 	} Zone;
 
-	pair<short int, short int> pos;
+
 
 	vector<char*> code;
 	vector<short int> linesize;
@@ -62,7 +63,7 @@ public:
 
 	//Functions
 	void eat(Food food);
-	void pathfind();
+	void pathfind();//marked
 	void give();
 	void take();
 };

@@ -2,8 +2,13 @@
 #include <queue>
 #include <cmath>
 #include <algorithm>
-
 #include "w_grid.h"
+
+
+
+a_star::a_star() {
+    grid = worker_pos;
+}
 
 a_star::a_star(const vector<vector<short int>>& grid) : grid(grid) {
     directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
@@ -14,7 +19,7 @@ bool a_star::isValid(short int x, short int y) {
 }
 
 double a_star::heuristic(short x1, short y1, short x2, short y2) {
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));//euclidian distance
 }
 //global worker grid 
 //local worker grid

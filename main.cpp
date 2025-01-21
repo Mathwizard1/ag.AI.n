@@ -4,6 +4,8 @@
 #include "worker.h"
 #include "gameConst.h"
 #include "w_grid.h"
+
+
 using namespace std;
 
 short int chosenperson = 0;
@@ -40,6 +42,7 @@ Colors:
 4->Boss (Red)
 
 */
+
 void ChangeWorkerPositions()
 {
 	for (int x = 0; x < workers.size(); x++)

@@ -1,8 +1,10 @@
 #pragma once
-
 #include <vector>
 #include <utility>
-std::vector<std::vector<short int>> worker_pos; //we are making a grid for workers
 
-bool is_0bstacle(std::pair<short int, short int> coordinate);
+using namespace std;
 
+
+extern vector<vector<short>> worker_pos;
+
+bool is_0bstacle(pair<short int, short int> coordinate);
