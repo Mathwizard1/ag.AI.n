@@ -8,7 +8,7 @@ using namespace std;
 short int chosenperson = 0;
 long long int gametime;
 float totalmoney = 0;
-float moneyincrement = 500;
+float moneyincrement = 0;
 float frametime;
 long long int quota = 10000;
 
@@ -33,6 +33,8 @@ enum shopstate {
 
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
+
+std::vector<std::vector<vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
 
 std::vector<tuple<Color, char*, int>> areaitems;
@@ -65,6 +67,10 @@ void ChangeWorkerPositions()
 			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
 			workers[x].path.pop_back();
 		}
+		else
+		{
+			workers[x].callFunction();
+		}
 	}
 }
 
@@ -92,54 +98,21 @@ void InitializeGrid(short int width, short int height, int type)
 	workbenchcolor = { 120,255,120,255 };
 	workbenchsize = 3;
 
-	//Create Grid
+	//Create Grid Network
 	for (int y = 0; y < height; y++)
 	{
 		std::vector<short int> row;
 
 		for (int x = 0; x < width; x++)
 		{
-
-			if (type == 0)
-			{
 				row.push_back(0);
-			}
-			else if (type == 1)
-			{
-				if (x > 0.05 * width && x < 0.5 * width)
-				{
-					if (y < 0.2 * height)
-					{
-						row.push_back(1);
-						continue;
-					}
-					if (y > 0.5 * height)
-					{
-						row.push_back(2);
-						continue;
-					}
-				}
-
-				else if (x > 0.6 * width && x < 0.9 * width)
-				{
-					if (y < 0.2 * height)
-					{
-						row.push_back(3);
-						continue;
-					}
-
-					if (y > 0.7 * height)
-					{
-						row.push_back(4);
-						continue;
-					}
-				}
-				row.push_back(0);
-			}
-
-
 		}
 		grid.push_back(row);
+	}
+
+	for (int z = 0; z < 4; z++)
+	{
+		gridnetwork.push_back(grid);
 	}
 
 	gridheight = grid.size() + 2 * screenbuffer;
@@ -160,8 +133,11 @@ void DrawWorkers(float linewidth,float lineheight)
 		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
 			DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 200,100,255,255 });
-			if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-			chosenperson = x;
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				chosenperson = x;
+				SidebarState = Code;
+			}
 		}
 	}
 }
@@ -239,6 +215,8 @@ void DrawMainScreen()
 	}
 
 	DrawWorkers(linewidth,lineheight);
+
+	//DrawCircle(70,70, 50,BLACK);
 
 }
 
@@ -716,6 +694,7 @@ void DrawHireTab()
 							}
 						}
 
+						//TODO:::IMPLEMENT WORKERPOSITIONS
 						for (int i = y - workbenchsize / 2; i < y + workbenchsize-1; i++)
 						{
 							for (int j = x - workbenchsize / 2; j < x + workbenchsize-1; j++)
@@ -734,7 +713,7 @@ void DrawHireTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers.push_back(Worker(screenbuffer, gridheight/2));
+						workers.push_back(Worker(0,screenbuffer, gridheight/2));
 						workers[workers.size() - 1].pathfind({x+workbenchsize/2+1,y+workbenchsize/2+1});
 					}
 				}
@@ -786,7 +765,7 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(40,40,0);
+	InitializeGrid(50,50,0);
 	InitializeShop();
 	InitializeHire();
 
@@ -796,6 +775,7 @@ int main()
 		//workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	}
+
 
 	//SET GAMETIME
 	gametime = time(NULL);
@@ -811,6 +791,7 @@ int main()
 
 			//Tick Functions
 			ChangeWorkerPositions();
+
 		}
 
 		BeginDrawing();
