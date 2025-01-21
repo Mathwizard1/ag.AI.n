@@ -79,8 +79,10 @@ public:
 
 	bool gender;
 
+	int gridnumber;
+
 	//Constructors
-	Worker(int index, short int x = 0, short int y = 0);
+	Worker(int index, short int x = 0, short int y = 0,short int gridnumber=0);
 	Worker(int index, bool gender, char* name, short int x = 0, short int y = 0);
 
 	//Functions
@@ -102,6 +104,6 @@ public:
 	void callFunction();
 };
 
-extern std::vector<Worker> workers;
+extern std::vector<std::vector<Worker>> workers;
 extern std::vector<Worker> bosses;
 extern std::vector<Worker> receptionists;

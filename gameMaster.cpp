@@ -122,7 +122,7 @@ int gameMaster::getCode(std::vector<char*>& instructionList, int listSize, std::
 		int tcount = TokenCount_lineWise[listSize - 1];
 		for (int t = 0; t < tcount; t++)
 		{
-			std::cout << parsedTokens[t] << ' : ' << t;
+			std::cout << parsedTokens[t] << " : " << t;
 			std::cout << '\n';
 		}
 

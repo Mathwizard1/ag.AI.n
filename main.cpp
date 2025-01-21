@@ -69,16 +69,17 @@ Colors:
 
 void ChangeWorkerPositions()
 {
-	for (int x = 0; x < workers.size(); x++)
+	for(int y=0;y<gridnetwork.size();y++)
+	for (int x = 0; x < workers[y].size(); x++)
 	{
-		if (workers[x].path.size() > 0)
+		if (workers[y][x].path.size() > 0)
 		{
-			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
-			workers[x].path.pop_back();
+			workers[y][x].pos = workers[y][x].path[workers[y][x].path.size() - 1];
+			workers[y][x].path.pop_back();
 		}
 		else
 		{
-			workers[x].callFunction();
+			workers[y][x].callFunction();
 		}
 	}
 }
@@ -123,10 +124,11 @@ void InitializeGrid(short int width, short int height, int type)
 	{
 		vector<char*> textboxes;
 		vector<short int> textsizes;
+		vector<Worker> gridworkers;
 		gridnetwork.push_back(grid);
 		textboxesnetwork.push_back(textboxes);
 		textsizesnetwork.push_back(textsizes);
-
+		workers.push_back(gridworkers);
 		 
 		vector<vector<short int>> pooledgrid;
 		for (int y = 0; y < grid.size() - 1; y += grid.size()/mapdims)
@@ -246,12 +248,12 @@ void DrawMap()
 
 void DrawWorkers(float linewidth,float lineheight)
 {
-	for (int x = 0; x < workers.size(); x++)
+	for (int x = 0; x < workers[chosengrid].size(); x++)
 	{
-		Vector2 workerpos = { (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2) };
+		Vector2 workerpos = { (float)(workers[chosengrid][x].pos.first * linewidth + linewidth / 2),(float)(workers[chosengrid][x].pos.second * lineheight + lineheight / 2) };
 		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
 		DrawCircleLinesV(workerpos, min(linewidth / 2, lineheight / 2) - 2, BLACK);
-		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[x].name,workers[x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
+		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[chosengrid][x].name,workers[chosengrid][x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
 
 		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
@@ -397,7 +399,7 @@ void DrawMainScreen()
 
 void DrawCodeTab()
 {
-	if (workers.empty())
+	if (workers[chosengrid].empty())
 	{
 		DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), GRAY);
 		DrawRectangle(windowwidth - sidebarwidth + 80, windowheight * 0.43, sidebarwidth - 160, 130, BLACK);
@@ -422,8 +424,8 @@ void DrawCodeTab()
 		startpos = 0;
 		chosentext = 0;
 		chosencode = chosenperson;
-		textboxes = workers[chosenperson].code;
-		textsizes = workers[chosenperson].linesize;
+		textboxes = workers[chosengrid][chosenperson].code;
+		textsizes = workers[chosengrid][chosenperson].linesize;
 	}
 	
 	//CODE SUBMISSION
@@ -552,14 +554,14 @@ void DrawCodeTab()
 	//DRAWING SAVE BUTTON
 	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
 	{
-		workers[chosenperson].code = textboxes;
-		workers[chosenperson].linesize = textsizes;
-		workers[chosenperson].getCode();
+		workers[chosengrid][chosenperson].code = textboxes;
+		workers[chosengrid][chosenperson].linesize = textsizes;
+		workers[chosengrid][chosenperson].getCode();
 	}
 
 	//DRAWING NAME BANNER
 	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight, sidebarwidth, namebannersize, DARKGRAY);
-	DrawTextEx(codingfontbold, workers[chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
+	DrawTextEx(codingfontbold, workers[chosengrid][chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
 }
 
 void DrawAreaTab()
@@ -888,8 +890,8 @@ void DrawHireTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers.push_back(Worker(0,screenbuffer, gridheight/2));
-						workers[workers.size() - 1].pathfind({x+workbenchsize/2+1,y+workbenchsize/2+1});
+						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
+						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1});
 					}
 				}
 			}
@@ -951,7 +953,7 @@ int main()
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	//}
 
-	//ScreenMode = Map;
+	ScreenMode = Map;
 	//SET GAMETIME
 	gametime = time(NULL);
 
