@@ -385,6 +385,8 @@ int main()
 	//Initialize Grid
 	InitializeGrid(60,60);
 
+	init_worker_grid(60, 60);
+
 	//Add random workers
 	for (int x = 0; x < 20; x++)
 	{

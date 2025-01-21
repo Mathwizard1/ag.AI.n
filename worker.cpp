@@ -3,12 +3,12 @@
 #include "a_star.h"
 #include "w_grid.h"
 
-a_star search_object(worker_pos);
+
 
 void Worker::pathfind()
 {
+	a_star search_object;
 	pair<short int, short int > end = this->end_point;
-	vector<pair<short int, short int>> temppath = {};
 	pair<short int, short int > start=this->pos;
 
 	path = search_object.findPath(start, end);
