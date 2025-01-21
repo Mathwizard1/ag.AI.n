@@ -5,11 +5,11 @@
 
 #include "w_grid.h"
 
-a_star::a_star(const vector<vector<short>>& grid) : grid(grid) {
+a_star::a_star(const vector<vector<short int>>& grid) : grid(grid) {
     directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 }
 
-bool a_star::isValid(short x, short y) {
+bool a_star::isValid(short int x, short int y) {
     return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 0;
 }
 
@@ -18,7 +18,7 @@ double a_star::heuristic(short x1, short y1, short x2, short y2) {
 }
 //global worker grid 
 //local worker grid
-vector<pair<short, short>> a_star::findPath(pair<short, short> start, pair<short, short> goal) {
+vector<pair<short int, short int>> a_star::findPath(pair<short int, short int> start, pair<short int, short int> goal) {
     short rows = grid.size(), cols = grid[0].size();
     priority_queue<Node> front;
     vector<vector<bool>> visited(rows, vector<bool>(cols, false));
@@ -29,7 +29,7 @@ vector<pair<short, short>> a_star::findPath(pair<short, short> start, pair<short
         front.pop();
 
         if (current.x == goal.first && current.y == goal.second) {
-            vector<pair<short, short>> path;
+            vector<pair<short int, short int>> path;
             while (current.parent != nullptr) {
                 path.push_back({ current.x, current.y });
                 current = *current.parent;
