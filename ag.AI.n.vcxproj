@@ -140,6 +140,7 @@
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="specialist_worker.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="inventory.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
+    <ClInclude Include="specialist_worker.h" />
     <ClInclude Include="worker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
