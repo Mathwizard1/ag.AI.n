@@ -139,6 +139,7 @@
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
+    <ClCompile Include="junior_worker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="senior_worker.cpp" />
     <ClCompile Include="specialist_worker.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="gameMaster.h" />
     <ClInclude Include="inventory.h" />
+    <ClInclude Include="junior_worker.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="senior_worker.h" />
