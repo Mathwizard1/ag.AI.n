@@ -140,6 +140,7 @@
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="senior_worker.cpp" />
     <ClCompile Include="specialist_worker.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
@@ -154,6 +155,7 @@
     <ClInclude Include="inventory.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
+    <ClInclude Include="senior_worker.h" />
     <ClInclude Include="specialist_worker.h" />
     <ClInclude Include="worker.h" />
   </ItemGroup>
