@@ -140,7 +140,6 @@
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="wokerclass_adv.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,7 +154,6 @@
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="worker.h" />
-    <ClInclude Include="workerclass_adv.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
