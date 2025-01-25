@@ -5,13 +5,15 @@
 #include "gameConst.h"
 using namespace std;
 
-short int chosenperson = 0;
 long long int gametime;
 float totalmoney = 0;
-float moneyincrement = 0;
+float moneyincrement = 1000;
 float frametime;
-long long int quota = 10000;
+short int mapsize = 9;
 
+short int chosengrid = 0;
+long long int quota = 100000;
+short int chosenperson = 0;
 short int gridheight;
 short int gridwidth;
 float linewidth;
@@ -31,10 +33,20 @@ enum shopstate {
 	Misc
 } ShopState;
 
+enum screenmode {
+	View,
+	Map
+} ScreenMode;
+
+std::vector<vector<char*>> textboxesnetwork;
+std::vector<vector<short int>> textsizesnetwork;
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
 
-std::vector<std::vector<vector<short int>>> gridnetwork;
+std::vector<short int> gridpurchased;
+std::vector<long long int> gridprices;
+std::vector < std::vector<std::vector<short int>>> pooledgridnetwork;
+std::vector<std::vector<std::vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
 
 std::vector<tuple<Color, char*, int>> areaitems;
@@ -46,6 +58,8 @@ short int workbenchsize;
 Color workbenchcolor;
 
 Vector2 mousepos;
+
+Texture officetile;
 
 /*
 Colors:
@@ -60,18 +74,24 @@ Colors:
 
 void ChangeWorkerPositions()
 {
-	for (int x = 0; x < workers.size(); x++)
+	for(int y=0;y<gridnetwork.size();y++)
+	for (int x = 0; x < workers[y].size(); x++)
 	{
-		if (workers[x].path.size() > 0)
+		if (workers[y][x].path.size() > 0)
 		{
-			workers[x].pos = workers[x].path[workers[x].path.size() - 1];
-			workers[x].path.pop_back();
+			workers[y][x].pos = workers[y][x].path[workers[y][x].path.size() - 1];
+			workers[y][x].path.pop_back();
 		}
 		else
 		{
-			workers[x].callFunction();
+			workers[y][x].callFunction();
 		}
 	}
+}
+
+void InitializeSprites()
+{
+	officetile = LoadTextureFromImage(LoadImage( "sprites/office_tile.png"));
 }
 
 void InitializeHire()
@@ -93,6 +113,44 @@ void InitializeShop()
 	areacolors.push_back(3);
 }
 
+void InitializeGridPrices()
+{
+	static int dims = sqrt(mapsize);
+	static int midx = dims/2;
+	static int midy = dims/ 2;
+
+	int x;
+	int y;
+
+	for (int i = 0; i < mapsize; i++)
+	{
+		x = i % dims;
+		y = i / dims;
+
+		switch (abs(midx - x) + abs(midy - y))
+		{
+		case 0:
+			gridprices[x + y * dims] = 0;
+			break;
+		case 1:
+			gridprices[x + y * dims] = 500;
+			break;
+		case 2:
+			gridprices[x + y * dims] = 5000;
+			break;
+		case 3:
+			gridprices[x + y * dims] = 10000;
+			break;
+		case 4:
+			gridprices[x + y * dims] = 50000;
+			break;
+		case 5:
+			gridprices[x + y * dims] = 100000;
+			break;
+		}
+	}
+}
+
 void InitializeGrid(short int width, short int height, int type)
 {
 	workbenchcolor = { 120,255,120,255 };
@@ -110,10 +168,51 @@ void InitializeGrid(short int width, short int height, int type)
 		grid.push_back(row);
 	}
 
-	for (int z = 0; z < 4; z++)
+	for (int z = 0; z < mapsize ; z++)
 	{
+		vector<char*> textboxes;
+		vector<short int> textsizes;
+		vector<Worker> gridworkers;
+		gridprices.push_back(0);
+		gridpurchased.push_back(0);
 		gridnetwork.push_back(grid);
+		textboxesnetwork.push_back(textboxes);
+		textsizesnetwork.push_back(textsizes);
+		workers.push_back(gridworkers);
+		 
+		vector<vector<short int>> pooledgrid;
+		for (int y = 0; y < grid.size() - 1; y += grid.size()/mapdims)
+		{
+			vector<short int> row;
+			for (int x = 0; x <grid[0].size() -1; x += grid[0].size() / mapdims)
+			{
+				int* numarray = (int*)malloc(sizeof(int) * 6);
+
+				for (int q = 0; q < grid.size() / mapdims; q++)
+				{
+					for (int r = 0; r < grid[0].size() / mapdims; r++)
+					{
+						//cout << grid[y + q][x + r] << endl;
+						if(grid[y+q][x+r]>-2)
+						numarray[grid[y+q][x+r]+1]++;
+					}
+				}
+				
+				int max = 0;
+				for (int q = 0; q < 6; q++)
+				{
+					if (numarray[q] > numarray[max])
+						max = q;
+				}
+				row.push_back(max-1);
+				free(numarray);
+			}
+
+			pooledgrid.push_back(row);
+		}
+		pooledgridnetwork.push_back(pooledgrid);
 	}
+	gridpurchased[mapsize / 2] = 1;
 
 	gridheight = grid.size() + 2 * screenbuffer;
 	gridwidth = grid[0].size() + 2 * screenbuffer;
@@ -121,14 +220,131 @@ void InitializeGrid(short int width, short int height, int type)
 	lineheight = (windowheight) / (float)gridheight;
 }
 
+void DrawMap()
+{
+	static int mapnumber = gridnetwork.size();
+	static int dims = sqrt(mapnumber);
+
+	//Draw Background and Boundary
+	DrawRectangleRec({ 0, 0, windowwidth, windowheight }, RAYWHITE);
+	DrawRectangleLinesEx({ 0, 0, windowwidth, windowheight },20, GRAY);
+
+	//Draw Total Money
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", totalmoney), { windowwidth - windowwidth/12, 50 }, 30, 1, GREEN);
+
+	//Draw Lines
+	for (int y = 0; y < dims; y++)
+	{
+
+		DrawLineEx({ windowwidth / 6,windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, { 5 * windowwidth / 6, windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, 8, DARKBLUE);
+		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 8, DARKBLUE);
+	}
+
+
+	//Draw Circles and Grids
+	for (int y = 0; y < dims; y++)
+	{
+		for (int x = 0; x < dims; x++)
+		{
+			float xpoint = windowwidth / 6 + x * (2 * windowwidth / 3) / (dims - 1);
+			float ypoint = windowheight / 6 + y * (2 * windowheight / 3) / (dims - 1);
+			float rad = (windowheight - 200) / (2 * dims);
+
+			//CIRCLES
+			if (gridpurchased[x + y * (dims)] == 1)
+			{
+				DrawCircle(xpoint, ypoint, rad + 100 / mapsize, BLUE);
+				DrawCircle(xpoint, ypoint, rad, {0,245,245,245});
+				DrawCircle(xpoint, ypoint, rad - 5, {0,205,205,205});
+			}
+			else
+			{
+				DrawCircle(xpoint, ypoint, rad + 100 / mapsize, RED);
+				DrawCircle(xpoint, ypoint, rad, {250,250,0,255});
+				DrawCircle(xpoint, ypoint, rad - 5, {200,20,0,255});
+			}
+
+			if (CheckCollisionPointCircle(mousepos, {xpoint,ypoint },rad))
+			{
+				short int gridnum = x + y * dims;
+				if (gridpurchased[gridnum] == 1)
+					DrawCircle(xpoint,ypoint,rad-5, { 0,225,225,225 });
+				else
+					DrawCircle(xpoint, ypoint, rad - 5, { 250,40,0,255 });
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+				{
+					if (gridpurchased[gridnum] == 0)
+					{
+						if (gridprices[gridnum] <= totalmoney)
+						{
+							totalmoney -= gridprices[gridnum];
+							gridpurchased[gridnum] = 1;
+						}
+					}
+					else
+					{
+						grid = gridnetwork[gridnum];
+						textboxes = textboxesnetwork[gridnum];
+						textsizes = textsizesnetwork[gridnum];
+						chosengrid =gridnum;
+						ScreenMode = View;
+					}
+				}
+			}
+
+
+			//GRIDS
+			if(gridpurchased[x+y*dims]==1)
+			{
+				Color blockcolor = WHITE;
+				for (int j = 0; j < mapdims; j++)
+				{
+					for (int i = 0; i < mapdims; i++)
+					{
+
+						switch (pooledgridnetwork[x + y * dims][j][i])
+						{
+						case -1:
+							blockcolor = BLACK;
+							break;
+						case 0:
+							blockcolor = WHITE;
+							break;
+						case 1:
+							blockcolor = YELLOW;
+							break;
+						case 2:
+							blockcolor = GREEN;
+							break;
+						case 3:
+							blockcolor = BLUE;
+							break;
+						case 4:
+							blockcolor = RED;
+							break;
+						}
+						DrawRectangleRounded({ xpoint - rad / 2 + i * rad / mapdims,ypoint - rad / 2 + j * rad / mapdims,rad / mapdims,rad / mapdims }, 0.5, 2, blockcolor);
+					}
+				}
+			}
+			//PRICES
+			else
+			{
+				DrawTextEx(codingfontbold, TextFormat("$%d", gridprices[x + y * dims]), { xpoint - rad / 3,ypoint - rad / 10 }, 20, 1, YELLOW);
+			}
+		}
+	}
+
+}
+
 void DrawWorkers(float linewidth,float lineheight)
 {
-	for (int x = 0; x < workers.size(); x++)
+	for (int x = 0; x < workers[chosengrid].size(); x++)
 	{
-		Vector2 workerpos = { (float)(workers[x].pos.first * linewidth + linewidth / 2),(float)(workers[x].pos.second * lineheight + lineheight / 2) };
+		Vector2 workerpos = { (float)(workers[chosengrid][x].pos.first * linewidth + linewidth / 2),(float)(workers[chosengrid][x].pos.second * lineheight + lineheight / 2) };
 		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
 		DrawCircleLinesV(workerpos, min(linewidth / 2, lineheight / 2) - 2, BLACK);
-		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[x].name,workers[x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
+		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[chosengrid][x].name,workers[chosengrid][x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
 
 		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
@@ -144,7 +360,7 @@ void DrawWorkers(float linewidth,float lineheight)
 
 void DrawProgressBar()
 {
-	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+35, 50,50,700 };
+	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,800 };
 	static Rectangle boundary = { windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight };
 	float fraction = totalmoney/ (float)quota;
 	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
@@ -153,7 +369,7 @@ void DrawProgressBar()
 	DrawRectangleRec(boundary, DARKGRAY);
 
 	DrawRectangleRounded(outerrect,10,10,BLACK);
-	DrawRectangleRounded(innerrect, 10, 10, GREEN);
+	DrawRectangleRounded(innerrect, 10, 10, GOLD);
 	DrawRectangleRounded(shinerect, 10, 10, WHITE);
 	DrawCircle(boundary.x + 10, boundary.y + 10, 5, GRAY);
 	DrawCircle(boundary.x +moneybarwidth- 10, boundary.y + 10, 5, GRAY);
@@ -165,6 +381,8 @@ void DrawProgressBar()
 
 void DrawMainScreen()
 {
+	static float tilesize = linewidth / (float)40;
+
 	//Draw Cells
 	Color color=WHITE;
 	for (int y = 0; y < gridheight; y++)
@@ -199,10 +417,11 @@ void DrawMainScreen()
 			if (((x >= 0 && x < screenbuffer)|| (x >= gridwidth - screenbuffer && x < gridwidth)) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
 				color = {0,205,255,255};
 
+			//DrawTextureEx(officetile, { x * linewidth, y * lineheight }, 0, tilesize, color);
 			DrawRectangleRec({ x * linewidth, y * lineheight, linewidth, lineheight }, color);
+			
 		}
 	}
-
 
 	//Draw Grid
 	for (int x = 0; x < gridwidth; x++)
@@ -214,15 +433,68 @@ void DrawMainScreen()
 		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth-moneybarwidth,y * lineheight }, 1, BLACK);
 	}
 
+	//DRAW WORKERS
 	DrawWorkers(linewidth,lineheight);
 
-	//DrawCircle(70,70, 50,BLACK);
+	DrawCircle(70, 70, 50, BLACK);
+	if (mousepos.x < 120 && mousepos.y < 120)
+		if (CheckCollisionPointCircle(mousepos, { 70,70 }, 50))
+		{
+			DrawCircle(70, 70, 45, { 0,171,255,255 });
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				gridnetwork[chosengrid] = grid;
+
+				//RECREATE POOLED MAP
+				
+				vector<vector<short int>> pooledgrid;
+				for (int l = 0; l < grid.size() -1; l += grid.size() / mapdims)
+				{
+					vector<short int> row;
+					for (int m = 0; m < grid[0].size()-1 ; m += grid[0].size() / mapdims)
+					{
+						//UPDATE
+						int* numarray = (int*)malloc(sizeof(int) * 6);
+
+						for (int q = 0; q < grid.size() / mapdims; q++)
+						{
+							for (int r = 0; r < grid[0].size() / mapdims; r++)
+							{
+								if(grid[l + q][m + r]>-2)
+								numarray[grid[l + q][m + r]+1]++;
+							}
+						}
+
+						int min = 0;
+						for (int q = 0; q < 6; q++)
+						{
+							if (numarray[q] > numarray[min])
+								min = q;
+						}
+						row.push_back(min-1);
+						free(numarray);
+					}
+					pooledgrid.push_back(row);
+				}
+				pooledgridnetwork[chosengrid] = pooledgrid;
+				textboxesnetwork[chosengrid]=textboxes;
+				textsizesnetwork[chosengrid] = textsizes;
+				ScreenMode = Map;
+				return;
+			}
+		}
+		else
+		DrawCircle(70, 70, 45, { 0,151,241,255 });
+	else
+	DrawCircle(70, 70, 45, { 0,151,241,255 });
+
+	GuiDrawIcon(ICON_EXIT, 38, 38, 4, WHITE);
 
 }
 
 void DrawCodeTab()
 {
-	if (workers.empty())
+	if (workers[chosengrid].empty())
 	{
 		DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), GRAY);
 		DrawRectangle(windowwidth - sidebarwidth + 80, windowheight * 0.43, sidebarwidth - 160, 130, BLACK);
@@ -247,8 +519,8 @@ void DrawCodeTab()
 		startpos = 0;
 		chosentext = 0;
 		chosencode = chosenperson;
-		textboxes = workers[chosenperson].code;
-		textsizes = workers[chosenperson].linesize;
+		textboxes = workers[chosengrid][chosenperson].code;
+		textsizes = workers[chosengrid][chosenperson].linesize;
 	}
 	
 	//CODE SUBMISSION
@@ -377,14 +649,14 @@ void DrawCodeTab()
 	//DRAWING SAVE BUTTON
 	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
 	{
-		workers[chosenperson].code = textboxes;
-		workers[chosenperson].linesize = textsizes;
-		workers[chosenperson].getCode();
+		workers[chosengrid][chosenperson].code = textboxes;
+		workers[chosengrid][chosenperson].linesize = textsizes;
+		workers[chosengrid][chosenperson].getCode();
 	}
 
 	//DRAWING NAME BANNER
 	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight, sidebarwidth, namebannersize, DARKGRAY);
-	DrawTextEx(codingfontbold, workers[chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
+	DrawTextEx(codingfontbold, workers[chosengrid][chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
 }
 
 void DrawAreaTab()
@@ -423,9 +695,9 @@ void DrawAreaTab()
 		DrawRectangleRounded(button, 4, 10, DARKBLUE);
 
 		DrawRectangleRoundedLinesEx(button,4,10,5, { 220,220,220,220 });
-		DrawCircle(button.x + button.width * 0.1, button.y + button.height * 0.5, button.height * 0.32, WHITE);
-		DrawCircle(button.x + button.width * 0.1 , button.y + button.height*0.5, button.height*0.3, get<0>(areaitems[x]));
-		DrawTextEx(codingfontbold, get<1>(areaitems[x]), { button.x + button.width * 0.2f ,button.y+button.height*0.4f},25,2,WHITE);
+		DrawCircle(button.x + button.width * 0.15, button.y + button.height * 0.5, button.height * 0.32, WHITE);
+		DrawCircle(button.x + button.width * 0.15 , button.y + button.height*0.5, button.height*0.3, get<0>(areaitems[x]));
+		DrawTextEx(codingfontbold, get<1>(areaitems[x]), { button.x + button.width * 0.3f ,button.y+button.height*0.4f},25,2,WHITE);
 		DrawTextEx(codingfontbold,TextFormat( "$%d",get<2>(areaitems[x])), {button.x + button.width * 0.8f ,button.y + button.height * 0.4f}, 25, 2, GREEN);
 	}
 
@@ -523,7 +795,7 @@ void DrawAreaTab()
 							}
 							else
 							{
-								if (x > startpos.first && y > startpos.second)
+								if (abs(x - startpos.first)+ abs(y - startpos.second)>0)
 								{
 									endpos = { x + 1 ,y + 1 };
 									totalcost = abs(startpos.first - endpos.first) * abs(startpos.second - endpos.second) * get<2>(areaitems[drawzone]);
@@ -679,12 +951,12 @@ void DrawHireTab()
 				Rectangle block = { (x + screenbuffer- workbenchsize / 2) * linewidth,(y + screenbuffer- workbenchsize / 2) * lineheight,linewidth*(workbenchsize),lineheight*(workbenchsize)};
 				if (CheckCollisionPointRec(mousepos, chosenblock))
 				{
-					DrawRectangleRec(block, workbenchcolor);
+					DrawRectangleRec(block, {40,255,40,255});
 					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 					{
-						for (int i = y - workbenchsize / 2; i < y + workbenchsize / 2; i++)
+						for (int i = y - workbenchsize / 2; i <= y + workbenchsize / 2; i++)
 						{
-							for (int j = x - workbenchsize / 2; j < x + workbenchsize / 2; j++)
+							for (int j = x - workbenchsize / 2; j <= x + workbenchsize / 2; j++)
 							{
 								if (grid[i][j] != 2||grid[i][j]<0)
 								{
@@ -713,8 +985,8 @@ void DrawHireTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers.push_back(Worker(0,screenbuffer, gridheight/2));
-						workers[workers.size() - 1].pathfind({x+workbenchsize/2+1,y+workbenchsize/2+1});
+						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
+						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1});
 					}
 				}
 			}
@@ -765,18 +1037,20 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(50,50,0);
+	InitializeGrid(30,30,0);
+	InitializeGridPrices();
 	InitializeShop();
 	InitializeHire();
+	InitializeSprites();
 
 	//Add random workers
-	for (int x = 0; x < 5; x++)
-	{
+	//for (int x = 0; x < 5; x++)
+	//{
 		//workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
-	}
+	//}
 
-
+	ScreenMode = Map;
 	//SET GAMETIME
 	gametime = time(NULL);
 
@@ -805,13 +1079,19 @@ int main()
 				totalmoney += moneyincrement * frametime;
 		}
 		
-		DrawMainScreen();
-		DrawSidebar();
-		DrawProgressBar();
-		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
+		switch (ScreenMode)
+		{
+		case View:
+			DrawMainScreen();
+			DrawSidebar();
+			DrawProgressBar();
+			break;
+		case Map:
+			DrawMap();
+			break;
+		}
+		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
 
 		EndDrawing();
 	}
-
-	
 }

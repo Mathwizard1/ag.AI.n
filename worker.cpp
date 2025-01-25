@@ -1,11 +1,12 @@
 #include "worker.h"
 #include "food.h"
 
-std::vector<Worker> workers;
+std::vector<vector<Worker>> workers;
 std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
 
-Worker::Worker(int index, short int x, short int y) {
+Worker::Worker(int index, short int x, short int y,short int gridnumber) {
+	this->gridnumber = gridnumber;
 	this->index = index;
 	this->energy = 50;
 	this->productivity = 80;
@@ -53,9 +54,9 @@ void Worker::eat() {
 bool Worker::give(int index, int fid, int fq, int wid, int wq) {
 	if (fq > 0) {
 		if (inventory.foodinv[fid] >= fq) {
-			if (workers[index].inventory.foodcount + fq <= 10) {
+			if (workers[gridnumber][index].inventory.foodcount + fq <= 10) {
 				inventory.food_from_inventory(fid, fq);
-				workers[index].inventory.food_into_inventory(fid, fq);
+				workers[gridnumber][index].inventory.food_into_inventory(fid, fq);
 				return 1;
 			}
 			else return 0;
@@ -64,9 +65,9 @@ bool Worker::give(int index, int fid, int fq, int wid, int wq) {
 	}
 	else {
 		if (inventory.workinv[wid] >= wq) {
-			if (workers[index].inventory.workcount + wq <= 10) {
+			if (workers[gridnumber][index].inventory.workcount + wq <= 10) {
 				inventory.work_from_inventory(wid, wq);
-				workers[index].inventory.work_into_inventory(wid, wq);
+				workers[gridnumber][index].inventory.work_into_inventory(wid, wq);
 				return 1;
 			}
 			else return 0;
@@ -77,7 +78,7 @@ bool Worker::give(int index, int fid, int fq, int wid, int wq) {
 }
 
 bool Worker::take(int index, int fid, int fq, int wid, int wq) {
-	return workers[index].give(this->index, fid, fq, wid, wq);
+	return workers[gridnumber][index].give(this->index, fid, fq, wid, wq);
 }
 
 int Worker::buy(Food food, int q) {

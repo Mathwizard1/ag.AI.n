@@ -139,7 +139,10 @@
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
+    <ClCompile Include="juniorWorker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="seniorWorker.cpp" />
+    <ClCompile Include="specialistWorker.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,8 +154,11 @@
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="gameMaster.h" />
     <ClInclude Include="inventory.h" />
+    <ClInclude Include="juniorWorker.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="Raygui.h" />
+    <ClInclude Include="seniorWorker.h" />
+    <ClInclude Include="specialistWorker.h" />
     <ClInclude Include="worker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
