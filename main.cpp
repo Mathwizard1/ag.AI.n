@@ -7,11 +7,12 @@ using namespace std;
 
 long long int gametime;
 float totalmoney = 0;
-float moneyincrement = 3000;
+float moneyincrement = 1000;
 float frametime;
+short int mapsize = 25;
 
 short int chosengrid = 0;
-long long int quota = 10000;
+long long int quota = 100000;
 short int chosenperson = 0;
 short int gridheight;
 short int gridwidth;
@@ -42,6 +43,8 @@ std::vector<vector<short int>> textsizesnetwork;
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
 
+std::vector<short int> gridpurchased;
+std::vector<long long int> gridprices;
 std::vector < std::vector<std::vector<short int>>> pooledgridnetwork;
 std::vector<std::vector<std::vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
@@ -110,6 +113,44 @@ void InitializeShop()
 	areacolors.push_back(3);
 }
 
+void InitializeGridPrices()
+{
+	static int dims = sqrt(mapsize);
+	static int midx = dims/2;
+	static int midy = dims/ 2;
+
+	int x;
+	int y;
+
+	for (int i = 0; i < mapsize; i++)
+	{
+		x = i % dims;
+		y = i / dims;
+
+		switch (abs(midx - x) + abs(midy - y))
+		{
+		case 0:
+			gridprices[x + y * dims] = 0;
+			break;
+		case 1:
+			gridprices[x + y * dims] = 500;
+			break;
+		case 2:
+			gridprices[x + y * dims] = 5000;
+			break;
+		case 3:
+			gridprices[x + y * dims] = 10000;
+			break;
+		case 4:
+			gridprices[x + y * dims] = 50000;
+			break;
+		case 5:
+			gridprices[x + y * dims] = 100000;
+			break;
+		}
+	}
+}
+
 void InitializeGrid(short int width, short int height, int type)
 {
 	workbenchcolor = { 120,255,120,255 };
@@ -127,11 +168,13 @@ void InitializeGrid(short int width, short int height, int type)
 		grid.push_back(row);
 	}
 
-	for (int z = 0; z < 25; z++)
+	for (int z = 0; z < mapsize ; z++)
 	{
 		vector<char*> textboxes;
 		vector<short int> textsizes;
 		vector<Worker> gridworkers;
+		gridprices.push_back(0);
+		gridpurchased.push_back(0);
 		gridnetwork.push_back(grid);
 		textboxesnetwork.push_back(textboxes);
 		textsizesnetwork.push_back(textsizes);
@@ -169,6 +212,7 @@ void InitializeGrid(short int width, short int height, int type)
 		}
 		pooledgridnetwork.push_back(pooledgrid);
 	}
+	gridpurchased[mapsize / 2] = 1;
 
 	gridheight = grid.size() + 2 * screenbuffer;
 	gridwidth = grid[0].size() + 2 * screenbuffer;
@@ -185,12 +229,17 @@ void DrawMap()
 	DrawRectangleRec({ 0, 0, windowwidth, windowheight }, RAYWHITE);
 	DrawRectangleLinesEx({ 0, 0, windowwidth, windowheight },20, GRAY);
 
+	//Draw Total Money
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", totalmoney), { windowwidth - windowwidth/12, 50 }, 30, 1, GREEN);
+
 	//Draw Lines
 	for (int y = 0; y < dims; y++)
 	{
-		DrawLineEx({ windowwidth / 6,windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, { 5 * windowwidth / 6, windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, 5, BLUE);
-		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 5, BLUE);
+
+		DrawLineEx({ windowwidth / 6,windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, { 5 * windowwidth / 6, windowheight / 6 + (float)y * (2 * windowheight / 3) / (dims - 1) }, 8, DARKBLUE);
+		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 8, DARKBLUE);
 	}
+
 
 	//Draw Circles and Grids
 	for (int y = 0; y < dims; y++)
@@ -202,55 +251,89 @@ void DrawMap()
 			float rad = (windowheight - 200) / (2 * dims);
 
 			//CIRCLES
-			DrawCircle(xpoint,ypoint,rad, BLUE);
-			DrawCircle(xpoint,ypoint,rad-5, LIGHTGRAY);
+			if (gridpurchased[x + y * (dims)] == 1)
+			{
+				DrawCircle(xpoint, ypoint, rad + 100 / mapsize, BLUE);
+				DrawCircle(xpoint, ypoint, rad, {0,245,245,245});
+				DrawCircle(xpoint, ypoint, rad - 5, {0,205,205,205});
+			}
+			else
+			{
+				DrawCircle(xpoint, ypoint, rad + 100 / mapsize, RED);
+				DrawCircle(xpoint, ypoint, rad, {250,250,0,255});
+				DrawCircle(xpoint, ypoint, rad - 5, {200,20,0,255});
+			}
+
 			if (CheckCollisionPointCircle(mousepos, {xpoint,ypoint },rad))
 			{
-				DrawCircle(xpoint,ypoint,rad-5, {220,220,220,255});
+				short int gridnum = x + y * dims;
+				if (gridpurchased[gridnum] == 1)
+					DrawCircle(xpoint,ypoint,rad-5, { 0,225,225,225 });
+				else
+					DrawCircle(xpoint, ypoint, rad - 5, { 250,40,0,255 });
 				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 				{
-					grid = gridnetwork[x + y * dims];
-					textboxes = textboxesnetwork[x + y * dims];
-					textsizes = textsizesnetwork[x + y * dims];
-					chosengrid = x + y * dims;
-					ScreenMode = View;
+					if (gridpurchased[gridnum] == 0)
+					{
+						if (gridprices[gridnum] <= totalmoney)
+						{
+							totalmoney -= gridprices[gridnum];
+							gridpurchased[gridnum] = 1;
+						}
+					}
+					else
+					{
+						grid = gridnetwork[gridnum];
+						textboxes = textboxesnetwork[gridnum];
+						textsizes = textsizesnetwork[gridnum];
+						chosengrid =gridnum;
+						ScreenMode = View;
+					}
 				}
 			}
 
+
 			//GRIDS
-			Color blockcolor = WHITE;
-			for (int j = 0; j < mapdims;j++)
+			if(gridpurchased[x+y*dims]==1)
 			{
-				for (int i = 0; i <mapdims;i++)
+				Color blockcolor = WHITE;
+				for (int j = 0; j < mapdims; j++)
 				{
-					
-					switch (pooledgridnetwork[x+y*dims][j][i])
+					for (int i = 0; i < mapdims; i++)
 					{
-					case -1:
-						blockcolor = BLACK;
-						break;
-					case 0:
-						blockcolor = WHITE;
-						break;
-					case 1:
-						blockcolor = YELLOW;
-						break;
-					case 2:
-						blockcolor = GREEN;
-						break;
-					case 3:
-						blockcolor = BLUE;
-						break;
-					case 4:
-						blockcolor = RED;
-						break;
+
+						switch (pooledgridnetwork[x + y * dims][j][i])
+						{
+						case -1:
+							blockcolor = BLACK;
+							break;
+						case 0:
+							blockcolor = WHITE;
+							break;
+						case 1:
+							blockcolor = YELLOW;
+							break;
+						case 2:
+							blockcolor = GREEN;
+							break;
+						case 3:
+							blockcolor = BLUE;
+							break;
+						case 4:
+							blockcolor = RED;
+							break;
+						}
+						DrawRectangleRounded({ xpoint - rad / 2 + i * rad / mapdims,ypoint - rad / 2 + j * rad / mapdims,rad / mapdims,rad / mapdims }, 0.5, 2, blockcolor);
 					}
-					DrawRectangleRounded({ xpoint - rad / 2 + i * rad / mapdims,ypoint - rad / 2 + j * rad / mapdims,rad / mapdims,rad / mapdims },0.5,2, blockcolor);
 				}
+			}
+			//PRICES
+			else
+			{
+				DrawTextEx(codingfontbold, TextFormat("$%d", gridprices[x + y * dims]), { xpoint - rad / 3,ypoint - rad / 10 }, 20, 1, YELLOW);
 			}
 		}
 	}
-
 
 }
 
@@ -286,7 +369,7 @@ void DrawProgressBar()
 	DrawRectangleRec(boundary, DARKGRAY);
 
 	DrawRectangleRounded(outerrect,10,10,BLACK);
-	DrawRectangleRounded(innerrect, 10, 10, GREEN);
+	DrawRectangleRounded(innerrect, 10, 10, GOLD);
 	DrawRectangleRounded(shinerect, 10, 10, WHITE);
 	DrawCircle(boundary.x + 10, boundary.y + 10, 5, GRAY);
 	DrawCircle(boundary.x +moneybarwidth- 10, boundary.y + 10, 5, GRAY);
@@ -611,8 +694,8 @@ void DrawAreaTab()
 		DrawRectangleRounded(button, 4, 10, DARKBLUE);
 
 		DrawRectangleRoundedLinesEx(button,4,10,5, { 220,220,220,220 });
-		DrawCircle(button.x + button.width * 0.1, button.y + button.height * 0.5, button.height * 0.32, WHITE);
-		DrawCircle(button.x + button.width * 0.1 , button.y + button.height*0.5, button.height*0.3, get<0>(areaitems[x]));
+		DrawCircle(button.x + button.width * 0.15, button.y + button.height * 0.5, button.height * 0.32, WHITE);
+		DrawCircle(button.x + button.width * 0.15 , button.y + button.height*0.5, button.height*0.3, get<0>(areaitems[x]));
 		DrawTextEx(codingfontbold, get<1>(areaitems[x]), { button.x + button.width * 0.3f ,button.y+button.height*0.4f},25,2,WHITE);
 		DrawTextEx(codingfontbold,TextFormat( "$%d",get<2>(areaitems[x])), {button.x + button.width * 0.8f ,button.y + button.height * 0.4f}, 25, 2, GREEN);
 	}
@@ -953,7 +1036,8 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(50,50,0);
+	InitializeGrid(30,30,0);
+	InitializeGridPrices();
 	InitializeShop();
 	InitializeHire();
 	InitializeSprites();

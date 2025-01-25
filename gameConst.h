@@ -34,4 +34,4 @@ constexpr int shopbuttonheight = 50;
 constexpr int areashopboundarywidth = 10;
 
 //Map
-constexpr int mapdims = 10;
+constexpr int mapdims = 15;
