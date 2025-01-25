@@ -9,7 +9,7 @@ long long int gametime;
 float totalmoney = 0;
 float moneyincrement = 1000;
 float frametime;
-short int mapsize = 25;
+short int mapsize = 9;
 
 short int chosengrid = 0;
 long long int quota = 100000;
@@ -433,6 +433,7 @@ void DrawMainScreen()
 		DrawLineEx({ 0,y * lineheight }, { windowwidth - sidebarwidth-moneybarwidth,y * lineheight }, 1, BLACK);
 	}
 
+	//DRAW WORKERS
 	DrawWorkers(linewidth,lineheight);
 
 	DrawCircle(70, 70, 50, BLACK);
@@ -794,7 +795,7 @@ void DrawAreaTab()
 							}
 							else
 							{
-								if (x > startpos.first && y > startpos.second)
+								if (abs(x - startpos.first)+ abs(y - startpos.second)>0)
 								{
 									endpos = { x + 1 ,y + 1 };
 									totalcost = abs(startpos.first - endpos.first) * abs(startpos.second - endpos.second) * get<2>(areaitems[drawzone]);
@@ -950,12 +951,12 @@ void DrawHireTab()
 				Rectangle block = { (x + screenbuffer- workbenchsize / 2) * linewidth,(y + screenbuffer- workbenchsize / 2) * lineheight,linewidth*(workbenchsize),lineheight*(workbenchsize)};
 				if (CheckCollisionPointRec(mousepos, chosenblock))
 				{
-					DrawRectangleRec(block, workbenchcolor);
+					DrawRectangleRec(block, {40,255,40,255});
 					if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 					{
-						for (int i = y - workbenchsize / 2; i < y + workbenchsize / 2; i++)
+						for (int i = y - workbenchsize / 2; i <= y + workbenchsize / 2; i++)
 						{
-							for (int j = x - workbenchsize / 2; j < x + workbenchsize / 2; j++)
+							for (int j = x - workbenchsize / 2; j <= x + workbenchsize / 2; j++)
 							{
 								if (grid[i][j] != 2||grid[i][j]<0)
 								{
