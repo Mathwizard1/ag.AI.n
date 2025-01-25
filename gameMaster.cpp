@@ -98,39 +98,33 @@ void gameMaster::tokenizer(const char* instruction, short int instructionSize, s
 
 int gameMaster::getCode(std::vector<char*>& instructionList, int listSize, std::vector<short int>& instructionSizes)
 {
-	if (listSize > 0)
+	int errorCodes = 0;
+
+	std::vector<std::string> parsedTokens;
+	std::vector<int> TokenCount_lineWise;
+
+	for (int i = 0; i < listSize; i++)
 	{
-		int errorCodes = 0;
+		tokenizer(instructionList[i], instructionSizes[i], parsedTokens);
+		TokenCount_lineWise.push_back(parsedTokens.size());
 
-		std::vector<std::string> parsedTokens;
-		std::vector<int> TokenCount_lineWise;
-
-		TokenCount_lineWise.resize(listSize);
-
-		for (int i = 0; i < listSize; i++)
+		if (nonPairedEntity)
 		{
-			tokenizer(instructionList[i], instructionSizes[i], parsedTokens);
-			TokenCount_lineWise[i] = parsedTokens.size();
-
-			if (nonPairedEntity)
-			{
-				errorCodes += 1;
-				nonPairedEntity = false;
-			}
+			errorCodes += 1;
+			nonPairedEntity = false;
 		}
-
-		int tcount = TokenCount_lineWise[listSize - 1];
-		for (int t = 0; t < tcount; t++)
-		{
-			std::cout << parsedTokens[t] << " : " << t;
-			std::cout << '\n';
-		}
-
-		return errorCodes;
 	}
 
-	return 0;
+	int tcount = TokenCount_lineWise[listSize - 1];
+	for (int t = 0; t < tcount; t++)
+	{
+		std::cout << parsedTokens[t] << " : " << t << '\n';
+	}
+
+	return errorCodes;
 }
+
+
 
 int gameMaster::genericProcess(std::string genericVal)
 {
