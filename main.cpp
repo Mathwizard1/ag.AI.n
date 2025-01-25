@@ -7,7 +7,7 @@ using namespace std;
 
 long long int gametime;
 float totalmoney = 0;
-float moneyincrement = 2000;
+float moneyincrement = 3000;
 float frametime;
 
 short int chosengrid = 0;
@@ -56,6 +56,8 @@ Color workbenchcolor;
 
 Vector2 mousepos;
 
+Texture officetile;
+
 /*
 Colors:
 1->Lunch Area (Yellow)
@@ -82,6 +84,11 @@ void ChangeWorkerPositions()
 			workers[y][x].callFunction();
 		}
 	}
+}
+
+void InitializeSprites()
+{
+	officetile = LoadTextureFromImage(LoadImage( "sprites/office_tile.png"));
 }
 
 void InitializeHire()
@@ -174,7 +181,8 @@ void DrawMap()
 	static int mapnumber = gridnetwork.size();
 	static int dims = sqrt(mapnumber);
 
-	//Draw Boundary
+	//Draw Background and Boundary
+	DrawRectangleRec({ 0, 0, windowwidth, windowheight }, RAYWHITE);
 	DrawRectangleLinesEx({ 0, 0, windowwidth, windowheight },20, GRAY);
 
 	//Draw Lines
@@ -237,7 +245,7 @@ void DrawMap()
 						blockcolor = RED;
 						break;
 					}
-					DrawRectangle(xpoint-rad/2+i*rad/mapdims,ypoint-rad/2+j*rad/mapdims,rad/mapdims,rad/mapdims,blockcolor);
+					DrawRectangleRounded({ xpoint - rad / 2 + i * rad / mapdims,ypoint - rad / 2 + j * rad / mapdims,rad / mapdims,rad / mapdims },0.5,2, blockcolor);
 				}
 			}
 		}
@@ -269,7 +277,7 @@ void DrawWorkers(float linewidth,float lineheight)
 
 void DrawProgressBar()
 {
-	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+35, 50,50,700 };
+	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,800 };
 	static Rectangle boundary = { windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight };
 	float fraction = totalmoney/ (float)quota;
 	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
@@ -290,6 +298,8 @@ void DrawProgressBar()
 
 void DrawMainScreen()
 {
+	static float tilesize = linewidth / (float)40;
+
 	//Draw Cells
 	Color color=WHITE;
 	for (int y = 0; y < gridheight; y++)
@@ -324,10 +334,11 @@ void DrawMainScreen()
 			if (((x >= 0 && x < screenbuffer)|| (x >= gridwidth - screenbuffer && x < gridwidth)) && y > (int)(gridheight * 0.4) && y < (int)(gridheight * 0.6))
 				color = {0,205,255,255};
 
+			//DrawTextureEx(officetile, { x * linewidth, y * lineheight }, 0, tilesize, color);
 			DrawRectangleRec({ x * linewidth, y * lineheight, linewidth, lineheight }, color);
+			
 		}
 	}
-
 
 	//Draw Grid
 	for (int x = 0; x < gridwidth; x++)
@@ -602,7 +613,7 @@ void DrawAreaTab()
 		DrawRectangleRoundedLinesEx(button,4,10,5, { 220,220,220,220 });
 		DrawCircle(button.x + button.width * 0.1, button.y + button.height * 0.5, button.height * 0.32, WHITE);
 		DrawCircle(button.x + button.width * 0.1 , button.y + button.height*0.5, button.height*0.3, get<0>(areaitems[x]));
-		DrawTextEx(codingfontbold, get<1>(areaitems[x]), { button.x + button.width * 0.2f ,button.y+button.height*0.4f},25,2,WHITE);
+		DrawTextEx(codingfontbold, get<1>(areaitems[x]), { button.x + button.width * 0.3f ,button.y+button.height*0.4f},25,2,WHITE);
 		DrawTextEx(codingfontbold,TextFormat( "$%d",get<2>(areaitems[x])), {button.x + button.width * 0.8f ,button.y + button.height * 0.4f}, 25, 2, GREEN);
 	}
 
@@ -945,6 +956,7 @@ int main()
 	InitializeGrid(50,50,0);
 	InitializeShop();
 	InitializeHire();
+	InitializeSprites();
 
 	//Add random workers
 	//for (int x = 0; x < 5; x++)
@@ -993,10 +1005,8 @@ int main()
 			DrawMap();
 			break;
 		}
-		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, WHITE);
+		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
 
 		EndDrawing();
 	}
-
-	
 }
