@@ -1,15 +1,17 @@
 #include <raylib.h>
 #include "Raygui.h"
-
+#include <chrono>
 #include "worker.h"
 #include "gameConst.h"
 using namespace std;
 
-long long int gametime;
+short int totalticks = 0;
+short int ticksize = 200;
+float gametime;
 float totalmoney = 0;
 float moneyincrement = 1000;
 float frametime;
-short int mapsize = 9;
+short int mapsize = 25;
 
 short int chosengrid = 0;
 long long int quota = 100000;
@@ -344,7 +346,7 @@ void DrawWorkers(float linewidth,float lineheight)
 		Vector2 workerpos = { (float)(workers[chosengrid][x].pos.first * linewidth + linewidth / 2),(float)(workers[chosengrid][x].pos.second * lineheight + lineheight / 2) };
 		DrawCircleV(workerpos, min(linewidth / 2, lineheight / 2) - 2, { 100,100,255,255 });
 		DrawCircleLinesV(workerpos, min(linewidth / 2, lineheight / 2) - 2, BLACK);
-		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[chosengrid][x].name,workers[chosengrid][x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 3, BLACK);
+		DrawTextEx(codingfontbold, TextFormat("%s(%d)", workers[chosengrid][x].name,workers[chosengrid][x].gender), {workerpos.x + linewidth / 3,workerpos.y - lineheight * 0.5f - 10.0f}, 18, 0, BLACK);
 
 		if (CheckCollisionPointCircle(mousepos, workerpos, min(linewidth, lineheight)))
 		{
@@ -1037,7 +1039,7 @@ int main()
 	GuiSetFont(codingfont);
 
 	//Initialize Grid
-	InitializeGrid(30,30,0);
+	InitializeGrid(60,60,0);
 	InitializeGridPrices();
 	InitializeShop();
 	InitializeHire();
@@ -1051,23 +1053,29 @@ int main()
 	//}
 
 	ScreenMode = Map;
-	//SET GAMETIME
-	gametime = time(NULL);
+
+	bool clockswitch = false;
 
 	while (!WindowShouldClose())
 	{
 		mousepos = GetMousePosition();
 		frametime = GetFrameTime();
 
-		if (time(NULL)!=gametime)
+		//GAMETIME
+		gametime = std::chrono::duration_cast<std::chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count()%ticksize;
+		if (gametime <= 20 && clockswitch == false)
 		{
-			gametime = time(NULL);
+			clockswitch = true;
+			totalticks++;
 
 			//Tick Functions
 			ChangeWorkerPositions();
 
 		}
+		else if (gametime > 50 && clockswitch == true)
+			clockswitch = false;
 
+		//RAYLIB
 		BeginDrawing();
 		ClearBackground(WHITE);
 
