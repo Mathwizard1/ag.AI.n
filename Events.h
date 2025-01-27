@@ -1,16 +1,29 @@
 #pragma once
-#include "gameConst.h"
+#include "gameFunction.h"
 #include "Events.h"
 
-
-class Events
-{
+class EventManager {
 private:
-	int *timeFrame;
-	std::unordered_map<std::string, std::pair<bool, std::string>> pastRecords;
+    // Internal function to set the event timer
+    void startEvent(int timer);
+
+    // Function to execute events based on the event timer
+    void executeEvent();
+
+    // Event functions
+    void event1();
+    void event2();
+
+    void event3();
+
+    void event4();
+    void event5();
 
 public:
-	Events();
+    int eventTimer = 0;
+    short currentEvent = 0;
 
+    // Function to check for and trigger an event
+    void checkEvent();
 };
 

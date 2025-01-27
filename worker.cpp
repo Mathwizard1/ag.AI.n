@@ -298,11 +298,6 @@ int Worker::getExpression(const std::string& var, const std::string& atr)
 			return foundIndex;
 		}
 	}
-	else
-	{
-		// check in peoples
-
-	}
 
 	return -1;
 }
@@ -327,6 +322,20 @@ int Worker::genericProcess(std::string genericVal)
 		else
 		{
 			value += genericVal[c];
+		}
+	}
+
+	if (value != "me" || value != "work" || value != "zone")
+	{
+		for (auto& worker : workers[0])
+		{
+			if (worker.name == value)
+			{
+				if (!attribute.empty())
+				{
+					return worker.getExpression("me", attribute);
+				}
+			}
 		}
 	}
 
@@ -423,21 +432,14 @@ void Worker::callFunction()
 		}
 		else if(tokens[0] == labelIdentifier)
 		{
-			// idle call
 			tempVal = 0;
 		}
 
 		if (expectToken != gameLexers::none)
 		{
 			// check cases for next tokens
-			if (expectToken == gameLexers::generic && tokens[1] == "$")
+			if (expectToken == gameLexers::generic && tcount >= 3 && tokens[1] == "$")
 			{
-				if (tcount < 3)
-				{
-					// idle call
-					std::cout << "error in expression\n";
-					return;
-				}
 				tempVal = genericProcess(tokens[2]);
 			}
 			else if (expectToken == gameLexers::literal)
@@ -460,45 +462,37 @@ void Worker::callFunction()
 				int lhs, rhs;
 				lhs = rhs = -1;
 
-				if (tcount <= 3)
-				{
-					// idle call
-					std::cout << "error in expression\n";
-					return;
-				}
-
 				if (tokens[1] != "$" && tokens[3] != "$")
 				{
-					lhs = literalProcess(tokens[1]);
-					tempToken = tokens[2];
-					rhs = literalProcess(tokens[3]);
-				}
-				else
-				{
-					if (tcount <= 4)
-					{
-						// idle call
-						std::cout << "error in expression\n";
-						return;
-					}
-
-					if (tokens[1] == "$" && tokens[4] != "$")
-					{
-						lhs = genericProcess(tokens[2]);
-						tempToken = tokens[3];
-						rhs = literalProcess(tokens[4]);
-					}
-					else if (tokens[1] != "$" && tokens[3] == "$")
+					if (tcount > 3)
 					{
 						lhs = literalProcess(tokens[1]);
 						tempToken = tokens[2];
-						rhs = genericProcess(tokens[4]);
+						rhs = literalProcess(tokens[3]);
 					}
-					else if (tokens[1] == "$" && tokens[4] == "$")
+				}
+				else
+				{
+					if (tcount > 4)
 					{
-						lhs = genericProcess(tokens[2]);
-						tempToken = tokens[3];
-						rhs = genericProcess(tokens[5]);
+						if (tokens[1] == "$" && tokens[4] != "$")
+						{
+							lhs = genericProcess(tokens[2]);
+							tempToken = tokens[3];
+							rhs = literalProcess(tokens[4]);
+						}
+						else if (tokens[1] != "$" && tokens[3] == "$")
+						{
+							lhs = literalProcess(tokens[1]);
+							tempToken = tokens[2];
+							rhs = genericProcess(tokens[4]);
+						}
+						else if (tokens[1] == "$" && tokens[4] == "$")
+						{
+							lhs = genericProcess(tokens[2]);
+							tempToken = tokens[3];
+							rhs = genericProcess(tokens[5]);
+						}
 					}
 				}
 
@@ -515,6 +509,7 @@ void Worker::callFunction()
 			{
 				// idle call
 				std::cout << code[linecounter] << " error in expression\n";
+				linecounter++;
 				return;
 			}
 			else
