@@ -328,7 +328,7 @@ int Worker::genericProcess(std::string genericVal)
 	if (value != "me" || value != "work" || value != "zone")
 	{
 		value[0] = toupper(value[0]);
-		for (auto& worker : workers[chosengrid])
+		for (auto& worker : workers[gridnumber])
 		{
 			if (worker.name == value)
 			{
@@ -532,7 +532,7 @@ void Worker::callFunction()
 			if (tempVal > 0)
 			{
 				cout << tempVal << '\n';
-				dir = workers[chosengrid][tempVal].pos;
+				dir = workers[gridnumber][tempVal].pos;
 			}
 			else
 			{
