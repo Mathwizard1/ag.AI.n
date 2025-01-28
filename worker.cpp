@@ -6,7 +6,7 @@ std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
 
 Worker::Worker(int index, short int x, short int y,short int gridnumber) {
-	this->gridnumber = gridnumber;
+	this->gridnumber = chosengrid;
 	this->index = workers[chosengrid].size();
 	this->energy = 50;
 	this->productivity = 80;
@@ -531,7 +531,7 @@ void Worker::callFunction()
 
 			if (tempVal > 0)
 			{
-				cout << tempVal << '\n';
+				//cout << tempVal << '\n';
 				dir = workers[gridnumber][tempVal].pos;
 			}
 			else
