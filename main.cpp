@@ -47,6 +47,10 @@ void ChangeWorkerPositions()
 			workers[x].path.pop_back();
 		}
 	}
+	//workers[0].inventory.food_into_inventory(0, 2);
+	//cout << workers[0].inventory.foodinv[0] << endl;
+	//workers[0].inventory.reset_inventory();
+	//cout << workers[0].inventory.foodinv[0] << endl;
 }
 
 void InitializeGrid(short int width, short int height)
