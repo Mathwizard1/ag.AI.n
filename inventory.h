@@ -7,13 +7,12 @@ extern std::unordered_map<string, int> worker_types;
 
 class Inventory {
 public:
+    int foodcount;
+    int workcount;
+    vector<int> foodinv;
+    vector<int> workinv;
 
-	int foodcount;
-	int workcount;
-	vector<int> foodinv;
-	vector<int> workinv;
-
-	Inventory() {
+    Inventory() {
 
 		foodcount = 0;
 		workcount = 0;
@@ -27,11 +26,15 @@ public:
 
 	}
 
-	//Food Functions
-	bool food_into_inventory(int id, int q);
-	bool food_from_inventory(int id, int q);
+    // Food Functions
+    bool food_into_inventory(int id, int quantity);
+    bool food_from_inventory(int id, int quantity);
 
-	//Work Functions
-	bool work_into_inventory(int id, int q);
-	bool work_from_inventory(int id, int q);
+    // Work Functions
+    bool work_into_inventory(int id, int quantity);
+    bool work_from_inventory(int id, int quantity);
+
+    // Utility Functions
+    void display_inventory();
+    void reset_inventory();
 };
