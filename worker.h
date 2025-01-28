@@ -4,12 +4,12 @@
 #include "inventory.h"
 #include "gameAST.h"
 
-#include "gameMaster.h"
+//#include "gameMaster.h"
 
 class Worker
 {
 protected:
-	gameMaster gM;
+	//gameMaster gM;
 	std::string genericIdentifier = "$";
 	std::string labelIdentifier = "!";
 

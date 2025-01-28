@@ -7,7 +7,7 @@ std::vector<Worker> receptionists;
 
 Worker::Worker(int index, short int x, short int y,short int gridnumber) {
 	this->gridnumber = gridnumber;
-	this->index = index;
+	this->index = workers[chosengrid].size();
 	this->energy = 50;
 	this->productivity = 80;
 	this->health = 100;
@@ -21,7 +21,7 @@ Worker::Worker(int index, short int x, short int y,short int gridnumber) {
 }
 
 Worker::Worker(int index, bool gender, char* name, short int x, short int y) {
-	this->index = index;
+	this->index = workers[chosengrid].size();
 	this->energy = 50;
 	this->productivity = 80;
 	this->health = 100;
@@ -309,7 +309,7 @@ int Worker::genericProcess(std::string genericVal)
 
 	bool attributePresent = false;
 
-	for (int c = 0; c < genericVal.size(); c++)
+	for (int c = 0, len = genericVal.size(); c < len; c++)
 	{
 		if (!attributePresent && genericVal[c] == genericAttribute)
 		{
@@ -327,16 +327,23 @@ int Worker::genericProcess(std::string genericVal)
 
 	if (value != "me" || value != "work" || value != "zone")
 	{
-		for (auto& worker : workers[0])
+		value[0] = toupper(value[0]);
+		for (auto& worker : workers[chosengrid])
 		{
 			if (worker.name == value)
 			{
-				if (!attribute.empty())
+				if (attribute.empty())
+				{
+					return (worker.index);
+				}
+				else
 				{
 					return worker.getExpression("me", attribute);
 				}
 			}
 		}
+
+		return -1;
 	}
 
 	return getExpression(value, attribute);
@@ -405,10 +412,10 @@ void Worker::callFunction()
 {
 	int codeSize = code.size();
 
-	if (! code.empty())
+	/*if (!code.empty())
 	{
 		gM.getCode(code, codeSize, linesize);
-	}
+	}*/
 
 	if (linecounter < codeSize)
 	{
@@ -522,13 +529,21 @@ void Worker::callFunction()
 		{
 			std::pair<int, int> dir = pos;
 
-			switch (tempVal)
+			if (tempVal > 0)
 			{
-			case 0:
-				dir = { 20, 20 };
-				break;
-			default:
-				break;
+				cout << tempVal << '\n';
+				dir = workers[chosengrid][tempVal].pos;
+			}
+			else
+			{
+				switch (tempVal)
+				{
+				case 0:
+					dir = { 20, 20 };
+					break;
+				default:
+					break;
+				}
 			}
 
 			pathfind(dir);

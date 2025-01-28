@@ -1,5 +1,15 @@
 #include "gameFunction.h"
 
+
+
+float totalmoney = 0;
+float moneyincrement = 1000;
+float frametime;
+
+short int chosengrid = 0;
+long long int quota = 100000;
+short int chosenperson = 0;
+
 vector<string> malenames;
 vector<string> femalenames;
 

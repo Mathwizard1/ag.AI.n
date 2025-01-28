@@ -1,21 +1,16 @@
 #include <raylib.h>
 #include "Raygui.h"
 #include <chrono>
+
 #include "worker.h"
-#include "gameConst.h"
 using namespace std;
 
 short int totalticks = 0;
 short int ticksize = 200;
-float gametime;
-float totalmoney = 0;
-float moneyincrement = 1000;
-float frametime;
 short int mapsize = 25;
 
-short int chosengrid = 0;
-long long int quota = 100000;
-short int chosenperson = 0;
+float gametime;
+
 short int gridheight;
 short int gridwidth;
 float linewidth;
