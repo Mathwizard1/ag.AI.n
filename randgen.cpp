@@ -13,11 +13,27 @@ RandomGenerator::RandomGenerator() {
 double RandomGenerator::randgen() {
     int n = playerstock.size();
     double comp_val_f = 0.0;
+
     double r = static_cast<double>(std::rand()) / RAND_MAX;
 
     if (n >= 2) {
         double player_dt = 1.5 * (playerstock[n - 1] - playerstock[n - 2]);
         double delta_factor = 0.0;
+
+        double const_factor = 0.0;
+
+        if (r < 0.5) { // 50% chance
+            const_factor = 30 * r;
+        }
+        else if (r < 0.6) { // 10% chance
+            const_factor = 15 / (r - 0.1);
+        }
+        else if (r < 0.75) { // 15% chance
+            const_factor = -20 * (r - 0.1);
+        }
+        else {
+            const_factor = -10;
+        }
 
         // Update momentum:
         momentum += phi * r * (2.0 * (r > 0.5) - 1.0);
@@ -38,9 +54,8 @@ double RandomGenerator::randgen() {
             delta_factor = -1.75 * player_dt * (r - 0.75) / 0.25;
         }
 
-        delta_factor += momentum * 0.4 * player_dt;
-
-        comp_val_f = competitor.back() + delta_factor;
+        delta_factor += momentum * (0.4 * player_dt);
+        comp_val_f = competitor.back() * 0.99 + const_factor * 1.01 + delta_factor;
     }
     else if (n == 1) 
     {
