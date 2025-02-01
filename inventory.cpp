@@ -67,3 +67,18 @@ void Inventory::reset_inventory() {
     foodcount = 0;
     workcount = 0;
 }
+
+// Transfer Functions
+bool Inventory::transfer_food(Inventory &other, int id, int quantity) {
+    if (food_from_inventory(id, quantity)) {
+        return other.food_into_inventory(id, quantity);
+    }
+    return false; // not sufficient
+}
+
+bool Inventory::transfer_worker(Inventory &other, int id, int quantity) {
+    if (work_from_inventory(id, quantity)) {
+        return other.work_into_inventory(id, quantity);
+    }
+    return false;
+}
