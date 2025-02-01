@@ -43,3 +43,5 @@ constexpr int updatetime = 5;
 
 //Bank
 constexpr int fullreturn = 60;
+constexpr int forwarddeposittime = 20;
+constexpr int loaninteresttime = 120;

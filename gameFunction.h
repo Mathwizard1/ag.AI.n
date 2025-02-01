@@ -3,7 +3,13 @@
 
 using namespace std;
 
-extern short int totalticks;
+extern short int totalticks ;
+extern short int ticksize ;
+extern short int mapsize ;
+
+extern float gametime;
+extern float minstock;
+extern float maxstock ;
 
 extern float totalmoney;
 extern float moneyincrement;
