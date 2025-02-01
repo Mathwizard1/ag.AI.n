@@ -134,20 +134,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="a_star.cpp" />
-    <ClCompile Include="Events.cpp" />
     <ClCompile Include="gameAST.cpp" />
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="juniorWorker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="randgen.cpp" />
     <ClCompile Include="seniorWorker.cpp" />
     <ClCompile Include="specialistWorker.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_star.h" />
-    <ClInclude Include="Events.h" />
     <ClInclude Include="food.h" />
     <ClInclude Include="gameAST.h" />
     <ClInclude Include="gameConst.h" />
@@ -156,6 +155,7 @@
     <ClInclude Include="inventory.h" />
     <ClInclude Include="juniorWorker.h" />
     <ClInclude Include="pathfinding.h" />
+    <ClInclude Include="randgen.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="seniorWorker.h" />
     <ClInclude Include="specialistWorker.h" />

@@ -8,6 +8,7 @@
 #include<math.h>
 #include <unordered_set>
 #include <unordered_map>
+#include <random>
 
 //Window
 constexpr int windowwidth = 1700;

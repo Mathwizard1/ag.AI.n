@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include "Raygui.h"
 #include <chrono>
-
+#include "randgen.h"
 #include "worker.h"
 using namespace std;
 
