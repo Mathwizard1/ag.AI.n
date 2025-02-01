@@ -137,21 +137,23 @@
     <ClCompile Include="gameAST.cpp" />
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
+    <ClCompile Include="garbage_maze.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="juniorWorker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="rand_walls.cpp" />
     <ClCompile Include="seniorWorker.cpp" />
     <ClCompile Include="specialistWorker.cpp" />
     <ClCompile Include="worker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_star.h" />
-    <ClInclude Include="Events.h" />
     <ClInclude Include="food.h" />
     <ClInclude Include="gameAST.h" />
     <ClInclude Include="gameConst.h" />
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="gameMaster.h" />
+    <ClInclude Include="garbage_maze.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="juniorWorker.h" />
     <ClInclude Include="pathfinding.h" />
