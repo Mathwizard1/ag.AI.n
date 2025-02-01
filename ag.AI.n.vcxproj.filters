@@ -21,9 +21,6 @@
     <ClCompile Include="gameMaster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="worker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -43,6 +40,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seniorWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="garbage_maze.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="randgen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rand_walls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bank.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,9 +89,6 @@
     <ClInclude Include="inventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Events.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="specialistWorker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -87,6 +96,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seniorWorker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="garbage_maze.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="randgen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

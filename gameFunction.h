@@ -3,6 +3,8 @@
 
 using namespace std;
 
+extern short int totalticks;
+
 extern float totalmoney;
 extern float moneyincrement;
 extern float frametime;

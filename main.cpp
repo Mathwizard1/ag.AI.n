@@ -3,6 +3,7 @@
 #include <chrono>
 #include "randgen.h"
 #include "worker.h"
+#include "Bank.h"
 using namespace std;
 
 short int totalticks = 0;
@@ -1262,6 +1263,9 @@ void UpdateStocks()
 			}
 		}
 	}
+	if (playerstock[playerstock.size() - 1] > maxstock)
+		maxstock = playerstock[playerstock.size() - 1];
+
 	minstock = minval;
 
 }
@@ -1290,14 +1294,10 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	//Add random workers
-	//for (int x = 0; x < 5; x++)
-	//{
-		//workers.push_back(Worker((rand() * (grid[0].size() - 2*screenbuffer)) / RAND_MAX + screenbuffer, (rand() * (grid.size() - 2*screenbuffer) )/ RAND_MAX + screenbuffer));
-		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
-	//}
+	//BANK
+	Bank bank(0.06, 0.1);
 
-	ScreenMode = Stock;
+	ScreenMode = Stock; //DEBUG
 	//Add Competitors
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
@@ -1320,7 +1320,7 @@ int main()
 			//Tick Functions
 			ChangeWorkerPositions();
 
-			if (totalticks % 5 == 0)
+			if (totalticks % updatetime == 0)
 			{
 				playerstock.push_back(totalmoney / 100);
 				for (int j = 0; j < competitors.size(); j++)
