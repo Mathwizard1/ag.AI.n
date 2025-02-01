@@ -141,6 +141,7 @@
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="juniorWorker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="randgen.cpp" />
     <ClCompile Include="rand_walls.cpp" />
     <ClCompile Include="seniorWorker.cpp" />
     <ClCompile Include="specialistWorker.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="inventory.h" />
     <ClInclude Include="juniorWorker.h" />
     <ClInclude Include="pathfinding.h" />
+    <ClInclude Include="randgen.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="seniorWorker.h" />
     <ClInclude Include="specialistWorker.h" />
