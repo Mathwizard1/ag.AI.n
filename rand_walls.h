@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MAZE_H
-#define MAZE_H
+#ifndef RAND_WALLS_H
+#define RAND_WALLS_H
 
 #include <vector>
 class MazeGenerator {
