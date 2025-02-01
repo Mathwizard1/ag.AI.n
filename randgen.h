@@ -10,7 +10,7 @@ public:
 	vector<double> competitor;
 
 	int momentum;
-	int consistency;
+	double phi;
 
 	RandomGenerator();
 	double randgen();

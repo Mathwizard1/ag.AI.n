@@ -7,41 +7,38 @@ mt19937 engine(rd());
 RandomGenerator::RandomGenerator() {
 	this->competitor = {};
     this->momentum = 0;
-    this->consistency = 0;
+    this->phi = (double)std::rand() / (double)RAND_MAX;
 }
 
 double RandomGenerator::randgen() {
     int n = playerstock.size();
 
-    double player_new =(n>=1)? playerstock[n-1]:0;
-    double player_val = (n>=2)? playerstock[n - 2]:0;
-    double comp_val = (n>=2)?competitor[n - 2]:0;
-    double prev_inc = player_val - ((n >= 3) ? playerstock[n - 3] : 0);
-    double cur_diff = comp_val - player_val;
-    double pl_inc = player_new - player_val;
+    double r = (double)std::rand() / (double)RAND_MAX;
+    double comp_val_f = 0.0;
 
-    //momentum
-    if (pl_inc >= prev_inc) momentum++;
-    else momentum = max(1, momentum - 1);
-
-    //consistency
-    if (pl_inc >= 0)consistency++;
-    else consistency = 0;
-
-    //calculation
-    double inc = 0.8 * pl_inc;
-    inc += (momentum * 4 + consistency * 2) * inc / 100;
-    float r = (float)std::rand() / (float)RAND_MAX;
-
-    if (r > 0.75)
+    if(n >= 2)
     {
-        inc += ((int)(cent(engine) / 20) + r * (consistency / 2)) * inc / 100;
-    }
-    else
-    {
-        inc += ((int)(cent(engine) / 10) - r * (consistency * 2)) * inc / 100;
-    }
-    competitor.push_back(comp_val + inc);
+        double player_t = playerstock[n - 1];
+        double player_dt = playerstock[n - 1] - playerstock[n - 2];
 
+        momentum = momentum * r + player_dt / (player_t + 1.0e-6) * phi + (0.5 - r);
+
+        comp_val_f = competitor[n - 1] + player_dt * momentum;
+    }
+    else if (n == 1)
+    {
+        if (r > 0.5)
+        {
+            momentum = phi;
+        }
+        else
+        {
+            momentum = -phi;
+        }
+
+        comp_val_f = playerstock[n - 1] + playerstock[n - 1] / 5 * momentum;
+    }
+    
+    competitor.push_back(comp_val_f);
     return competitor.back();
 }

@@ -9,7 +9,7 @@
 class Worker
 {
 protected:
-	//gameMaster gM;
+	// gameMaster gM;
 	std::string genericIdentifier = "$";
 	std::string labelIdentifier = "!";
 
