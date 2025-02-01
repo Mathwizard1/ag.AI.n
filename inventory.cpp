@@ -44,6 +44,7 @@ bool Inventory::work_from_inventory(int id, int q) {
 }
 
 // Utility display-reset
+// Display ka dekh lena , if you want to change the display format
 void Inventory::display_inventory() {
     std::cout << "Food Inventory:\n";
     for (auto it = foods.begin(); it != foods.end(); ++it) {
@@ -69,16 +70,25 @@ void Inventory::reset_inventory() {
 }
 
 // Transfer Functions
-bool Inventory::transfer_food(Inventory &other, int id, int quantity) {
+bool Inventory::transfer_food(Inventory& other, int id, int quantity) {
     if (food_from_inventory(id, quantity)) {
         return other.food_into_inventory(id, quantity);
     }
     return false; // not sufficient
 }
 
-bool Inventory::transfer_worker(Inventory &other, int id, int quantity) {
+bool Inventory::transfer_worker(Inventory& other, int id, int quantity) {
     if (work_from_inventory(id, quantity)) {
         return other.work_into_inventory(id, quantity);
     }
     return false;
+}
+
+// Availability Check Functions
+bool Inventory::is_food_available(int id, int quantity) {
+    return (id >= 0 && id < foodinv.size() && foodinv[id] >= quantity);
+}
+
+bool Inventory::is_worker_available(int id, int quantity) {
+    return (id >= 0 && id < workinv.size() && workinv[id] >= quantity);
 }
