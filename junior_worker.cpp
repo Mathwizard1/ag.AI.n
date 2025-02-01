@@ -10,6 +10,7 @@ JuniorSoftware::JuniorSoftware(int index, bool gender, char* name, short int x, 
 
 void JuniorSoftware::makeObedient() {
     obedient = true;  // add on
+    money -= 100;
 }
 
 void JuniorSoftware::makeNonObedient() {
@@ -17,6 +18,17 @@ void JuniorSoftware::makeNonObedient() {
         obedient = false;  //remove to get some money in need
         money += 50;
     }
+}
+void JuniorSoftware::incProgSkills(int amt) {
+    if(programmingSkills + amt>=100){
+        int reqd = 100 - programmingSkills;
+        programmingSkills = 100;
+        money -= 2 * reqd;
+        return;
+    }
+
+    programmingSkills += amt;
+    money -= 2* amt;
 }
 
 JuniorHardware::JuniorHardware(int index, short int x, short int y, short int gridnumber)
@@ -29,13 +41,25 @@ JuniorHardware::JuniorHardware(int index, bool gender, char* name, short int x, 
 
 void JuniorHardware::makeObedient() {
     obedient = true;  
+    money -= 100;
 }
 
 void JuniorHardware::makeNonObedient() {
     if (obedient == true) {
-        obedient = false; \
+        obedient = false; 
         money += 50;
     }
+}
+void JuniorHardware::incTechSkills(int amt) {
+    if (technicalSkills + amt >= 100) {
+        int reqd = 100 - technicalSkills;
+        technicalSkills = 100;
+        money -= 2 * reqd;
+        return;
+    }
+
+    technicalSkills += amt;
+    money -= 2 * amt;
 }
 
 JuniorNetwork::JuniorNetwork(int index, short int x, short int y, short int gridnumber)
@@ -48,6 +72,7 @@ JuniorNetwork::JuniorNetwork(int index, bool gender, char* name, short int x, sh
 
 void JuniorNetwork::makeObedient() {
     obedient = true; 
+    money -= 100;
 }
 
 void JuniorNetwork::makeNonObedient() {
@@ -55,4 +80,16 @@ void JuniorNetwork::makeNonObedient() {
         obedient = false; 
         money += 50;
     }
+}
+
+void JuniorNetwork::incNetworkSkills(int amt) {
+    if (networkingSkills + amt >= 100) {
+        int reqd = 100 - networkingSkills;
+        networkingSkills = 100;
+        money -= 2 * reqd;
+        return;
+    }
+
+    networkingSkills += amt;
+    money -= 2 * amt;
 }

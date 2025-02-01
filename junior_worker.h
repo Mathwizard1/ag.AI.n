@@ -14,6 +14,7 @@ public:
     // extra addons to buy
     void makeObedient();
     void makeNonObedient();
+    void incProgSkills(int amt);
 };
 
 class JuniorHardware : public Worker {
@@ -27,6 +28,7 @@ public:
     // add ons
     void makeObedient();
     void makeNonObedient();
+    void incTechSkills(int amt);
 };
 
 class JuniorNetwork : public Worker {
@@ -40,4 +42,5 @@ public:
     // add ons
     void makeObedient();
     void makeNonObedient();
+    void incNetworkSkills(int amt);
 };
