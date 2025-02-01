@@ -1,6 +1,5 @@
 #pragma once
 #include "gameFunction.h"
-#include "Events.h"
 
 class EventManager {
 private:

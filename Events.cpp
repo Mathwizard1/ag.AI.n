@@ -1,8 +1,6 @@
 #include "Events.h"
 #include <cstdlib>
 
-EventManager::EventManager() : eventTimer(0) {}
-
     void EventManager::checkEvent() {
         // If no event is currently running
         if (eventTimer <= 0) {
