@@ -92,3 +92,69 @@ bool Inventory::is_food_available(int id, int quantity) {
 bool Inventory::is_worker_available(int id, int quantity) {
     return (id >= 0 && id < workinv.size() && workinv[id] >= quantity);
 }
+
+// Finding workers or foods with extreme quantities(max/min) 
+int Inventory::find_food_with_lowest_quantity() {
+    int min_id = -1, min_qty = INT_MAX;
+    for (int i = 0; i < foodinv.size(); i++) {
+        if (foodinv[i] < min_qty) {
+            min_qty = foodinv[i];
+            min_id = i;
+        }
+    }
+    return min_id;
+}
+
+int Inventory::find_worker_with_lowest_quantity() {
+    int min_id = -1, min_qty = INT_MAX;
+    for (int i = 0; i < workinv.size(); i++) {
+        if (workinv[i] < min_qty) {
+            min_qty = workinv[i];
+            min_id = i;
+        }
+    }
+    return min_id;
+}
+
+int Inventory::find_food_with_highest_quantity() {
+    int max_id = -1, max_qty = 0;
+    for (int i = 0; i < foodinv.size(); i++) {
+        if (foodinv[i] > max_qty) {
+            max_qty = foodinv[i];
+            max_id = i;
+        }
+    }
+    return max_id;
+}
+
+int Inventory::find_worker_with_highest_quantity() {
+    int max_id = -1, max_qty = 0;
+    for (int i = 0; i < workinv.size(); i++) {
+        if (workinv[i] > max_qty) {
+            max_qty = workinv[i];
+            max_id = i;
+        }
+    }
+    return max_id;
+}
+
+// Range searching Functions
+vector<int> Inventory::get_foods_in_quantity_range(int min_qty, int max_qty) {
+    vector<int> result;
+    for (int i = 0; i < foodinv.size(); i++) {
+        if (foodinv[i] >= min_qty && foodinv[i] <= max_qty) {
+            result.push_back(i);
+        }
+    }
+    return result;
+}
+
+vector<int> Inventory::get_workers_in_quantity_range(int min_qty, int max_qty) {
+    vector<int> result;
+    for (int i = 0; i < workinv.size(); i++) {
+        if (workinv[i] >= min_qty && workinv[i] <= max_qty) {
+            result.push_back(i);
+        }
+    }
+    return result;
+}

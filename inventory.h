@@ -43,6 +43,16 @@ public:
     bool is_food_available(int id, int quantity);
     bool is_worker_available(int id, int quantity);
 
+    // Find Min/Max
+    int find_food_with_lowest_quantity();
+    int find_worker_with_lowest_quantity();
+    int find_food_with_highest_quantity();
+    int find_worker_with_highest_quantity();
+
+    // Search by Range
+    vector<int> get_foods_in_quantity_range(int min_qty, int max_qty);
+    vector<int> get_workers_in_quantity_range(int min_qty, int max_qty);
+
     // Utility Functions
     void display_inventory();
     void reset_inventory();
