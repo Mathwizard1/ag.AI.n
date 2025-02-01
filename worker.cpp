@@ -445,7 +445,7 @@ void Worker::callFunction()
 		if (expectToken != gameLexers::none)
 		{
 			// check cases for next tokens
-			if (expectToken == gameLexers::generic && tcount >= 3 && tokens[1] == "$")
+			if (expectToken == gameLexers::generic && tcount >= 2 && tokens[1] == "$")
 			{
 				tempVal = genericProcess(tokens[2]);
 			}
@@ -611,7 +611,14 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "eat")
 		{
-
+			for (int i = 0; i < lunchpositions.size(); i++)
+			{
+				if (!lunchpositions[i].second)
+				{
+					lunchpositions[i].second = 1;
+					pathfind(lunchpositions[i].first);
+				}
+			}
 		}
 		else if (tokens[0] == "exit")
 		{

@@ -21,20 +21,12 @@ double RandomGenerator::randgen() {
     double pl_inc = player_new - player_val;
 
     //momentum
-    if (pl_inc >= prev_inc) {
-        momentum++;
-    }
-    else {
-        momentum = max(1, momentum - 1);
-    }
+    if (pl_inc >= prev_inc) momentum++;
+    else momentum = max(1, momentum - 1);
 
     //consistency
-    if (pl_inc >= 0) {
-        consistency++;
-    }
-    else {
-        consistency = 0;
-    }
+    if (pl_inc >= 0)consistency++;
+    else consistency = 0;
 
     //calculation
     double inc = 0.8 * pl_inc;
