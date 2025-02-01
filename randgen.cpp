@@ -39,7 +39,16 @@ double RandomGenerator::randgen() {
     //calculation
     double inc = 0.8 * pl_inc;
     inc += (momentum * 4 + consistency * 2) * inc / 100;
-    inc += ((int)(cent(engine) / 20) - 2) * inc / 100;
+    float r = (float)std::rand() / (float)RAND_MAX;
+
+    if (r > 0.75)
+    {
+        inc += ((int)(cent(engine) / 20) + r * (consistency / 2)) * inc / 100;
+    }
+    else
+    {
+        inc += ((int)(cent(engine) / 10) - r * (consistency * 2)) * inc / 100;
+    }
     competitor.push_back(comp_val + inc);
 
     return competitor.back();
