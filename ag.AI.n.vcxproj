@@ -134,7 +134,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="a_star.cpp" />
-    <ClCompile Include="Events.cpp" />
     <ClCompile Include="gameAST.cpp" />
     <ClCompile Include="gameFunction.cpp" />
     <ClCompile Include="gameMaster.cpp" />
