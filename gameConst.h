@@ -8,6 +8,7 @@
 #include<math.h>
 #include <unordered_set>
 #include <unordered_map>
+#include <random>
 
 //Window
 constexpr int windowwidth = 1700;
@@ -35,3 +36,7 @@ constexpr int areashopboundarywidth = 10;
 
 //Map
 constexpr int mapdims = 15;
+
+//Stocks
+constexpr int stockperiod = 20;
+constexpr int updatetime = 5;

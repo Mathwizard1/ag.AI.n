@@ -1,7 +1,5 @@
 #include "gameFunction.h"
 
-
-
 float totalmoney = 0;
 float moneyincrement = 1000;
 float frametime;
