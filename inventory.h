@@ -34,6 +34,15 @@ public:
     bool work_into_inventory(int id, int quantity);
     bool work_from_inventory(int id, int quantity);
 
+
+    // Transfer Operations
+    bool transfer_food(Inventory& other, int id, int quantity);
+    bool transfer_worker(Inventory& other, int id, int quantity);
+
+    // Availability Check
+    bool is_food_available(int id, int quantity);
+    bool is_worker_available(int id, int quantity);
+
     // Utility Functions
     void display_inventory();
     void reset_inventory();
