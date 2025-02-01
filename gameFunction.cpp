@@ -8,6 +8,15 @@ short int chosengrid = 0;
 long long int quota = 100000;
 short int chosenperson = 0;
 
+short int totalticks = 0;
+short int ticksize = 200;
+short int mapsize = 25;
+
+float gametime;
+float minstock = 0;
+float maxstock = 100;
+
+
 vector<string> malenames;
 vector<string> femalenames;
 

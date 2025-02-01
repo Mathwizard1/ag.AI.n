@@ -4,15 +4,8 @@
 #include "randgen.h"
 #include "worker.h"
 #include "Bank.h"
+
 using namespace std;
-
-short int totalticks = 0;
-short int ticksize = 200;
-short int mapsize = 25;
-
-float gametime;
-float minstock = 0;
-float maxstock = 100;
 
 short int gridheight;
 short int gridwidth;
@@ -82,6 +75,26 @@ Colors:
 -1->Boundary
 -2->Workspace
 */
+
+void BankUpdate(Bank* bank)
+{
+	//Interest
+	bank->update_investment();
+
+	//Loan Interest
+	bank->apply_loan_interest();
+
+	//Forward Deposits
+	for (int x = 0; x < (*bank).forward_deposit_amount.size(); x++)
+	{
+		if (--(*bank).forward_deposit_term[x] <= 0)
+		{
+			totalmoney += (*bank).mature_forward_deposits(x);
+		}
+	}
+
+	
+}
 
 void ChangeWorkerPositions()
 {
@@ -1295,15 +1308,18 @@ int main()
 	InitializeSprites();
 
 	//BANK
-	Bank bank(0.06, 0.1);
+	Bank bank(0.06,0.1);
 
-	ScreenMode = Stock; //DEBUG
+	//ScreenMode = Stock; //DEBUG
 	//Add Competitors
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
 	
 	bool clockswitch = false;
+
+	bank.invest(40000);
+	bank.add_forward_deposit(20000,30,0.5);
 
 	while (!WindowShouldClose())
 	{
@@ -1319,7 +1335,8 @@ int main()
 
 			//Tick Functions
 			ChangeWorkerPositions();
-
+			BankUpdate(&bank);
+			cout << bank.player_savings << endl;
 			if (totalticks % updatetime == 0)
 			{
 				playerstock.push_back(totalmoney / 100);
@@ -1338,13 +1355,14 @@ int main()
 		BeginDrawing();
 		ClearBackground(WHITE);
 
-		if (totalmoney < quota)
+		//Money Increment
+		/*if (totalmoney < quota)
 		{
 			if (totalmoney + moneyincrement * frametime > quota)
 				totalmoney = quota;
 			else
 				totalmoney += moneyincrement * frametime;
-		}
+		}*/
 		
 		switch (ScreenMode)
 		{
