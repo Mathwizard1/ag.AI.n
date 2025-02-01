@@ -56,6 +56,7 @@ std::vector<short int> areacolors;
 
 std::vector<tuple<Color, char*, int>> miscitems;
 std::vector<short int> misccolors;
+std::vector<pair<pair<short int, short int>,bool>> lunchpositions;
 
 std:: vector<tuple< Color,char*, int>> workertypes;
 
@@ -248,10 +249,10 @@ void DrawStocks()
 	//Draw Rectangle
 	DrawRectangleLinesEx({ 0,0,windowwidth,windowheight }, 20, DARKGRAY);
 	DrawRectangleRec({ 20,20,windowwidth - 40,windowheight - 40 }, GRAY);
-	DrawRectangle(rectx-30, recty, rectx+40, windowheight * 0.6+20, BLUE);
-	DrawRectangle(rectx -10, recty + 20, rectx , windowheight * 0.6-20 , WHITE);
+	DrawRectangle(rectx-80, recty, rectx+140, windowheight * 0.6+20, BLUE);
+	DrawRectangle(rectx -60, recty + 20, rectx+100 , windowheight * 0.6-20 , WHITE);
 
-	//Draw Stocks
+	//Draw Competitors Stocks
 	for (int i = 0; i < competitors.size(); i++)
 	{
 		if (competitors[i].competitor.size() > 1)
@@ -268,9 +269,25 @@ void DrawStocks()
 		}
 	}
 
+	//Draw Player Stocks
+	if(playerstock.size()>0)
+	for (int j = xstart; j < playerstock.size() - 1; j++)
+	{
+		//STOCK LINES
+		DrawLineEx({ rectx + 40 + (j - xstart) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((playerstock[j] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80)}, {rectx + 40 + (j - xstart + 1) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((playerstock[j+1] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80)}, 5, GREEN);
+	}
+
+	//Labels
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", maxstock), { rectx-40 , recty + 50 }, 22,1, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", minstock), { rectx - 40 , windowheight * 0.75f - 20 }, 22, 1, GREEN);
+	DrawTextEx(codingfont, "$", {rectx - 30 , windowheight * 0.5f - 20}, 50, 1, GREEN);
+
 	//Draw Axes
-	DrawRectangleRounded({ rectx + 35,recty + 40 ,12, windowheight * 0.6 - 80 }, 8, 1, BLACK);
-	DrawRectangleRounded({ rectx + 35,windowheight * 0.8f - 50 , rectx - 70,12 }, 8, 1, BLACK);
+	DrawRectangleRounded({ rectx + 35,recty + 40 ,12, windowheight * 0.6 - 80 }, 6, 1, BLACK);
+	DrawRectangleRounded({ rectx + 35,windowheight * 0.8f - 50 , rectx - 70,12 }, 6, 1, BLACK);
+
+	GuiDrawIcon(ICON_ARROW_UP_FILL, rectx+18, recty+15, 3, BLACK);
+	GuiDrawIcon(ICON_ARROW_RIGHT_FILL, 2*rectx-60, windowheight * 0.8-69, 3, BLACK);
 
 }
 
@@ -847,8 +864,13 @@ void DrawMiscTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
-						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1 });
+						if (chosenworkertype == 5)
+						{
+							workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
+							workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1 });
+						}
+						else
+							lunchpositions.push_back( {{ x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1 },0} );
 					}
 				}
 			}
@@ -1307,6 +1329,7 @@ int main()
 				}
 				UpdateStocks();
 			}
+
 		}
 		else if (gametime > 50 && clockswitch == true)
 			clockswitch = false;

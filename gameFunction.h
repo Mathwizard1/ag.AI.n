@@ -16,6 +16,8 @@ extern vector<double> playerstock;
 extern float minstock;
 extern float maxstock;
 
+extern vector<pair<pair<short int, short int>,bool>> lunchpositions;
+
 class gameFunction
 {
 public:
