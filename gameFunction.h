@@ -11,6 +11,11 @@ extern short int chosengrid;
 extern long long int quota;
 extern short int chosenperson;
 
+extern vector<double> playerstock;
+
+extern float minstock;
+extern float maxstock;
+
 class gameFunction
 {
 public:

@@ -10,6 +10,8 @@ short int ticksize = 200;
 short int mapsize = 25;
 
 float gametime;
+float minstock = 0;
+float maxstock = 100;
 
 short int gridheight;
 short int gridwidth;
@@ -32,13 +34,16 @@ enum shopstate {
 
 enum screenmode {
 	View,
-	Map
+	Map,
+	Stock
 } ScreenMode;
 
 std::vector<vector<char*>> textboxesnetwork;
 std::vector<vector<short int>> textsizesnetwork;
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
+
+std::vector<double> playerstock = {};
 
 std::vector<short int> gridpurchased;
 std::vector<long long int> gridprices;
@@ -53,6 +58,8 @@ std::vector<tuple<Color, char*, int>> miscitems;
 std::vector<short int> misccolors;
 
 std:: vector<tuple< Color,char*, int>> workertypes;
+
+std::vector<RandomGenerator> competitors;
 
 short int workbenchsize;
 Color workbenchcolor;
@@ -231,6 +238,42 @@ void InitializeGrid(short int width, short int height, int type)
 	lineheight = (windowheight) / (float)gridheight;
 }
 
+void DrawStocks()
+{
+	static float rectx = windowwidth * 0.33;
+	static float recty = windowheight * 0.2;
+	int xstart = (totalticks/updatetime-stockperiod<0)?0:totalticks/updatetime - stockperiod;
+
+
+	//Draw Rectangle
+	DrawRectangleLinesEx({ 0,0,windowwidth,windowheight }, 20, DARKGRAY);
+	DrawRectangleRec({ 20,20,windowwidth - 40,windowheight - 40 }, GRAY);
+	DrawRectangle(rectx-30, recty, rectx+40, windowheight * 0.6+20, BLUE);
+	DrawRectangle(rectx -10, recty + 20, rectx , windowheight * 0.6-20 , WHITE);
+
+	//Draw Stocks
+	for (int i = 0; i < competitors.size(); i++)
+	{
+		if (competitors[i].competitor.size() > 1)
+		{
+			for (int j = xstart; j < competitors[i].competitor.size() - 1; j++)
+			{
+				//STOCK LINES
+				DrawLineEx({ rectx + 40 + (j - xstart) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((competitors[i].competitor[j] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80) }, { rectx + 40 + (j - xstart + 1) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((competitors[i].competitor[j + 1] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80) }, 5, RED);
+			}
+			if (competitors[i].competitor[competitors[i].competitor.size() - 1] > maxstock)
+			{
+				maxstock = competitors[i].competitor[competitors[i].competitor.size() - 1]*1.4;
+			}
+		}
+	}
+
+	//Draw Axes
+	DrawRectangleRounded({ rectx + 35,recty + 40 ,12, windowheight * 0.6 - 80 }, 8, 1, BLACK);
+	DrawRectangleRounded({ rectx + 35,windowheight * 0.8f - 50 , rectx - 70,12 }, 8, 1, BLACK);
+
+}
+
 void DrawMap()
 {
 	static int mapnumber = gridnetwork.size();
@@ -251,6 +294,18 @@ void DrawMap()
 		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 8, DARKBLUE);
 	}
 
+	DrawCircle(75, 75, 50, BLACK);
+	if (CheckCollisionPointCircle(mousepos, { 75,75 }, 45))
+	{
+		DrawCircle(75, 75, 45, { 0,171,255,255 });
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			ScreenMode = Stock;
+		}
+	}
+	else
+	DrawCircle(75, 75, 45, { 0,151,241,255 });
+	GuiDrawIcon(ICON_WAVE_TRIANGULAR, 43, 43, 4, WHITE);
 
 	//Draw Circles and Grids
 	for (int y = 0; y < dims; y++)
@@ -456,6 +511,7 @@ void DrawMainScreen()
 	//DRAW WORKERS
 	DrawWorkers(linewidth,lineheight);
 
+	//Draw Circle
 	DrawCircle(70, 70, 50, BLACK);
 	if (mousepos.x < 120 && mousepos.y < 120)
 		if (CheckCollisionPointCircle(mousepos, { 70,70 }, 50))
@@ -1163,6 +1219,31 @@ void DrawSidebar()
 	}
 }
 
+void UpdateStocks()
+{
+	//UPDATE STOCKS
+	int minval = INT_MAX;
+	for (int i = 0; i < competitors.size(); i++)
+	{
+		if (competitors[i].competitor.size() > 1)
+		{
+			if (competitors[i].competitor[competitors[i].competitor.size() - 1] > maxstock)
+			{
+				maxstock = competitors[i].competitor[competitors[i].competitor.size() - 1] * 1.4;
+			}
+			for (int j = (totalticks/updatetime - stockperiod < 0) ? 0 : totalticks/updatetime - stockperiod; j < competitors[i].competitor.size() - 1; j++)
+			{
+				if (competitors[i].competitor[j] < minval)
+				{
+					minval = competitors[i].competitor[j];
+				}
+			}
+		}
+	}
+	minstock = minval;
+
+}
+
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
@@ -1194,8 +1275,12 @@ int main()
 		//workers[x].pathfind({ (rand() * (grid[0].size()-2*screenbuffer)) / RAND_MAX + screenbuffer ,(rand() * (grid.size()-2*screenbuffer)) / RAND_MAX + screenbuffer });
 	//}
 
-	ScreenMode = Map;
-
+	ScreenMode = Stock;
+	//Add Competitors
+	competitors.push_back(RandomGenerator());
+	competitors.push_back(RandomGenerator());
+	competitors.push_back(RandomGenerator());
+	
 	bool clockswitch = false;
 
 	while (!WindowShouldClose())
@@ -1213,6 +1298,15 @@ int main()
 			//Tick Functions
 			ChangeWorkerPositions();
 
+			if (totalticks % 5 == 0)
+			{
+				playerstock.push_back(totalmoney / 100);
+				for (int j = 0; j < competitors.size(); j++)
+				{
+					competitors[j].randgen();
+				}
+				UpdateStocks();
+			}
 		}
 		else if (gametime > 50 && clockswitch == true)
 			clockswitch = false;
@@ -1239,6 +1333,9 @@ int main()
 		case Map:
 			DrawMap();
 			break;
+		case Stock:
+			DrawStocks();
+			break; 
 		}
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
 

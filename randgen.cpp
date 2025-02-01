@@ -5,19 +5,18 @@ uniform_int_distribution<int> cent(1, 100);
 mt19937 engine(rd());
 
 RandomGenerator::RandomGenerator() {
-    this->player = {};
 	this->competitor = {};
     this->momentum = 0;
     this->consistency = 0;
 }
 
 double RandomGenerator::randgen() {
-    int n = player.size();
+    int n = playerstock.size();
 
-    double player_new =(n>=1)? player[n-1]:0;
-    double player_val = (n>=2)? player[n - 2]:0;
+    double player_new =(n>=1)? playerstock[n-1]:0;
+    double player_val = (n>=2)? playerstock[n - 2]:0;
     double comp_val = (n>=2)?competitor[n - 2]:0;
-    double prev_inc = player_val - ((n >= 3) ? player[n - 3] : 0);
+    double prev_inc = player_val - ((n >= 3) ? playerstock[n - 3] : 0);
     double cur_diff = comp_val - player_val;
     double pl_inc = player_new - player_val;
 

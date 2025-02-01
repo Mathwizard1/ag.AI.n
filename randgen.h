@@ -7,7 +7,6 @@ extern mt19937 engine;
 
 class RandomGenerator {
 public:
-	vector<double> player;
 	vector<double> competitor;
 
 	int momentum;

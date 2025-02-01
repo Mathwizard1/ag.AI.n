@@ -36,3 +36,7 @@ constexpr int areashopboundarywidth = 10;
 
 //Map
 constexpr int mapdims = 15;
+
+//Stocks
+constexpr int stockperiod = 20;
+constexpr int updatetime = 5;
