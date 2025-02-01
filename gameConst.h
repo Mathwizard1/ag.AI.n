@@ -40,3 +40,6 @@ constexpr int mapdims = 15;
 //Stocks
 constexpr int stockperiod = 20;
 constexpr int updatetime = 5;
+
+//Bank
+constexpr int fullreturn = 60;
