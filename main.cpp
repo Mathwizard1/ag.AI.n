@@ -378,6 +378,9 @@ void DrawMap()
 	DrawCircle(75, 75, 45, { 0,151,241,255 });
 	GuiDrawIcon(ICON_WAVE_TRIANGULAR, 43, 43, 4, WHITE);
 
+
+	float rad = (windowheight - 200) / (2 * dims);
+	float radmap = rad / mapdims;
 	//Draw Circles and Grids
 	for (int y = 0; y < dims; y++)
 	{
@@ -385,7 +388,6 @@ void DrawMap()
 		{
 			float xpoint = windowwidth / 6 + x * (2 * windowwidth / 3) / (dims - 1);
 			float ypoint = windowheight / 6 + y * (2 * windowheight / 3) / (dims - 1);
-			float rad = (windowheight - 200) / (2 * dims);
 
 			//CIRCLES
 			if (gridpurchased[x + y * (dims)] == 1)
@@ -460,7 +462,8 @@ void DrawMap()
 							blockcolor = RED;
 							break;
 						}
-						DrawRectangleRounded({ xpoint - rad / 2 + i * rad / mapdims,ypoint - rad / 2 + j * rad / mapdims,rad / mapdims,rad / mapdims }, 0.5, 2, blockcolor);
+						//DONOT USE ROUNDED REC
+						DrawRectangleRec({ xpoint - rad*0.5f + i * radmap+1,ypoint - rad*0.5f + j * radmap+1,radmap-2,radmap-2 }, blockcolor);
 					}
 				}
 			}
@@ -1414,7 +1417,7 @@ void UpdateStocks()
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
-	SetTargetFPS(144);
+	//SetTargetFPS(144);
 
 	srand(time(NULL));
 
@@ -1447,7 +1450,6 @@ int main()
 	bool clockswitch = false;
 
 	bank.invest(40000);
-	bank.add_forward_deposit(20000,30,0.5);
 
 	while (!WindowShouldClose())
 	{

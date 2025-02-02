@@ -15,7 +15,7 @@ constexpr int windowwidth = 1700;
 constexpr int windowheight = 900;
 
 //Screen
-constexpr int screenbuffer = 6;
+constexpr int screenbuffer = 5;
 constexpr int sidebarwidth =550;
 constexpr int sidebarbuttonheight = 50;
 
@@ -35,7 +35,7 @@ constexpr int shopbuttonheight = 50;
 constexpr int areashopboundarywidth = 10;
 
 //Map
-constexpr int mapdims = 15;
+constexpr int mapdims = 10;
 
 //Stocks
 constexpr int stockperiod = 20;

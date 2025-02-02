@@ -1,7 +1,7 @@
 #include "gameFunction.h"
 
 float totalmoney = 0;
-float moneyincrement = 1000;
+float moneyincrement = 50000;
 float frametime;
 
 short int chosengrid = 0;
