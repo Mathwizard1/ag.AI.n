@@ -15,7 +15,7 @@ constexpr int windowwidth = 1700;
 constexpr int windowheight = 900;
 
 //Screen
-constexpr int screenbuffer = 2;
+constexpr int screenbuffer = 3;
 constexpr int sidebarwidth =550;
 constexpr int sidebarbuttonheight = 50;
 
@@ -45,3 +45,5 @@ constexpr int updatetime = 5;
 constexpr int fullreturn = 60;
 constexpr int forwarddeposittime = 20;
 constexpr int loaninteresttime = 120;
+constexpr int maxforwarddeposits = 5;
+constexpr int bankbuttonheight = 50;

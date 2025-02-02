@@ -161,6 +161,7 @@
     <ClInclude Include="juniorWorker.h" />
     <ClInclude Include="pathfinding.h" />
     <ClInclude Include="randgen.h" />
+    <ClInclude Include="rand_walls.h" />
     <ClInclude Include="Raygui.h" />
     <ClInclude Include="seniorWorker.h" />
     <ClInclude Include="specialistWorker.h" />

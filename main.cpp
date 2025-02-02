@@ -4,6 +4,8 @@
 #include "randgen.h"
 #include "worker.h"
 #include "Bank.h"
+#include "garbage_maze.h"
+#include "rand_walls.h"
 
 using namespace std;
 
@@ -15,16 +17,26 @@ float lineheight;
 Font codingfont;
 Font codingfontbold;
 
+//BANK
+Bank bank(0.06, 0.1);
+
 enum sidebarstate {
 	Code,
 	Shop,
-	Hire
+	Hire,
+	Money,
 } SidebarState;
 
 enum shopstate {
 	Area,
 	Misc
 } ShopState;
+
+enum bankstate {
+	Invest,
+	FD,
+	Loan
+} BankState;
 
 enum screenmode {
 	View,
@@ -62,6 +74,7 @@ Color workbenchcolor;
 Vector2 mousepos;
 
 Texture officetile;
+Texture bankicon;
 
 /*
 Colors:
@@ -76,20 +89,20 @@ Colors:
 -2->Workspace
 */
 
-void BankUpdate(Bank* bank)
+void BankUpdate()
 {
 	//Interest
-	bank->update_investment();
+	bank.update_investment();
 
 	//Loan Interest
-	bank->apply_loan_interest();
+	bank.apply_loan_interest();
 
 	//Forward Deposits
-	for (int x = 0; x < (*bank).forward_deposit_amount.size(); x++)
+	for (int x = 0; x < bank.forward_deposit_amount.size(); x++)
 	{
-		if (--(*bank).forward_deposit_term[x] <= 0)
+		if (--bank.forward_deposit_term[x] <= 0)
 		{
-			totalmoney += (*bank).mature_forward_deposits(x);
+			totalmoney += bank.mature_forward_deposits(x);
 		}
 	}
 
@@ -116,6 +129,7 @@ void ChangeWorkerPositions()
 void InitializeSprites()
 {
 	officetile = LoadTextureFromImage(LoadImage( "sprites/office_tile.png"));
+	bankicon = LoadTextureFromImage(LoadImage("sprites/Bank.png"));
 }
 
 void InitializeHire()
@@ -186,23 +200,24 @@ void InitializeGridPrices()
 
 void InitializeGrid(short int width, short int height, int type)
 {
+	static int mapseed = 1;
+	static int dims = sqrt(mapsize);
+	static int midx = dims / 2;
+	static int midy = dims / 2;
+
 	workbenchcolor = { 120,255,120,255 };
 	workbenchsize = 3;
 
-	//Create Grid Network
-	for (int y = 0; y < height; y++)
-	{
-		std::vector<short int> row;
-
-		for (int x = 0; x < width; x++)
-		{
-				row.push_back(0);
-		}
-		grid.push_back(row);
-	}
+	//grid = generateMaze(width, height,1 );
 
 	for (int z = 0; z < mapsize ; z++)
 	{
+		int x = z % dims;
+		int y = z / dims;
+		int walldensity = abs(midx - x) + abs(midy - y);
+		MazeGenerator generator(width, height, width * (1-0.15*walldensity));
+		grid = generator.generateMaze(rand());
+
 		vector<char*> textboxes;
 		vector<short int> textsizes;
 		vector<Worker> gridworkers;
@@ -219,26 +234,28 @@ void InitializeGrid(short int width, short int height, int type)
 			vector<short int> row;
 			for (int x = 0; x <grid[0].size() -1; x += grid[0].size() / mapdims)
 			{
-				int* numarray = (int*)malloc(sizeof(int) * 9);
+				vector<int> numarray(9);
 
 				for (int q = 0; q < grid.size() / mapdims; q++)
 				{
 					for (int r = 0; r < grid[0].size() / mapdims; r++)
 					{
 						//cout << grid[y + q][x + r] << endl;
-						if(grid[y+q][x+r]>-2)
-						numarray[grid[y+q][x+r]+1]++;
+						if(grid[y+q][x+r]>=-2)
+						numarray[grid[y+q][x+r]+2]++;
 					}
 				}
 				
 				int max = 0;
+				if (numarray[1] > 0)
+					max = 1;
+				else
 				for (int q = 0; q < 9; q++)
 				{
 					if (numarray[q] > numarray[max])
 						max = q;
 				}
-				row.push_back(max-1);
-				free(numarray);
+				row.push_back(max-2);
 			}
 
 			pooledgrid.push_back(row);
@@ -246,6 +263,7 @@ void InitializeGrid(short int width, short int height, int type)
 		pooledgridnetwork.push_back(pooledgrid);
 	}
 	gridpurchased[mapsize / 2] = 1;
+	grid = gridnetwork[mapsize / 2];
 
 	gridheight = grid.size() + 2 * screenbuffer;
 	gridwidth = grid[0].size() + 2 * screenbuffer;
@@ -280,6 +298,8 @@ void DrawStocks()
 			{
 				maxstock = competitors[i].competitor[competitors[i].competitor.size() - 1]*1.4;
 			}
+
+			DrawTextEx(codingfontbold, TextFormat("Competitor %d: $%0.f", i + 1, competitors[i].competitor[competitors[i].competitor.size() - 1]), { windowwidth * 0.75,windowheight * 0.1f * (i + 1) }, 30, 1, MAROON);
 		}
 	}
 
@@ -302,6 +322,26 @@ void DrawStocks()
 
 	GuiDrawIcon(ICON_ARROW_UP_FILL, rectx+18, recty+15, 3, BLACK);
 	GuiDrawIcon(ICON_ARROW_RIGHT_FILL, 2*rectx-60, windowheight * 0.8-69, 3, BLACK);
+
+
+	//Draw Circle
+	DrawCircle(80, 80, 50, BLACK);
+	if (mousepos.x < 130 && mousepos.y < 130)
+		if (CheckCollisionPointCircle(mousepos, { 80,80 }, 50))
+		{
+			DrawCircle(80, 80, 45, { 0,171,255,255 });
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				ScreenMode = Map;
+				return;
+			}
+		}
+		else
+			DrawCircle(80, 80, 45, { 0,151,241,255 });
+	else
+		DrawCircle(80, 80, 45, { 0,151,241,255 });
+
+	GuiDrawIcon(ICON_EXIT, 48, 48, 4, WHITE);
 
 }
 
@@ -486,8 +526,10 @@ void DrawMainScreen()
 	{
 		for (int x = 0; x < gridwidth; x++)
 		{
-			if ((x >= 0&&x<screenbuffer) || (x >= gridwidth-screenbuffer&&x<gridwidth) || (y >= 0 && y < screenbuffer) || (y >= gridheight -screenbuffer&&y<gridheight))
+			if ((x >= 0&&x<screenbuffer-1) || (x >= gridwidth-screenbuffer+1&&x<gridwidth) || (y >= 0 && y < screenbuffer-1) || (y >= gridheight -screenbuffer+1 &&y<gridheight))
 				color = BROWN;
+			else if (( x == screenbuffer-1) || (x == gridwidth - screenbuffer) || (y == screenbuffer-1) || (y == gridheight - screenbuffer))
+					color =DARKBROWN;
 			else
 			switch (grid[y-screenbuffer][x-screenbuffer])
 			{
@@ -514,6 +556,9 @@ void DrawMainScreen()
 				break;
 			case 7:
 				color = DARKBLUE;
+				break;
+			case -1:
+				color = DARKBROWN;
 				break;
 			case -2:
 				color = workbenchcolor;
@@ -561,25 +606,30 @@ void DrawMainScreen()
 					for (int m = 0; m < grid[0].size()-1 ; m += grid[0].size() / mapdims)
 					{
 						//UPDATE
-						int* numarray = (int*)malloc(sizeof(int) * 9);
+						vector<int> numarray(9);
 
 						for (int q = 0; q < grid.size() / mapdims; q++)
 						{
 							for (int r = 0; r < grid[0].size() / mapdims; r++)
 							{
-								if(grid[l + q][m + r]>-2)
-								numarray[grid[l + q][m + r]+1]++;
+								numarray[grid[l + q][m + r]+2]++;
 							}
 						}
 
+
 						int min = 0;
-						for (int q = 0; q < 9; q++)
+						if (numarray[1] > 0)
+							min = 1;
+						else
 						{
-							if (numarray[q] > numarray[min])
-								min = q;
+							for (int q = 0; q < 9; q++)
+							{
+								if (numarray[q] > numarray[min])
+									min = q;
+							}
 						}
-						row.push_back(min-1);
-						free(numarray);
+
+						row.push_back(min-2);
 					}
 					pooledgrid.push_back(row);
 				}
@@ -1231,16 +1281,89 @@ void DrawHireTab()
 
 }
 
+void DrawInvestTab()
+{
+	static char inputamount[10] = "";
+	static float outputamount = 0;
+
+	//BOUNDARY
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), {0,100,50,255});
+	DrawRectangleLinesEx({ windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight) }, areashopboundarywidth, { 220,220,220,220 });
+
+	//Bank Icon
+	DrawTextureEx(bankicon, { windowwidth - sidebarwidth * 0.75f, windowheight *0.2 },0,1, WHITE);
+
+	//Money Invested
+	DrawTextEx(codingfontbold, "Money Invested", { windowwidth - sidebarwidth * 0.8,windowheight*0.55 }, 38, 1, WHITE);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f",bank.player_savings), { windowwidth - sidebarwidth * (0.55f+((bank.player_savings/1000>0)?0.06f:0.0f)),windowheight * 0.61}, 30, 1, GREEN);
+
+	//Invest Amount
+	DrawTextEx(codingfontbold, "Invest:", { windowwidth - sidebarwidth * 0.75f ,windowheight * 0.72 }, 25, 1, WHITE);
+	if (GuiTextBox({ windowwidth - sidebarwidth * 0.52f ,windowheight * 0.7,sidebarwidth * 0.4f,windowheight * 0.06f }, inputamount, 10, true))
+	{
+		int amount=0;
+		try
+		{
+			amount = stoi(inputamount);
+		}
+		catch (exception e) {};
+
+		if (amount <= totalmoney&&amount>=0)
+		{
+			bank.invest(amount);
+			totalmoney -= amount;
+		}
+		inputamount[0] = '\0';
+	}
+
+	//Extract Amount
+	DrawTextEx(codingfontbold, "Take Out:", { windowwidth - sidebarwidth * 0.68f ,windowheight * 0.81 }, 25, 1, WHITE);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f",outputamount), {windowwidth - sidebarwidth * 0.43f ,windowheight * 0.81}, 25, 1, GREEN);
+	GuiSlider({ windowwidth - sidebarwidth * 0.8f ,windowheight * 0.85,sidebarwidth * 0.6f,40 }, "0", TextFormat("%0.f", bank.player_savings), &outputamount, 0, bank.player_savings);
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - bankbuttonheight,sidebarwidth,bankbuttonheight }, "Extract"))
+	{
+		if (outputamount < bank.player_savings)
+		{
+			bank.player_savings -= outputamount;
+			totalmoney += outputamount;
+			outputamount = 0;
+		}
+	}
+}
+
+void DrawBankTab()
+{
+	if (GuiButton({ windowwidth - sidebarwidth ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "Invest"))
+		BankState = Invest;
+	if (GuiButton({ windowwidth - 2*sidebarwidth/3 ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "FD"))
+		BankState = FD;
+	if (GuiButton({ windowwidth - sidebarwidth / 3 ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "Loan"))
+		BankState = Loan;
+
+	switch (BankState)
+	{
+	case Invest:
+		DrawInvestTab();
+		break;
+	case FD:
+		break;
+	case Loan:
+		break;
+	}
+}
+
 void DrawSidebar()
 {
 	//Drawing 3 Sidebar Buttons
 	DrawRectangle(windowwidth - sidebarwidth, 0, sidebarwidth, windowheight, DARKGRAY);
-	if (GuiButton({ windowwidth - sidebarwidth,0,sidebarwidth / 3,sidebarbuttonheight }, "Code"))
+	if (GuiButton({ windowwidth - sidebarwidth,0,sidebarwidth / 4,sidebarbuttonheight }, "Code"))
 		SidebarState = Code;
-	else if (GuiButton({ windowwidth - 2 * sidebarwidth / 3,0,sidebarwidth/3,sidebarbuttonheight }, "Shop"))
+	else if (GuiButton({ windowwidth - 3 * sidebarwidth / 4,0,sidebarwidth / 4,sidebarbuttonheight }, "Shop"))
 		SidebarState = Shop;
-	else if (GuiButton({ windowwidth - sidebarwidth / 3,0,sidebarwidth / 3,sidebarbuttonheight }, "Hire"))
+	else if (GuiButton({ windowwidth - sidebarwidth / 2,0,sidebarwidth / 4,sidebarbuttonheight }, "Hire"))
 		SidebarState = Hire;
+	else if (GuiButton({ windowwidth - sidebarwidth / 4,0,sidebarwidth / 4,sidebarbuttonheight }, "Bank"))
+		SidebarState = Money;
 
 	switch (SidebarState)
 	{
@@ -1252,6 +1375,10 @@ void DrawSidebar()
 		break;
 	case Hire:
 		DrawHireTab();
+		break;
+	case Money:
+		DrawBankTab();
+		break;
 	}
 }
 
@@ -1307,10 +1434,10 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	//BANK
-	Bank bank(0.06,0.1);
-
 	//ScreenMode = Stock; //DEBUG
+	BankState = Invest;
+	SidebarState = Money;
+
 	//Add Competitors
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
@@ -1335,8 +1462,8 @@ int main()
 
 			//Tick Functions
 			ChangeWorkerPositions();
-			BankUpdate(&bank);
-			cout << bank.player_savings << endl;
+			BankUpdate();
+
 			if (totalticks % updatetime == 0)
 			{
 				playerstock.push_back(totalmoney / 100);
@@ -1356,13 +1483,13 @@ int main()
 		ClearBackground(WHITE);
 
 		//Money Increment
-		/*if (totalmoney < quota)
+		if (totalmoney < quota)
 		{
 			if (totalmoney + moneyincrement * frametime > quota)
 				totalmoney = quota;
 			else
 				totalmoney += moneyincrement * frametime;
-		}*/
+		}
 		
 		switch (ScreenMode)
 		{

@@ -3,7 +3,7 @@
 #include <queue>
 #include <random>
 
-void ensureConnectivity(std::vector<std::vector<int>>& grid) {
+void ensureConnectivity(std::vector<std::vector<short int>>& grid) {
     int rows = grid.size(), cols = grid[0].size();
     std::queue<std::pair<int, int>> q;
     std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
@@ -55,7 +55,7 @@ void ensureConnectivity(std::vector<std::vector<int>>& grid) {
     }
 }
 //some empt block(relaxation)
-void placeEmptyBlock(std::vector<std::vector<int>>& grid, int blockWidth, int blockHeight) {
+void placeEmptyBlock(std::vector<std::vector<short int>>& grid, int blockWidth, int blockHeight) {
     int rows = grid.size(), cols = grid[0].size();
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -72,9 +72,8 @@ void placeEmptyBlock(std::vector<std::vector<int>>& grid, int blockWidth, int bl
     }
 }
 
-std::vector<std::vector<int>> generateMaze(int rows, int cols, int density) {
-    std::vector<std::vector<int>> grid(rows, std::vector<int>(cols, 0));
-
+std::vector<std::vector<short int>> generateMaze(int rows, int cols, int density) {
+    std::vector<std::vector<short int>> grid(rows, std::vector<short int>(cols, 0));
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
             if (y % 2 == 0 || x % 2 == 0) {

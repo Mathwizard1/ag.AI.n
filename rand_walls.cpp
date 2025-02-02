@@ -1,7 +1,4 @@
 #include "rand_walls.h"
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
 
 using namespace std;
 
@@ -9,19 +6,11 @@ MazeGenerator::MazeGenerator(int rows, int cols, int minSize) {
     n = rows;
     m = cols;
     min_width = minSize;
-    maze.resize(n, vector<int>(m, 0));
-}
-
-void MazeGenerator::addBoundaryWalls() {
-    for (int i = 0; i < n; i++) {
-        maze[i][0] = maze[i][m - 1] = -1;
-    }
-    for (int j = 0; j < m; j++) {
-        maze[0][j] = maze[n - 1][j] = -1;
-    }
+    maze.resize(n, vector<short int>(m, 0));
 }
 
 void MazeGenerator::divideMaze(int x1, int y1, int x2, int y2) {
+
     if ((x2 - x1 < min_width) || (y2 - y1 < min_width)) {
         return;
     }
@@ -77,21 +66,10 @@ void MazeGenerator::addEntryExit() {
     maze[edges[idx2].first][edges[idx2].second] = 0;
 }
 
-vector<vector<int>> MazeGenerator::generateMaze() {
-    srand(time(0));
-
-    addBoundaryWalls();
-    divideMaze(1, 1, n - 1, m - 1);
+vector<vector<short int>> MazeGenerator::generateMaze(int seed) {
+    srand(seed);
+    divideMaze(0, 0, n , m );
     addEntryExit();
 
     return maze;
-}
-
-void MazeGenerator::printMaze(const vector<vector<int>>& maze) const {
-    for (const auto& row : maze) {
-        for (int cell : row) {
-            cout << (cell == -1 ? "#" : " ") << " ";
-        }
-        cout << endl;
-    }
 }
