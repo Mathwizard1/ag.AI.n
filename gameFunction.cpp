@@ -16,7 +16,6 @@ float gametime;
 float minstock = 0;
 float maxstock = 100;
 
-
 vector<string> malenames;
 vector<string> femalenames;
 

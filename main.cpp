@@ -922,19 +922,19 @@ void DrawMiscTab()
 
 						//Calculate Cost
 						int workernetcost = get<2>(miscitems[chosenworkertype]);
-						cout << workernetcost;
 
 						//Subtract Cost
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						if (chosenworkertype == 5)
+						if (chosenworkertype == 1)
 						{
-							workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
-							workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1 });
+							workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
+							workers[chosengrid].back().grid = &grid;
+							workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + screenbuffer,y + screenbuffer });
 						}
 						else
-							lunchpositions.push_back( {{ x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1 },0} );
+							lunchpositions.push_back( {{ x + screenbuffer,y + screenbuffer },0} );
 					}
 				}
 			}
@@ -1271,8 +1271,9 @@ void DrawHireTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2));
-						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x + workbenchsize / 2 + 1,y + workbenchsize / 2 + 1});
+						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
+						workers[chosengrid].back().grid = &grid;
+						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x +screenbuffer ,y+screenbuffer});
 					}
 				}
 			}
@@ -1434,7 +1435,7 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	//ScreenMode = Stock; //DEBUG
+	ScreenMode = Map; //DEBUG
 	BankState = Invest;
 	SidebarState = Money;
 

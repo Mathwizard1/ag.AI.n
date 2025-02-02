@@ -43,8 +43,22 @@ public:
 		Boss,
 	} Zone;
 
-	pair<short int, short int> pos;
+	struct Node {
+		short int x, y;
+		double gCost, hCost;
+		Node* parent;
+		Node(short int x,short int y, double g = 0, double h = 0, Node* p = nullptr)
+			: x(x), y(y), gCost(g), hCost(h), parent(p) {
+		}
+		double fCost() const {
+			return gCost + hCost;
+		}
+		bool operator<(const Node& other) const {
+			return fCost() > other.fCost();
+		}
+	};
 
+	pair<short int, short int> pos;
 
 	short int lag = -1;
 	int linecounter = 0;
@@ -52,6 +66,8 @@ public:
 	vector<char*> code;
 	vector<short int> linesize;
 	vector<pair<short int, short int>> path;
+	vector<pair<short int, short int>> directions;
+	vector<vector<short int>>* grid;
 
 	int work[2] = {10, 0};
 
@@ -82,12 +98,12 @@ public:
 	int gridnumber;
 
 	//Constructors
-	Worker(int index, short int x = 0, short int y = 0,short int gridnumber=0);
+	Worker(int index, short int x , short int y,short int gridnumber);
 	Worker(int index, bool gender, char* name, short int x = 0, short int y = 0);
 
 	//Functions
 	void eat();
-	void pathfind( pair<short int, short int> end);
+	void pathfind(pair<short int, short int> end);
 	bool give(int index, int fid, int fq, int wid, int wq);
 	bool take(int index, int fid, int fq, int wid, int wq);
 	int buy(Food food, int q);

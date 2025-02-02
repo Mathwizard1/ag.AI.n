@@ -3,13 +3,6 @@
 #include <cmath>
 #include <algorithm>
 
-a_star::a_star(const vector<vector<int>>& grid) : grid(grid) {
-    directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
-}
-
-bool a_star::isValid(int x, int y) {
-    return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 0;
-}
 
 double a_star::heuristic(int x1, int y1, int x2, int y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -24,9 +17,8 @@ vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goa
     while (!front.empty()) {
         Node current = front.top();
         front.pop();
-
+        vector<pair<int, int>> path;
         if (current.x == goal.first && current.y == goal.second) {
-            vector<pair<int, int>> path;
             while (current.parent != nullptr) {
                 path.push_back({ current.x, current.y });
                 current = *current.parent;
@@ -41,7 +33,7 @@ vector<pair<int, int>> a_star::findPath(pair<int, int> start, pair<int, int> goa
 
         for (const auto& dir : directions) {
             int nx = current.x + dir.first, ny = current.y + dir.second;
-            if (isValid(nx, ny) && !visited[nx][ny]) {
+            if (nx >= 0 && nx < grid.size() && ny >= 0 && ny < grid[0].size() && grid[nx][ny] == 0 && !visited[nx][ny]) {
                 double gCost = current.gCost + 1;
                 if (dir.first != 0 && dir.second != 0) {
                     gCost += 0.414; //to compnsate diagonal
