@@ -24,8 +24,8 @@ protected:
 	std::pair<char, char> paranSmooth = { '(', ')' };
 
 public:
-
 	std::unordered_map<std::string, int> labelMap;
+	std::unordered_set<std::pair<int, int>> bracketMaps;
 
 	int index;
 	int energy;

@@ -122,6 +122,8 @@ int Worker::buy(Food food, int q) {
 void Worker::getCode()
 {
 	linecounter = 0;
+	labelMap.clear();
+
 	std::vector<std::string> tokens;
 
 	int codeSize = code.size();
@@ -145,7 +147,7 @@ void Worker::getCode()
 			else
 			{
 				// idle call
-				std::cout << code[i] << " common time\n";
+				std::cout << code[i] << " common token\n";
 				return;
 			}
 		}
@@ -357,7 +359,8 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
-	if (value != "me" || value != "work" || value != "zone")
+	cout << value << '\n';
+	if (value != "me" && value != "work" && value != "zone")
 	{
 		value[0] = toupper(value[0]);
 		for (auto& worker : workers[gridnumber])
@@ -366,7 +369,7 @@ int Worker::genericProcess(std::string genericVal)
 			{
 				if (attribute.empty())
 				{
-					return (worker.index);
+					return -(worker.index + 1) * zoneLimit;
 				}
 				else
 				{
@@ -454,6 +457,12 @@ void Worker::callFunction()
 		std::vector<std::string> tokens;
 		tokenizer(code[linecounter], linesize[linecounter], tokens);
 
+		if (tokens.empty())
+		{
+			linecounter++;
+			return;
+		}
+
 		gameLexers expectToken = gameLexers::none;
 		bool bracketCheck = false;
 		bool actionCheck = false;
@@ -471,13 +480,14 @@ void Worker::callFunction()
 		}
 		else if(tokens[0] == labelIdentifier)
 		{
-			tempVal = 0;
+			linecounter++;
+			return;
 		}
 
 		if (expectToken != gameLexers::none)
 		{
 			// check cases for next tokens
-			if (expectToken == gameLexers::generic && tcount >= 2 && tokens[1] == "$")
+			if (expectToken == gameLexers::generic && tcount >= 2 && tokens[1] == genericIdentifier)
 			{
 				tempVal = genericProcess(tokens[2]);
 			}
@@ -485,8 +495,9 @@ void Worker::callFunction()
 			{
 				tempVal = literalProcess(tokens[1]);
 			}
-			else if (expectToken == gameLexers::label && tokens[1] == "!")
+			else if (expectToken == gameLexers::label || tokens[1] == labelIdentifier)
 			{
+				std::cout << "label found\n";
 				if (labelMap.find(tokens[2]) != labelMap.end())
 				{
 					tempVal = labelMap[tokens[2]];
@@ -495,13 +506,15 @@ void Worker::callFunction()
 				{
 					tempVal = -1;
 				}
+
+				std::cout << tempVal << '-' << tokens[2] << '\n';
 			}
 			else if (expectToken == gameLexers::expression)
 			{
 				int lhs, rhs;
 				lhs = rhs = -1;
 
-				if (tokens[1] != "$" && tokens[3] != "$")
+				if (tokens[1] != genericIdentifier && tokens[3] != genericIdentifier)
 				{
 					if (tcount > 3)
 					{
@@ -514,19 +527,19 @@ void Worker::callFunction()
 				{
 					if (tcount > 4)
 					{
-						if (tokens[1] == "$" && tokens[4] != "$")
+						if (tokens[1] == genericIdentifier && tokens[4] != genericIdentifier)
 						{
 							lhs = genericProcess(tokens[2]);
 							tempToken = tokens[3];
 							rhs = literalProcess(tokens[4]);
 						}
-						else if (tokens[1] != "$" && tokens[3] == "$")
+						else if (tokens[1] != genericIdentifier && tokens[3] == genericIdentifier)
 						{
 							lhs = literalProcess(tokens[1]);
 							tempToken = tokens[2];
 							rhs = genericProcess(tokens[4]);
 						}
-						else if (tokens[1] == "$" && tokens[4] == "$")
+						else if (tokens[1] == genericIdentifier && tokens[4] == genericIdentifier)
 						{
 							lhs = genericProcess(tokens[2]);
 							tempToken = tokens[3];
@@ -535,7 +548,7 @@ void Worker::callFunction()
 					}
 				}
 
-				if(bracketCheck && tokens[tcount - 1] != paranFlower.first) 
+				if(bracketCheck && tokens.back() != paranFlower.first) 
 				{
 					lhs = rhs = -1;
 				}
@@ -561,9 +574,10 @@ void Worker::callFunction()
 		{
 			std::pair<int, int> dir = pos;
 
-			if (tempVal > 0)
+			if (tempVal < 0)
 			{
 				//cout << tempVal << '\n';
+				tempVal = -(tempVal / zoneLimit + 1);
 				dir = workers[gridnumber][tempVal].pos;
 			}
 			else
