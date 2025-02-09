@@ -643,6 +643,8 @@ void Worker::callFunction()
 				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal].pos.first, workers[gridnumber][tempVal].pos.second) <= sqrt(2))
 				{
 					std::cout << this->name << " talking with " << workers[gridnumber][tempVal].name << '\n';
+					//workers[gridnumber][tempVal].activity = talking;
+					activity = Talking;
 				}
 			}
 			
