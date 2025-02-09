@@ -161,7 +161,7 @@ void WorkerCodeUpdate()
 					switch (workers[i][j].activity)
 					{
 					case Worker::Working:
-							totalmoney += 100;
+						totalmoney += 100;
 							workers[i][j].energy -= 20;
 							workers[i][j].productivity -= 40;
 							break;
