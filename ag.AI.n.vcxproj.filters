@@ -18,13 +18,7 @@
     <ClCompile Include="gameFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gameMaster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="worker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="a_star.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gameAST.cpp">
@@ -71,16 +65,7 @@
     <ClInclude Include="food.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gameMaster.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="worker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pathfinding.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="a_star.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gameAST.h">

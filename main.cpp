@@ -106,6 +106,8 @@ const char* GetEnumEquivalent(Worker::activitytype act)
 		return "Eating";
 	case Worker::Idle:
 		return "Idle";
+	case Worker::Talking:
+		return "Talking";
 	default:
 		return "No Expression Found";
 	}
@@ -173,6 +175,7 @@ void WorkerCodeUpdate()
 					case Worker::Moving:
 						break;
 					}
+
 					workers[i][j].activity = Worker::Idle;
 					workers[i][j].linecounter++;
 				}

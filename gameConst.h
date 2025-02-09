@@ -13,6 +13,7 @@
 //Worker Constants
 constexpr short int worktime = 20;
 constexpr short int eattime = 10;
+constexpr short int talkingtime = 5;
 
 //Window
 constexpr int windowwidth = 1700;
