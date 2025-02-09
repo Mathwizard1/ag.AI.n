@@ -640,6 +640,22 @@ void Worker::callFunction()
 			if (tempVal < 0)
 			{
 				tempVal = -(tempVal / zoneLimit + 1);
+
+				//TODO REPLACE THIS CODE
+				if (workers[gridnumber][tempVal].path.size() > 0)
+				{
+					pathfind(workers[gridnumber][tempVal].path.front());
+					workers[gridnumber][tempVal].activitycounter = max(path.size(), workers[gridnumber][tempVal].path.size()) + talkingtime;
+					activitycounter = max(path.size(), workers[gridnumber][tempVal].path.size()) + talkingtime;
+				}
+				else
+				{
+					pathfind(workers[gridnumber][tempVal].pos);
+					workers[gridnumber][tempVal].activitycounter = path.size()+ talkingtime;
+					activitycounter = path.size() + talkingtime;
+				}
+				
+
 				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal].pos.first, workers[gridnumber][tempVal].pos.second) <= sqrt(2))
 				{
 					std::cout << this->name << " talking with " << workers[gridnumber][tempVal].name << '\n';
@@ -696,7 +712,7 @@ void Worker::callFunction()
 			lag = -1;
 		}
 
-		linecounter++;
+		//linecounter++;
 	}
 	//linecounter = 0;
 }

@@ -50,6 +50,7 @@ public:
 		Working,
 		Eating,
 		Moving,
+		Talking
 	}activity=Idle;
 	short int activitycounter = 0;
 
