@@ -99,6 +99,7 @@ void Worker::getCode()
 	labelMap.clear();
 
 	std::vector<std::string> tokens;
+	std::string paired_paran = "";
 
 	int codeSize = code.size();
 	for (int i = 0; i < codeSize; i++)
@@ -107,7 +108,6 @@ void Worker::getCode()
 		if (nonPairedEntity)
 		{
 			std::cout << "non paired brackets on " << i << '\n';
-			nonPairedEntity = false;
 		}
 
 
@@ -124,6 +124,11 @@ void Worker::getCode()
 				std::cout << code[i] << " common token\n";
 				return;
 			}
+		}
+
+		for(auto &token: tokens)
+		{
+
 		}
 
 		tokens.clear();
@@ -205,7 +210,7 @@ void Worker::tokenizer(char* instruction, short int instructionSize, std::vector
 		}
 	}
 
-	if (paired_paran.size() > 0)
+	if (! paired_paran.empty())
 	{
 		nonPairedEntity = true;
 	}
@@ -333,7 +338,6 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
-	cout << value << '\n';
 	if (value != "me" && value != "work" && value != "zone")
 	{
 		value[0] = toupper(value[0]);
@@ -426,6 +430,7 @@ void Worker::callFunction()
 		std::vector<std::string> tokens;
 		tokenizer(code[linecounter], linesize[linecounter], tokens);
 
+		// empty line skip
 		if (tokens.empty())
 		{
 			linecounter++;
@@ -571,6 +576,13 @@ void Worker::callFunction()
 		else if (tokens[0] == "break")
 		{
 			activitycounter = tempVal;
+			/*
+			if(lag == -1)
+			{
+				lag = tempVal;
+				// do break changes
+			}
+			*/
 		}
 		else if (tokens[0] == "if")
 		{
@@ -625,7 +637,15 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "talk")
 		{
-			std::cout << "talk" << '\n';
+			if (tempVal < 0)
+			{
+				tempVal = -(tempVal / zoneLimit + 1);
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal].pos.first, workers[gridnumber][tempVal].pos.second) <= sqrt(2))
+				{
+					std::cout << this->name << " talking with " << workers[gridnumber][tempVal].name << '\n';
+				}
+			}
+			
 		}
 		else if (tokens[0] == "submit")
 		{
@@ -665,7 +685,18 @@ void Worker::callFunction()
 			return;
 		}
 
-		//linecounter++;
+		// For repeated call functions
+		if (lag > 1)
+		{
+			linecounter--;
+			lag--;
+		}
+		else
+		{
+			lag = -1;
+		}
+
+		linecounter++;
 	}
 	//linecounter = 0;
 }
