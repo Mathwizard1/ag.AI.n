@@ -25,7 +25,7 @@ protected:
 
 public:
 	std::unordered_map<std::string, int> labelMap;
-	std::unordered_set<std::pair<int, int>> bracketMaps;
+	//std::unordered_set<std::pair<int, int>> bracketMaps;
 
 	int index;
 	int energy;
@@ -43,6 +43,17 @@ public:
 		Boss,
 	} Zone;
 
+
+	//ACTIVITIES
+	enum activitytype {
+		Idle,
+		Working,
+		Eating,
+		Moving,
+	}activity=Idle;
+	short int activitycounter = 0;
+
+
 	struct Node {
 		short int x, y;
 		double gCost, hCost;
@@ -58,11 +69,16 @@ public:
 		}
 	};
 
+	//POSITION AND WORKSPACE
 	pair<short int, short int> pos;
+	pair<short int, short int> workspace;
+	short int occupiedbench;
 
+	//ASSEMBLER STUFF
 	short int lag = -1;
 	int linecounter = 0;
 
+	//CODE STUFF
 	vector<char*> code;
 	vector<short int> linesize;
 	vector<pair<short int, short int>> path;

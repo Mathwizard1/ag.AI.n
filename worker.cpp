@@ -42,42 +42,16 @@ double heuristic(int x1, int y1, int x2, int y2) {
 
 void Worker::pathfind(pair<short int,short int> end)
 {
-	int rows = grid->size(), cols = (*grid)[0].size();
-	priority_queue<Node> front;
-	vector<vector<bool>> visited(rows, vector<bool>(cols, false));
-	front.push(Node(pos.first, pos.second, 0, heuristic(pos.first, pos.second, end.first, end.second)));
-
-	while (!front.empty()) {
-		Node current = front.top();
-		front.pop();
-
-		if (current.x == end.first && current.y == end.second) {
-			vector<pair<short int, short int>> temppath;
-			while (current.parent != nullptr) {
-				temppath.push_back({ current.x, current.y });
-				current = *current.parent;
-			}
-			temppath.push_back({ current.x, current.y });
-			path = temppath;
-			return;
-		}
-
-		if (visited[current.x][current.y]) continue;
-		visited[current.x][current.y] = true;
-
-		for (const auto& dir : directions) {
-			int nx = current.x + dir.first, ny = current.y + dir.second;
-			if (nx >= 0 && nx < grid->size() && ny >= 0 && ny < (*grid)[0].size() && (*grid)[nx][ny] == 0 && !visited[nx][ny]) {
-				double gCost = current.gCost + 1;
-				if (dir.first != 0 && dir.second != 0) {
-					gCost += 0.414; //to compnsate diagonal
-				}
-				double hCost = heuristic(nx, ny, end.first, end.second);
-				front.push(Node(nx, ny, gCost, hCost, new Node(current)));
-			}
-		}
+	vector<pair<short int, short int>> temppath = { end };
+	while (end != pos)
+	{
+		if (end.first < pos.first)end.first++;
+		if (end.first > pos.first)end.first--;
+		if (end.second < pos.second)end.second++;
+		if (end.second > pos.second)end.second--;
+		temppath.push_back(end);
 	}
-	return;
+	path = temppath;
 }
 
 void Worker::eat() {
@@ -447,11 +421,6 @@ void Worker::callFunction()
 {
 	int codeSize = code.size();
 
-	/*if (!code.empty())
-	{
-		gM.getCode(code, codeSize, linesize);
-	}*/
-
 	if (linecounter < codeSize)
 	{
 		std::vector<std::string> tokens;
@@ -570,6 +539,7 @@ void Worker::callFunction()
 			}
 		}
 
+
 		if (tokens[0] == "moveto")
 		{
 			std::pair<int, int> dir = pos;
@@ -592,11 +562,15 @@ void Worker::callFunction()
 				}
 			}
 
+			//Pathfind
 			pathfind(dir);
+			activitycounter = path.size();
+			activity = Moving;
+
 		}
 		else if (tokens[0] == "break")
 		{
-			std::cout << "break" << tempVal << '\n';
+			activitycounter = tempVal;
 		}
 		else if (tokens[0] == "if")
 		{
@@ -604,7 +578,7 @@ void Worker::callFunction()
 			nonPairedEntity = true;
 
 			tcount = linecounter;
-			std::cout << "if : " << tempVal << '\n';
+			//std::cout << "if : " << tempVal << '\n';
 			
 			if (tempVal == 0)
 			{
@@ -612,7 +586,7 @@ void Worker::callFunction()
 
 				while (linecounter < codeSize)
 				{
-					std::cout << linecounter << '\n';
+					//std::cout << linecounter << '\n';
 
 					tokens.clear();
 					tokenizer(code[linecounter], linesize[linecounter], tokens);
@@ -645,7 +619,9 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "work")
 		{
-			std::cout << "work" << '\n';
+			pathfind(workspace);
+			activitycounter = path.size()+worktime;
+			activity = Working;
 		}
 		else if (tokens[0] == "talk")
 		{
@@ -659,10 +635,14 @@ void Worker::callFunction()
 		{
 			for (int i = 0; i < lunchpositions.size(); i++)
 			{
-				if (!lunchpositions[i].second)
+				if (lunchpositions[i].second==false)
 				{
-					lunchpositions[i].second = 1;
+					lunchpositions[i].second = true;
 					pathfind(lunchpositions[i].first);
+					activitycounter = path.size()+eattime;
+					occupiedbench = i;
+					activity = Eating;
+					break;
 				}
 			}
 		}
@@ -685,7 +665,7 @@ void Worker::callFunction()
 			return;
 		}
 
-		linecounter++;
+		//linecounter++;
 	}
 	//linecounter = 0;
 }

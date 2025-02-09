@@ -10,6 +10,10 @@
 #include <unordered_map>
 #include <random>
 
+//Worker Constants
+constexpr short int worktime = 20;
+constexpr short int eattime = 10;
+
 //Window
 constexpr int windowwidth = 1700;
 constexpr int windowheight = 900;
