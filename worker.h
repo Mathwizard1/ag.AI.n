@@ -25,7 +25,7 @@ protected:
 
 public:
 	std::unordered_map<std::string, int> labelMap;
-	std::unordered_set<std::pair<int, int>> bracketMaps;
+	//std::unordered_set<std::pair<int, int>> bracketMaps;
 
 	int index;
 	int energy;
