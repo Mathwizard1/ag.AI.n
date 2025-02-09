@@ -44,22 +44,27 @@ enum screenmode {
 	Stock
 } ScreenMode;
 
+//Code Variables
 std::vector<vector<char*>> textboxesnetwork;
 std::vector<vector<short int>> textsizesnetwork;
 std::vector<char*> textboxes;
 std::vector<short int> textsizes;
 
+//Stock Variables
 std::vector<double> playerstock = {};
 
+//Grid Variables
 std::vector<short int> gridpurchased;
 std::vector<long long int> gridprices;
 std::vector<std::vector<std::vector<short int>>> pooledgridnetwork;
 std::vector<std::vector<std::vector<short int>>> gridnetwork;
 std::vector<std::vector<short int>> grid;
 
+//Area Variables
 std::vector<tuple<Color, char*, int>> areaitems;
 std::vector<short int> areacolors;
 
+//Misc Variables
 std::vector<tuple<Color, char*, int>> miscitems;
 std::vector<short int> misccolors;
 std::vector<pair<pair<short int, short int>,bool>> lunchpositions;
@@ -88,6 +93,23 @@ Colors:
 -1->Boundary
 -2->Workspace
 */
+
+const char* GetEnumEquivalent(Worker::activitytype act)
+{
+	switch (act)
+	{
+	case Worker::Working:
+		return "Working";
+	case Worker::Moving:
+		return "Moving";
+	case Worker::Eating:
+		return "Eating";
+	case Worker::Idle:
+		return "Idle";
+	default:
+		return "No Expression Found";
+	}
+}
 
 void BankUpdate()
 {
@@ -119,9 +141,48 @@ void ChangeWorkerPositions()
 			workers[y][x].pos = workers[y][x].path[workers[y][x].path.size() - 1];
 			workers[y][x].path.pop_back();
 		}
-		else
+	}
+}
+
+void WorkerCodeUpdate()
+{
+	for (int i = 0; i < workers.size(); i++)
+	{
+		for (int j = 0; j < workers[i].size(); j++)
 		{
-			workers[y][x].callFunction();
+			if (workers[i][j].activitycounter > 0)
+			{
+				//Decrement Activity Counter
+				workers[i][j].activitycounter--;
+
+				//If Activity Ends
+				if (workers[i][j].activitycounter == 0)
+				{
+					switch (workers[i][j].activity)
+					{
+					case Worker::Working:
+							totalmoney += 100;
+							workers[i][j].energy -= 20;
+							workers[i][j].productivity -= 40;
+							break;
+					case Worker::Eating:
+						workers[i][j].energy += 60;
+						workers[i][j].productivity += 10;
+						lunchpositions[workers[i][j].occupiedbench].second =false ;
+						break;
+					case Worker::Moving:
+						break;
+					}
+					workers[i][j].activity = Worker::Idle;
+					workers[i][j].linecounter++;
+				}
+
+			}
+			else
+			{
+				//Interpret Line
+				workers[i][j].callFunction();
+			}
 		}
 	}
 }
@@ -671,6 +732,8 @@ void DrawCodeTab()
 	static short int chosentext = 0;
 	static short int chosencode = 0;
 	static double codeblockheight = (windowheight - sidebarbuttonheight - textinputheight-textsavebuttonheight-namebannersize) / (double)codeblocks;
+	
+	short int interpreterblock = workers[chosengrid][chosenperson].linecounter;
 
 	//CODE CHANGE FOR DIFFERENT PERSON
 	if (chosencode != chosenperson)
@@ -787,6 +850,9 @@ void DrawCodeTab()
 	for (int i = 0; i < codeblocks; i++)
 	{
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
+		if (i == interpreterblock)
+			blockcolor = DARKBLUE;
+
 		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight +namebannersize+ i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);
 		DrawRectangle(codeblock.x, codeblock.y, 55, codeblockheight, GRAY);
@@ -817,6 +883,13 @@ void DrawCodeTab()
 	//DRAWING NAME BANNER
 	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight, sidebarwidth, namebannersize, DARKGRAY);
 	DrawTextEx(codingfontbold, workers[chosengrid][chosenperson].name, { windowwidth - 0.6 * sidebarwidth,sidebarbuttonheight + 10 }, 20, 5, WHITE);
+
+	//Drawing Worker State
+	DrawTextEx(codingfontbold,GetEnumEquivalent(workers[chosengrid][chosenperson].activity), {windowwidth - 0.2 * sidebarwidth, sidebarbuttonheight + 10}, 20, 1, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("E: %d", workers[chosengrid][chosenperson].energy), {windowwidth - sidebarwidth, sidebarbuttonheight + 10}, 17, 1, YELLOW);
+	DrawTextEx(codingfontbold, TextFormat("P: %d", workers[chosengrid][chosenperson].productivity), { windowwidth - 0.85*sidebarwidth, sidebarbuttonheight + 10 }, 17, 1, YELLOW);
+
+
 }
 
 void DrawMiscTab()
@@ -934,6 +1007,7 @@ void DrawMiscTab()
 						{
 							workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
 							workers[chosengrid].back().grid = &grid;
+							workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
 							workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + screenbuffer,y + screenbuffer });
 						}
 						else
@@ -1276,6 +1350,7 @@ void DrawHireTab()
 						//Spawn Worker
 						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
 						workers[chosengrid].back().grid = &grid;
+						workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
 						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x +screenbuffer ,y+screenbuffer});
 					}
 				}
@@ -1417,7 +1492,7 @@ void UpdateStocks()
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
-	//SetTargetFPS(144);
+	SetTargetFPS(144);
 
 	srand(time(NULL));
 
@@ -1449,8 +1524,6 @@ int main()
 	
 	bool clockswitch = false;
 
-	bank.invest(40000);
-
 	while (!WindowShouldClose())
 	{
 		mousepos = GetMousePosition();
@@ -1466,7 +1539,7 @@ int main()
 			//Tick Functions
 			ChangeWorkerPositions();
 			BankUpdate();
-
+			WorkerCodeUpdate();
 			if (totalticks % updatetime == 0)
 			{
 				playerstock.push_back(totalmoney / 100);
@@ -1476,7 +1549,6 @@ int main()
 				}
 				UpdateStocks();
 			}
-
 		}
 		else if (gametime > 50 && clockswitch == true)
 			clockswitch = false;
