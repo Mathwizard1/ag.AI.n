@@ -1,11 +1,11 @@
 #pragma once
 
 #include <iostream>
-#include<fstream>
-#include<stdlib.h>
+#include <fstream>
+#include <stdlib.h>
 #include <vector>
-#include<string>
-#include<math.h>
+#include <string>
+#include <math.h>
 #include <unordered_set>
 #include <unordered_map>
 #include <random>

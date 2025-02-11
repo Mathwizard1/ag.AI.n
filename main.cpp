@@ -273,14 +273,14 @@ void InitializeGrid(short int width, short int height, int type)
 	workbenchsize = 3;
 
 	//grid = generateMaze(width, height,1 );
+	MazeGenerator generator(width, height, 5);
 
 	for (int z = 0; z < mapsize ; z++)
 	{
 		int x = z % dims;
 		int y = z / dims;
 		int walldensity = abs(midx - x) + abs(midy - y);
-		MazeGenerator generator(width, height, width * (1-0.15*walldensity));
-		grid = generator.generateMaze(rand());
+		generator.generateMaze(grid, generator.randOrient(), walldensity, width, height);
 
 		vector<char*> textboxes;
 		vector<short int> textsizes;

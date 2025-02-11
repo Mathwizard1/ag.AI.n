@@ -113,7 +113,7 @@ public:
 	int gridnumber;
 
 	// Spec attr.
-	int skills = 0;
+	int skills = 50;
 	bool obedient = false;
 
 	//Constructors

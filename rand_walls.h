@@ -2,19 +2,22 @@
 #ifndef RAND_WALLS_H
 #define RAND_WALLS_H
 
-#include <vector>
 #include "gameConst.h"
 
 class MazeGenerator {
 private:
-    std::vector<std::vector<short int>> maze;
+    enum class orientation
+    {
+        Horizontal,
+        Vertical
+    };
 
-    void divideMaze(int x1, int y1, int x2, int y2);
-    void addEntryExit();
-
+    orientation chooseOrientation(int width, int height);
+    short int fullWidth, fullHeight, fraq;
 public:
-    int n, m, min_width;
-    MazeGenerator(int rows, int cols, int minSize);
-    std::vector<std::vector<short int>> generateMaze(int seed);
+    MazeGenerator(short int fullWidth, short int fullHeight, short int fraq);
+
+    orientation randOrient();
+    void generateMaze(std::vector<std::vector<short int>> &maze, orientation wallOrientation, short int maxDepth, short int width, short int height, short int x = 0, short int y = 0, short int depth = 0);
 };
 #endif 

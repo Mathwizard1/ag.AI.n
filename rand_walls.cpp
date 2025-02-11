@@ -1,75 +1,89 @@
 #include "rand_walls.h"
 
-using namespace std;
-
-MazeGenerator::MazeGenerator(int rows, int cols, int minSize) {
-    n = rows;
-    m = cols;
-    min_width = minSize;
-    maze.resize(n, vector<short int>(m, 0));
+MazeGenerator::orientation MazeGenerator::chooseOrientation(int width, int height)
+{
+    if (width < height)
+    {
+        return orientation::Horizontal;
+    }
+    else if (height < width)
+    {
+        return orientation::Vertical;
+    }
+    
+    return ((rand() % 2) ? orientation::Vertical : orientation::Horizontal);
 }
 
-void MazeGenerator::divideMaze(int x1, int y1, int x2, int y2) {
+MazeGenerator::MazeGenerator(short int fullWidth, short int fullHeight, short int fraq)
+{
+    this->fullWidth = fullWidth;
+    this->fullHeight = fullHeight;
+    this->fraq = fraq;
+}
 
-    if ((x2 - x1 < min_width) || (y2 - y1 < min_width)) {
-        return;
+MazeGenerator::orientation MazeGenerator::randOrient()
+{
+    return chooseOrientation(1, 1);
+}
+
+void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orientation wallOrientation, short int maxDepth, short int width, short int height, short int x, short int y, short int depth)
+{
+    if (depth == 0)
+    {
+        maze.clear();
+        maze.resize(width, std::vector<short int>(height, 0));
+    }
+    else
+    {
+        if (width <= fullWidth / fraq || height <= fullHeight / fraq) { return; }
     }
 
-    bool horizDiv = (x2 - x1) > (y2 - y1);
+    if (depth < maxDepth)
+    {
+        short int wx, wy, nx, ny, w, h;
+        short int dx, dy, rx, ry;
 
-    if (horizDiv) {
-        int wallX = x1 + rand() % (x2 - x1 - 1) + 1;
-        int passageY = y1 + rand() % (y2 - y1);
+        // the line filler
+        dx = (wallOrientation == orientation::Horizontal) ? 1 : 0;
+        dy = (wallOrientation == orientation::Horizontal) ? 0 : 1;
 
-        for (int y = y1; y < y2; y++) {
-            if (y != passageY) {
-                maze[wallX][y] = -1;
+        // draw walls at wx,wy
+        rx = (width - 1) / 2 + (1 + -2 * (rand() % 2)) * ( rand() % ((width - 1) / 4 + 1));
+        ry = (height - 1) / 2 + (1 + -2 * (rand() % 2)) * ( rand() % ((height - 1) / 4 + 1));
+
+        wx = x + ((wallOrientation == orientation::Horizontal) ? 0 : rx);
+        wy = y + ((wallOrientation == orientation::Horizontal) ? ry : 0);
+
+        // where will the passage through the wall
+        short int px, py;
+        px = wx + ((wallOrientation == orientation::Horizontal) ? 0 : 0);   // needs changes
+        py = wy + ((wallOrientation == orientation::Horizontal) ? 0 : 0);
+
+        short int length = (wallOrientation == orientation::Horizontal) ? width : height;
+        while (length)
+        {
+            if (wx != px || wy != py)
+            {
+                maze[wx][wy] = -1;
             }
+            wx += dx;
+            wy += dy;
+            length--;
         }
 
-        divideMaze(x1, y1, wallX, y2);
-        divideMaze(wallX + 1, y1, x2, y2);
-    }
-    else {
-        int wallY = y1 + rand() % (y2 - y1 - 1) + 1;
-        int passageX = x1 + rand() % (x2 - x1);
+        nx = x;
+        ny = y;
 
-        for (int x = x1; x < x2; x++) {
-            if (x != passageX) {
-                maze[x][wallY] = -1;
-            }
-        }
+        w = (wallOrientation == orientation::Horizontal) ? width : wx - x + 1;
+        h = (wallOrientation == orientation::Horizontal) ? wy - y + 1 : height;
+        generateMaze(maze, chooseOrientation(w, h), maxDepth, w, h, nx, ny, depth + 1);
 
-        divideMaze(x1, y1, x2, wallY);
-        divideMaze(x1, wallY + 1, x2, y2);
+        nx = (wallOrientation == orientation::Horizontal) ? x : wx + 1;
+        ny = (wallOrientation == orientation::Horizontal) ? wy + 1 : y;
+
+        w = (wallOrientation == orientation::Horizontal) ? width : x + width - wx - 1;
+        h = (wallOrientation == orientation::Horizontal) ? y + height - wy - 1 : height;
+        generateMaze(maze, chooseOrientation(w, h), maxDepth, w, h, nx, ny, depth + 1);
     }
 }
 
-void MazeGenerator::addEntryExit() {
-    vector<pair<int, int>> edges;
-    for (int i = 1; i < n - 1; i++) {
-        edges.push_back({ i, 0 });
-        edges.push_back({ i, m - 1 });
-    }
-    for (int j = 1; j < m - 1; j++) {
-        edges.push_back({ 0, j });
-        edges.push_back({ n - 1, j });
-    }
-
-    int idx1 = rand() % edges.size();
-    int idx2;
-    do {
-        idx2 = rand() % edges.size();
-    } while (idx1 == idx2);
-
-    maze[edges[idx1].first][edges[idx1].second] = 0;
-    maze[edges[idx2].first][edges[idx2].second] = 0;
-}
-
-vector<vector<short int>> MazeGenerator::generateMaze(int seed) {
-    srand(seed);
-    divideMaze(0, 0, n , m );
-    addEntryExit();
-
-    return maze;
-}
