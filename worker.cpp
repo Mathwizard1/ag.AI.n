@@ -635,6 +635,10 @@ void Worker::callFunction()
 					std::cout << tcount << " No brackets found matching\n";
 				}
 			}
+			else
+			{
+				linecounter++;;
+			}
 		}
 		else if (tokens[0] == "work")
 		{
