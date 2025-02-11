@@ -1,11 +1,13 @@
 #include "juniorWorker.h"
 
 JuniorSoftware::JuniorSoftware(int index, short int x, short int y, short int gridnumber)
-    : Worker(index, x, y, gridnumber), programmingSkills(50) {
+    : Worker(index, x, y, gridnumber){
+    this->skills = 50;
 }
 
 JuniorSoftware::JuniorSoftware(int index, bool gender, char* name, short int x, short int y)
-    : Worker(index, gender, name, x, y), programmingSkills(50) {
+    : Worker(index, gender, name, x, y){
+    this->skills = 50;
 }
 
 void JuniorSoftware::makeObedient() {
@@ -19,24 +21,27 @@ void JuniorSoftware::makeNonObedient() {
         money += 50;
     }
 }
-void JuniorSoftware::incProgSkills(int amt) {
-    if (programmingSkills + amt >= 100) {
-        int reqd = 100 - programmingSkills;
-        programmingSkills = 100;
+void JuniorSoftware::incSkills(int amt)
+{
+    if (skills + amt >= 100) {
+        int reqd = 100 - skills;
+        skills = 100;
         money -= 2 * reqd;
         return;
     }
 
-    programmingSkills += amt;
+    skills += amt;
     money -= 2 * amt;
 }
 
 JuniorHardware::JuniorHardware(int index, short int x, short int y, short int gridnumber)
-    : Worker(index, x, y, gridnumber), technicalSkills(50) {
+    : Worker(index, x, y, gridnumber){
+    this->skills = 50;
 }
 
 JuniorHardware::JuniorHardware(int index, bool gender, char* name, short int x, short int y)
-    : Worker(index, gender, name, x, y), technicalSkills(50) {
+    : Worker(index, gender, name, x, y){
+    this->skills = 50;
 }
 
 void JuniorHardware::makeObedient() {
@@ -63,11 +68,13 @@ void JuniorHardware::incTechSkills(int amt) {
 }
 
 JuniorNetwork::JuniorNetwork(int index, short int x, short int y, short int gridnumber)
-    : Worker(index, x, y, gridnumber), networkingSkills(50) {
+    : Worker(index, x, y, gridnumber){
+    this->skills = 50;
 }
 
 JuniorNetwork::JuniorNetwork(int index, bool gender, char* name, short int x, short int y)
-    : Worker(index, gender, name, x, y), networkingSkills(50) {
+    : Worker(index, gender, name, x, y){
+    this->skills = 50;
 }
 
 void JuniorNetwork::makeObedient() {

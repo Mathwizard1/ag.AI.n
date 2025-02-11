@@ -28,11 +28,11 @@ public:
 	//std::unordered_set<std::pair<int, int>> bracketMaps;
 
 	int index;
-	int energy;
-	int productivity;
-	int mood;
-	int health;
-	int money;
+	int energy = 50;
+	int productivity = 80;
+	int mood = 80;
+	int health = 100;
+	int money = 100;
 
 	Inventory inventory;
 
@@ -73,7 +73,7 @@ public:
 	//POSITION AND WORKSPACE
 	pair<short int, short int> pos;
 	pair<short int, short int> workspace;
-	short int occupiedbench;
+	short int occupiedbench = -1;
 
 	//ASSEMBLER STUFF
 	short int lag = -1;
@@ -83,8 +83,7 @@ public:
 	vector<char*> code;
 	vector<short int> linesize;
 	vector<pair<short int, short int>> path;
-	vector<pair<short int, short int>> directions;
-	vector<vector<short int>>* grid;
+	vector<vector<short int>>* grid = nullptr;
 
 	int work[2] = {10, 0};
 
@@ -109,14 +108,17 @@ public:
 	};
 
 	char* name;
-
 	bool gender;
 
 	int gridnumber;
 
+	// Spec attr.
+	int skills = 0;
+	bool obedient = false;
+
 	//Constructors
-	Worker(int index, short int x , short int y,short int gridnumber);
-	Worker(int index, bool gender, char* name, short int x = 0, short int y = 0);
+	Worker(short int x , short int y);
+	Worker(bool gender, char* name, short int x = 0, short int y = 0);
 
 	//Functions
 	void eat();
@@ -135,6 +137,10 @@ public:
 	int literalProcess(std::string intLiteral);
 
 	void callFunction();
+
+	// Spec functions
+	virtual void incSkills(int amt);
+	virtual void updateObedience() ;
 };
 
 extern std::vector<std::vector<Worker>> workers;

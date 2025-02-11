@@ -26,10 +26,5 @@ extern float maxstock;
 
 extern vector<pair<pair<short int, short int>,bool>> lunchpositions;
 
-class gameFunction
-{
-public:
-	pair<bool, char*> NameGenerator();
-
-};
+pair<bool, char*> NameGenerator();
 

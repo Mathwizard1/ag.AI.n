@@ -27,15 +27,6 @@
     <ClCompile Include="inventory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="specialistWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="juniorWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seniorWorker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="garbage_maze.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,15 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inventory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="specialistWorker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="juniorWorker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seniorWorker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="garbage_maze.h">

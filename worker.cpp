@@ -7,32 +7,24 @@ std::vector<vector<Worker>> workers;
 std::vector<Worker> bosses;
 std::vector<Worker> receptionists;
 
-Worker::Worker(int index, short int x, short int y,short int gridnumber) {
+std::vector<std::pair<short, short>> directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
+
+Worker::Worker(short int x, short int y) {
 	this->gridnumber = chosengrid;
 	this->index = workers[chosengrid].size();
-	this->energy = 50;
-	this->productivity = 80;
-	this->health = 100;
 	this->Zone = Office;
-	pair<bool, char*> p = gameFunction().NameGenerator();
+	pair<bool, char*> p = NameGenerator();
 	this->name = p.second;
 	this->gender = p.first;
-	this->money = 100;
-	this->mood = (3 * energy + 5 * health) / 8;
 	this->pos = { x,y };
-	this->directions={ {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 }
 
-Worker::Worker(int index, bool gender, char* name, short int x, short int y) {
+Worker::Worker(bool gender, char* name, short int x, short int y) {
+	this->gridnumber = chosengrid;
 	this->index = workers[chosengrid].size();
-	this->energy = 50;
-	this->productivity = 80;
-	this->health = 100;
 	this->Zone = Office;
 	this->gender = gender;
 	this->name = name;
-	this->money = 0;
-	this->mood = (3 * energy + 5 * health) / 8;
 	this->pos = { x,y };
 }
 
@@ -124,11 +116,6 @@ void Worker::getCode()
 				std::cout << code[i] << " common token\n";
 				return;
 			}
-		}
-
-		for(auto &token: tokens)
-		{
-
 		}
 
 		tokens.clear();
@@ -338,6 +325,11 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
+	if (value == "inventory")
+	{
+
+	}
+
 	if (value != "me" && value != "work" && value != "zone")
 	{
 		value[0] = toupper(value[0]);
@@ -355,6 +347,21 @@ int Worker::genericProcess(std::string genericVal)
 				}
 			}
 		}
+
+		//for (auto& receptionist : receptionists[gridnumber])
+		//{
+		//	if (receptionist.name == value)
+		//	{
+		//		if (attribute.empty())
+		//		{
+		//			return -(receptionist.index + 1) * zoneLimit;
+		//		}
+		//		else
+		//		{
+		//			return receptionist.getExpression("me", attribute);
+		//		}
+		//	}
+		//}
 
 		return -1;
 	}
@@ -717,4 +724,14 @@ void Worker::callFunction()
 		//linecounter++;
 	}
 	//linecounter = 0;
+}
+
+void Worker::incSkills(int amt)
+{
+	std::cout << amt << "virtual function\n";
+}
+
+void Worker::updateObedience()
+{
+	std::cout << "virtual function\n";
 }

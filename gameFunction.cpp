@@ -19,7 +19,7 @@ float maxstock = 100;
 vector<string> malenames;
 vector<string> femalenames;
 
-pair<bool, char*> gameFunction::NameGenerator() {
+pair<bool, char*> NameGenerator() {
 	if (malenames.size() == 0)
 	{
 		string name;
@@ -42,6 +42,9 @@ pair<bool, char*> gameFunction::NameGenerator() {
 		int ind =rand()%femalenames.size();
 		return { 1, strcpy(name, femalenames[ind].c_str()) };
 	}
-	int ind = rand() % malenames.size();
-	return { 0, strcpy(name, malenames[ind].c_str()) };
+	else
+	{
+		int ind =rand()%malenames.size();
+		return { 0, strcpy(name, malenames[ind].c_str()) };
+	}
 }

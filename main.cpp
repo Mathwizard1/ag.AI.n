@@ -1008,7 +1008,7 @@ void DrawMiscTab()
 						//Spawn Worker
 						if (chosenworkertype == 1)
 						{
-							workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
+							workers[chosengrid].push_back(Worker(screenbuffer, gridheight / 2));
 							workers[chosengrid].back().grid = &grid;
 							workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
 							workers[chosengrid][workers[chosengrid].size() - 1].pathfind({ x + screenbuffer,y + screenbuffer });
@@ -1351,7 +1351,7 @@ void DrawHireTab()
 						if (workernetcost <= totalmoney)totalmoney -= workernetcost;
 
 						//Spawn Worker
-						workers[chosengrid].push_back(Worker(0, screenbuffer, gridheight / 2,chosengrid));
+						workers[chosengrid].push_back(Worker(screenbuffer, gridheight / 2));
 						workers[chosengrid].back().grid = &grid;
 						workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
 						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x +screenbuffer ,y+screenbuffer});
