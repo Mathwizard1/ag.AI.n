@@ -41,7 +41,11 @@ enum bankstate {
 enum screenmode {
 	View,
 	Map,
-	Stock
+	Stock,
+	Landing,   //channges made by me
+	Settings,
+	ISA,
+	Help
 } ScreenMode;
 
 //Code Variables
@@ -1492,6 +1496,52 @@ void UpdateStocks()
 
 }
 
+void DrawLanding() {
+	DrawRectangle(0, 0, windowwidth, windowheight, LIGHTGRAY);
+	DrawText("WELCOME TO AG.AI.N", windowwidth / 2 - 150, 150, 30, DARKGRAY);
+
+	Rectangle playButton =     { windowwidth / 2 - 100, 300, 200, 50 };
+	Rectangle settingsButton = { windowwidth / 2 - 100, 370, 200, 50 };
+	Rectangle isaButton =      { windowwidth / 2 - 100, 440, 200, 50 };
+	Rectangle helpButton =     { windowwidth / 2 - 100, 510, 200, 50 };
+
+	if (GuiButton(playButton, "PLAY")) {
+		ScreenMode = View;  // Switch to game screen
+	}
+	if (GuiButton(settingsButton, "SETTINGS")) {
+		ScreenMode = Settings;
+	}
+	if (GuiButton(isaButton, "ISA")) {
+		ScreenMode = ISA;
+	}
+	if (GuiButton(helpButton, "HELP")) {
+		ScreenMode = Help;
+	}
+}
+
+Rectangle back_button = { windowwidth-210, 10, 200, 50 };
+
+void DrawSettingsScreen() {
+	DrawText("Settings Screen", windowwidth / 2 - 100, 100, 30, DARKGRAY);
+
+	if (GuiButton(back_button, "Back")) {
+		ScreenMode = Landing;
+	}
+}
+
+void DrawISAScreen() {
+	DrawText("Instruction Set Architecture (ISA)", windowwidth / 2 - 200, 100, 30, DARKGRAY);
+	if (GuiButton(back_button, "Back")) {
+		ScreenMode = Landing;
+	}
+}
+
+void DrawHelpScreen() {
+	DrawText("Help Screen", windowwidth / 2 - 100, 100, 30, DARKGRAY);
+	if (GuiButton(back_button, "Back")) {
+		ScreenMode = Landing;
+	}
+}
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
@@ -1516,7 +1566,7 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	ScreenMode = Map; //DEBUG
+	ScreenMode = Landing; //DEBUG
 	BankState = Invest;
 	SidebarState = Money;
 
@@ -1582,6 +1632,18 @@ int main()
 		case Stock:
 			DrawStocks();
 			break; 
+		case Landing:
+			DrawLanding();
+			break;
+		case Settings:
+			DrawSettingsScreen();
+			break;
+		case ISA:
+			DrawISAScreen();
+			break;
+		case Help:
+			DrawHelpScreen();
+			break;
 		}
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
 
