@@ -1497,13 +1497,32 @@ void UpdateStocks()
 }
 
 void DrawLanding() {
-	DrawRectangle(0, 0, windowwidth, windowheight, LIGHTGRAY);
-	DrawText("WELCOME TO AG.AI.N", windowwidth / 2 - 150, 150, 30, DARKGRAY);
 
-	Rectangle playButton =     { windowwidth / 2 - 100, 300, 200, 50 };
-	Rectangle settingsButton = { windowwidth / 2 - 100, 370, 200, 50 };
-	Rectangle isaButton =      { windowwidth / 2 - 100, 440, 200, 50 };
-	Rectangle helpButton =     { windowwidth / 2 - 100, 510, 200, 50 };
+	DrawRectangle(0, 0, windowwidth, windowheight, LIGHTGRAY);
+
+
+	DrawText("WELCOME TO AG.AI.N", windowwidth / 2 - MeasureText("WELCOME TO AG.AI.N", 30) / 2, 100, 30, DARKGRAY);
+
+	int videoWidth = windowwidth / 2;
+	int videoHeight = 200;
+	int videoX = (windowwidth - videoWidth) / 2;
+	int videoY = 150;
+
+	DrawRectangle(videoX, videoY, videoWidth, videoHeight, GRAY);
+	DrawRectangleLines(videoX, videoY, videoWidth, videoHeight, DARKGRAY);
+	DrawText("VIDEO OF THE GAME BEING PLAYED", videoX + 20, videoY + videoHeight / 2 - 10, 20, BLACK);
+
+	// Buttons
+	int buttonWidth = 200;
+	int buttonHeight = 50;
+	int buttonX = windowwidth / 2 - buttonWidth / 2;
+	int startY = videoY + videoHeight + 50;  // Adjusted for better spacing
+	int gap = 20;
+
+	Rectangle playButton = { buttonX, startY, buttonWidth, buttonHeight };
+	Rectangle settingsButton = { buttonX, startY + (buttonHeight + gap), buttonWidth, buttonHeight };
+	Rectangle isaButton = { buttonX, startY + 2 * (buttonHeight + gap), buttonWidth, buttonHeight };
+	Rectangle helpButton = { buttonX, startY + 3 * (buttonHeight + gap), buttonWidth, buttonHeight };
 
 	if (GuiButton(playButton, "PLAY")) {
 		ScreenMode = View;  // Switch to game screen
@@ -1537,11 +1556,36 @@ void DrawISAScreen() {
 }
 
 void DrawHelpScreen() {
-	DrawText("Help Screen", windowwidth / 2 - 100, 100, 30, DARKGRAY);
+	static int scrollOffset = 0;
+	int maxScroll = 400; 
+
+	
+	if (IsKeyDown(KEY_DOWN) && scrollOffset < maxScroll) scrollOffset += 5;
+	if (IsKeyDown(KEY_UP) && scrollOffset > 0) scrollOffset -= 5;
+
+	DrawRectangle(0, 0, windowwidth, windowheight, RAYWHITE);
+	DrawText("Help Screen", windowwidth / 2 - 100, 50 - scrollOffset, 30, DARKGRAY);
+
+	
+	DrawText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 50, 120 - scrollOffset, 20, BLACK);
+	DrawText("Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", 50, 160 - scrollOffset, 20, BLACK);
+	DrawText("Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", 50, 200 - scrollOffset, 20, BLACK);
+	DrawText("Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", 50, 240 - scrollOffset, 20, BLACK);
+	DrawText("Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", 50, 280 - scrollOffset, 20, BLACK);
+
+	
+	DrawText("More info section", 50, 350 - scrollOffset, 24, DARKGRAY);
+	DrawText("Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.", 50, 390 - scrollOffset, 20, BLACK);
+	DrawText("Curabitur sodales ligula in libero. Sed dignissim lacinia nunc.", 50, 430 - scrollOffset, 20, BLACK);
+	DrawText("Curabitur tortor. Pellentesque nibh. Aenean quam.", 50, 470 - scrollOffset, 20, BLACK);
+	DrawText("In scelerisque sem at dolor. Maecenas mattis.", 50, 510 - scrollOffset, 20, BLACK);
+
+	
 	if (GuiButton(back_button, "Back")) {
 		ScreenMode = Landing;
 	}
 }
+
 int main()
 {
 	InitWindow(windowwidth, windowheight, "ag.AI.n");
