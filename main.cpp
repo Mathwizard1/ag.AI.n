@@ -84,6 +84,7 @@ Vector2 mousepos;
 
 Texture officetile;
 Texture bankicon;
+Texture2D background;
 
 /*
 Colors:
@@ -198,6 +199,8 @@ void InitializeSprites()
 {
 	officetile = LoadTextureFromImage(LoadImage( "sprites/office_tile.png"));
 	bankicon = LoadTextureFromImage(LoadImage("sprites/Bank.png"));
+	background = LoadTexture("landing.png");
+
 }
 
 void InitializeHire()
@@ -1497,46 +1500,113 @@ void UpdateStocks()
 }
 
 void DrawLanding() {
+	int backgroundWidth = background.width;
+	int backgroundHeight = background.height;
+	int destWidth = windowwidth;
+	int destHeight = windowheight;
 
-	DrawRectangle(0, 0, windowwidth, windowheight, LIGHTGRAY);
+	Rectangle sourceRect;
+	sourceRect.x = 0;
+	sourceRect.y = 0;
+	sourceRect.width = backgroundWidth;
+	sourceRect.height = backgroundHeight;
 
+	Rectangle destRect;
+	destRect.x = 0;
+	destRect.y = 0;
+	destRect.width = destWidth;
+	destRect.height = destHeight;
 
-	DrawText("WELCOME TO AG.AI.N", windowwidth / 2 - MeasureText("WELCOME TO AG.AI.N", 30) / 2, 100, 30, DARKGRAY);
+	Vector2 origin;
+	origin.x = 0;
+	origin.y = 0;
+
+	DrawTexturePro(background, sourceRect, destRect, origin, 0.0f, WHITE);
+
+	Color golden = { 255, 215, 0, 255 };
+
+	int logoFontSize = 55;
+	int logoTextWidth = MeasureText("WELCOME TO AG.AI.N", logoFontSize);
+	int logoX = (windowwidth - logoTextWidth) / 2;
+	int logoY = 80;
+
+	DrawText("WELCOME TO AG.AI.N", logoX, logoY, logoFontSize, golden);
 
 	int videoWidth = windowwidth / 2;
 	int videoHeight = 200;
 	int videoX = (windowwidth - videoWidth) / 2;
-	int videoY = 150;
+	int videoY = 160;
 
-	DrawRectangle(videoX, videoY, videoWidth, videoHeight, GRAY);
-	DrawRectangleLines(videoX, videoY, videoWidth, videoHeight, DARKGRAY);
-	DrawText("VIDEO OF THE GAME BEING PLAYED", videoX + 20, videoY + videoHeight / 2 - 10, 20, BLACK);
+	DrawRectangle(videoX, videoY, videoWidth, videoHeight, DARKGRAY);
+	DrawRectangleLines(videoX, videoY, videoWidth, videoHeight, BLACK);
+	DrawText("VIDEO OF THE GAME BEING PLAYED", videoX + 20, videoY + videoHeight / 2 - 10, 22, RAYWHITE);
 
-	// Buttons
-	int buttonWidth = 200;
-	int buttonHeight = 50;
-	int buttonX = windowwidth / 2 - buttonWidth / 2;
-	int startY = videoY + videoHeight + 50;  // Adjusted for better spacing
-	int gap = 20;
+	int buttonWidth = 260;
+	int buttonHeight = 65;
+	int buttonX = (windowwidth - buttonWidth) / 2;
+	int startY = videoY + videoHeight + 50;
+	int gap = 25;
 
-	Rectangle playButton = { buttonX, startY, buttonWidth, buttonHeight };
-	Rectangle settingsButton = { buttonX, startY + (buttonHeight + gap), buttonWidth, buttonHeight };
-	Rectangle isaButton = { buttonX, startY + 2 * (buttonHeight + gap), buttonWidth, buttonHeight };
-	Rectangle helpButton = { buttonX, startY + 3 * (buttonHeight + gap), buttonWidth, buttonHeight };
+	Rectangle playButton, settingsButton, isaButton, helpButton;
 
-	if (GuiButton(playButton, "PLAY")) {
-		ScreenMode = View;  // Switch to game screen
-	}
-	if (GuiButton(settingsButton, "SETTINGS")) {
-		ScreenMode = Settings;
-	}
-	if (GuiButton(isaButton, "ISA")) {
-		ScreenMode = ISA;
-	}
-	if (GuiButton(helpButton, "HELP")) {
-		ScreenMode = Help;
-	}
+	playButton.x = buttonX;
+	playButton.y = startY;
+	playButton.width = buttonWidth;
+	playButton.height = buttonHeight;
+
+	settingsButton.x = buttonX;
+	settingsButton.y = startY + (buttonHeight + gap);
+	settingsButton.width = buttonWidth;
+	settingsButton.height = buttonHeight;
+
+	isaButton.x = buttonX;
+	isaButton.y = startY + 2 * (buttonHeight + gap);
+	isaButton.width = buttonWidth;
+	isaButton.height = buttonHeight;
+
+	helpButton.x = buttonX;
+	helpButton.y = startY + 3 * (buttonHeight + gap);
+	helpButton.width = buttonWidth;
+	helpButton.height = buttonHeight;
+
+	Color buttonColor = { 218, 165, 32, 255 };
+	Color hoverColor = { 255, 223, 0, 255 };
+	Vector2 mousePosition = GetMousePosition();
+
+	float enlargeFactor = 1.1f;
+	int liftAmount = 5;
+
+	auto DrawButton = [&](Rectangle button, const char* text) {
+		Rectangle modifiedButton = button;
+		Color currentColor = buttonColor;
+
+		if (CheckCollisionPointRec(mousePosition, button)) {
+			modifiedButton.width *= enlargeFactor;
+			modifiedButton.height *= enlargeFactor;
+			modifiedButton.x -= (modifiedButton.width - button.width) / 2;
+			modifiedButton.y -= liftAmount;
+			currentColor = hoverColor;
+		}
+
+		DrawRectangleRounded(modifiedButton, 0.3f, 10, currentColor);
+		DrawText(text, modifiedButton.x + (modifiedButton.width - MeasureText(text, 27)) / 2, modifiedButton.y + 20, 27, BLACK);
+
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePosition, button)) {
+			if (text == "PLAY") ScreenMode = View;
+			if (text == "SETTINGS") ScreenMode = Settings;
+			if (text == "ISA") ScreenMode = ISA;
+			if (text == "HELP") ScreenMode = Help;
+		}
+		};
+
+	DrawButton(playButton, "PLAY");
+	DrawButton(settingsButton, "SETTINGS");
+	DrawButton(isaButton, "ISA");
+	DrawButton(helpButton, "HELP");
 }
+
+
+
 
 Rectangle back_button = { windowwidth-210, 10, 200, 50 };
 
