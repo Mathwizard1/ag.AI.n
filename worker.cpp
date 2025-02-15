@@ -78,7 +78,7 @@ void Worker::pathfind(pair<short int,short int> end)
 
 		if (node.x == pos.first && node.y == pos.second)
 		{
-			cout << "NODE FOUND" << endl;
+			//cout << "NODE FOUND" << endl;
 			temp = node;
 			break;
 		}
@@ -161,7 +161,8 @@ void Worker::getCode()
 	labelMap.clear();
 
 	std::vector<std::string> tokens;
-	std::string paired_paran = "";
+	std::vector<int> paranIndex;
+	bool errorFlag = false;
 
 	int codeSize = code.size();
 	for (int i = 0; i < codeSize; i++)
@@ -173,22 +174,57 @@ void Worker::getCode()
 		}
 
 
-		if (!tokens.empty() && tokens[0] == labelIdentifier)
+		if (!tokens.empty())
 		{
-			if (labelMap.find(tokens[1]) == labelMap.end())
+			if (tokens[0] == labelIdentifier)
 			{
-				labelMap[tokens[1]] = i;
-				std::cout << code[i] << "," << i << " token\n";
+				if(labelMap.find(tokens[1]) == labelMap.end())
+				{
+					labelMap[tokens[1]] = i;
+					std::cout << code[i] << "," << i << " token\n";
+				}
+				else
+				{
+					// idle call
+					std::cout << code[i] << " common token\n";
+					return;
+				}
 			}
 			else
 			{
-				// idle call
-				std::cout << code[i] << " common token\n";
-				return;
+				for (const std::string& t : tokens)
+				{
+					if (t == paranFlower.second)
+					{
+						if (! paranIndex.empty())
+						{
+							bracketMaps[paranIndex.back()] = i;
+							paranIndex.pop_back();
+						}
+						else
+						{
+							paranIndex.push_back(i);
+							errorFlag = true;
+							break;
+						}
+					}
+					else if (t == paranFlower.first)
+					{
+						paranIndex.push_back(i);
+					}
+				}
+
+				if (errorFlag) break;
 			}
 		}
 
 		tokens.clear();
+	}
+
+	if (! paranIndex.empty())
+	{
+		std::cout << code[paranIndex.back()] << " non paired brackets in code" << '\n';
+		linecounter = codeSize;
 	}
 }
 
@@ -230,6 +266,13 @@ void Worker::tokenizer(char* instruction, short int instructionSize, std::vector
 				}
 
 				specialString += c;
+
+				//tokens for { }
+				if (specialString == paranFlower.first || specialString == paranFlower.second)
+				{
+					tokensList.push_back(specialString);
+					specialString.clear();
+				}
 			}
 		}
 		// delimiter there
@@ -287,42 +330,53 @@ void Worker::tokenizer(char* instruction, short int instructionSize, std::vector
 	}
 }
 
-int Worker::getExpression(const std::string& var, const std::string& atr)
+int Worker::getExpression(std::string& atr)
 {
 	bool foundValue = false;
 	int foundIndex = -1;
 
-	// check in me
-	if (var == "me")
+	if (atr.empty())
 	{
-		for (int i = 0; i < me.size(); i++)
-		{
-			if (me[i] == atr)
-			{
-				foundValue = true;
-				foundIndex = i;
-				break;
-			}
-		}
+		return -1;
+	}
 
-		if (foundValue)
+	// check in me
+	for (int i = 0; i < me.size(); i++)
+	{
+		if (me[i] == atr)
 		{
-			switch (foundIndex)
-			{
-			case 0:
-				return energy;
-			case 1:
-				return productivity;
-			case 2:
-				return mood;
-			case 3:
-				return health;
-			case 4:
-				return money;
-			default:
-				break;
-			}
+			foundValue = true;
+			foundIndex = i;
+			break;
 		}
+	}
+
+	if (foundValue)
+	{
+		switch (foundIndex)
+		{
+		case 0:
+			return energy;
+		case 1:
+			return productivity;
+		case 2:
+			return mood;
+		case 3:
+			return health;
+		case 4:
+			return money;
+		default:
+			break;
+		}
+	}
+
+	atr[0] = std::toupper(atr[0]);
+	if (foods.find(atr) != foods.end())
+	{
+		auto foodIt = inventory.foodinv.begin();
+		std::advance(foodIt, std::distance(foods.begin(), foods.find(atr)));
+		std::cout << (*foodIt) << " :food iterator\n";
+		return (*foodIt);
 	}
 
 	return -1;
@@ -356,7 +410,6 @@ int Worker::genericProcess(std::string genericVal)
 		if (!attribute.empty())
 		{
 			attribute[0] = std::toupper(attribute[0]);
-
 			if(foods.find(attribute) != foods.end())
 			{
 
@@ -404,7 +457,7 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
-	if (value != "me" && value != "zone" && value != "work")
+	if (value != "me" && value != "zone" && value != "work" && value != "food")
 	{
 		value[0] = std::toupper(value[0]);
 		for (auto& worker : workers[gridnumber])
@@ -417,7 +470,7 @@ int Worker::genericProcess(std::string genericVal)
 				}
 				else
 				{
-					return worker.getExpression("me", attribute);
+					return worker.getExpression(attribute);
 				}
 			}
 		}
@@ -440,7 +493,8 @@ int Worker::genericProcess(std::string genericVal)
 		return -1;
 	}
 
-	return getExpression(value, attribute);
+	std::cout << value << '.' << attribute << '\n';
+	return getExpression(attribute);
 }
 
 int Worker::expressionProcess(int lhs, int rhs, std::string Opr)
@@ -629,8 +683,8 @@ void Worker::callFunction()
 		if (tokens[0] == "moveto")
 		{
 			std::pair<int, int> dir = pos;
-
-			if (tempVal <= -zoneLimit)
+			int wSize = workers[gridnumber].size();
+			if (tempVal <= -zoneLimit && tempVal > -(wSize * zoneLimit + 1))
 			{
 				//cout << tempVal << '\n';
 				tempVal = -(tempVal / zoneLimit + 1);
@@ -666,53 +720,13 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "if")
 		{
-			std::string paired_paran = "{";
-			nonPairedEntity = true;
-
 			tcount = linecounter;
 			//std::cout << "if : " << tempVal << '\n';
-			
+
 			if (tempVal == 0)
 			{
-				linecounter++; // start from next line
-
-				while (linecounter < codeSize)
-				{
-					//std::cout << linecounter << '\n';
-
-					tokens.clear();
-					tokenizer(code[linecounter], linesize[linecounter], tokens);
-
-					for (auto& token : tokens)
-					{
-						if (paired_paran.empty())
-						{
-							return;
-						}
-						else if (token == paranFlower.second)
-						{
-							paired_paran.pop_back();
-						}
-						else if (token == paranFlower.first)
-						{
-							paired_paran += token;
-						}
-					}
-
-					linecounter++;
-				}
-
-				// idle call
-				if (linecounter == codeSize)
-				{
-					std::cout << tcount << " No brackets found matching\n";
-					activity = Idle;
-				}
+				linecounter = bracketMaps[linecounter]; // start from end
 			}
-			//else
-			//{
-			//	linecounter++;;
-			//}
 		}
 		else if (tokens[0] == "work")
 		{
@@ -722,7 +736,8 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "talk")
 		{
-			if (tempVal <= -zoneLimit)
+			int wSize = workers[gridnumber].size();
+			if (tempVal <= -zoneLimit && tempVal > -(wSize * zoneLimit + 1))
 			{
 				tempVal = -(tempVal / zoneLimit + 1);
 
@@ -775,7 +790,7 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "give")
 		{
-			inventory.display_inventory();
+			inventory.display_inventory(this->name);
 			std::cout << tempVal << '\n';
 			if (lastTalkingto != -1)
 			{
@@ -783,7 +798,7 @@ void Worker::callFunction()
 				{
 					activity = Giving;
 					std::cout << this->name << " giving " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit)
+					if (tempVal <= -foodLimit && tempVal > -(foodLimit * foodLimit + 1))
 					{
 						tempVal = -(tempVal / foodLimit + 1);
 						std::cout << "food index " << tempVal << '\n';
@@ -795,13 +810,13 @@ void Worker::callFunction()
 						give(lastTalkingto, 0, 0, tempVal, 1);
 					}
 				}
-				inventory.display_inventory();
+				inventory.display_inventory(this->name);
 			}
 			activitycounter = 1;
 		}
 		else if (tokens[0] == "take")
 		{
-			inventory.display_inventory();
+			inventory.display_inventory(this->name);
 			std::cout << tempVal << '\n';
 			if (lastTalkingto != -1)
 			{
@@ -809,7 +824,7 @@ void Worker::callFunction()
 				{
 					activity = Taking;
 					std::cout << this->name << " taking " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit)
+					if (tempVal <= -foodLimit && tempVal > -(foodLimit * foodLimit + 1))
 					{
 						tempVal = -(tempVal / foodLimit + 1);
 						std::cout << "food index " << tempVal << '\n';
@@ -821,7 +836,7 @@ void Worker::callFunction()
 						take(lastTalkingto, 0, 0, tempVal, 1);
 					}
 				}
-				inventory.display_inventory();
+				inventory.display_inventory(this->name);
 			}
 			activitycounter = 1;
 		}
@@ -846,7 +861,7 @@ void Worker::callFunction()
 			{
 				activitycounter = 2;
 				activity = Buying;
-				if (tempVal <= foodLimit)
+				if (tempVal <= foodLimit && tempVal > -(foodLimit * foodLimit + 1))
 				{
 					std::cout << tempVal;
 					tempVal = -(tempVal / foodLimit + 1);
@@ -855,7 +870,7 @@ void Worker::callFunction()
 
 					buy(it->second, 1);
 				}
-				inventory.display_inventory();
+				inventory.display_inventory(this->name);
 				lunchpositions[occupiedbench].second = false;
 				occupiedbench = -1;
 			}

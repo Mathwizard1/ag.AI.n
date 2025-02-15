@@ -37,7 +37,7 @@ protected:
 
 public:
 	std::unordered_map<std::string, int> labelMap;
-	//std::unordered_set<int, int> bracketMaps;
+	std::unordered_map<short, short> bracketMaps;
 
 	int index;
 	int energy = 50;
@@ -121,8 +121,6 @@ public:
 	void eat();
 	void pathfind(pair<short int, short int> end);
 	vector<pair<short int, short int>> getneighbors(pair<short int, short int> node);
-	bool give(int index, int fid, int fq, int wid, int wq);
-	bool take(int index, int fid, int fq, int wid, int wq);
 	bool give(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	bool take(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	int buy(Food food, int q);
@@ -130,7 +128,7 @@ public:
 	void getCode();
 	void tokenizer(char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
-	int getExpression(const std::string& var, const std::string& atr);
+	int getExpression(std::string& atr);
 
 	int genericProcess(std::string genericVal);
 	int expressionProcess(int lhs, int rhs, std::string Opr);

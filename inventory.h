@@ -55,6 +55,6 @@ public:
     vector<int> get_workers_in_quantity_range(int min_qty, int max_qty);
 
     // Utility Functions
-    void display_inventory();
+    void display_inventory(std::string name);
     void reset_inventory();
 };

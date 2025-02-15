@@ -49,7 +49,8 @@ bool Inventory::work_from_inventory(int id, int q) {
 
 // Utility display-reset
 // Display ka dekh lena , if you want to change the display format
-void Inventory::display_inventory() {
+void Inventory::display_inventory(std::string name) {
+    std::cout << name << '\n';
     std::cout << "Food Inventory:\n";
     for (auto it = foods.begin(); it != foods.end(); ++it) {
         const std::string& name = it->first;
