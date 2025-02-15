@@ -59,10 +59,16 @@ void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orie
         px = wx + ((wallOrientation == orientation::Horizontal) ? 0 : 0);   // needs changes
         py = wy + ((wallOrientation == orientation::Horizontal) ? 0 : 0);
 
+        int entrSize = 1;
+
         short int length = (wallOrientation == orientation::Horizontal) ? width : height;
         while (length)
         {
-            if (wx != px || wy != py)
+            if ((wx <= (px - entrSize) || wx >= (px + entrSize)) && (wallOrientation == orientation::Horizontal))
+            {
+                maze[wx][wy] = -1;
+            }
+            else if ((wy <= (py - entrSize) || wy >= (py + entrSize)) && (wallOrientation == orientation::Vertical))
             {
                 maze[wx][wy] = -1;
             }
