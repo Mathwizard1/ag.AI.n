@@ -25,6 +25,7 @@ extern float minstock;
 extern float maxstock;
 
 extern vector<pair<pair<short int, short int>,bool>> lunchpositions;
+extern std::vector<std::vector<std::pair<short, short>>> gridPaths;
 
 pair<bool, char*> NameGenerator();
 

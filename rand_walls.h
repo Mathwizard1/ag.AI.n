@@ -2,7 +2,7 @@
 #ifndef RAND_WALLS_H
 #define RAND_WALLS_H
 
-#include "gameConst.h"
+#include "gameFunction.h"
 
 class MazeGenerator {
 private:
@@ -11,6 +11,8 @@ private:
         Horizontal,
         Vertical
     };
+
+    std::vector<std::pair<short, short>> gridPath = {};
 
     orientation chooseOrientation(int width, int height);
     short int fullWidth, fullHeight, fraq;

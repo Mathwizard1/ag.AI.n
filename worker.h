@@ -6,6 +6,15 @@
 
 //#include "gameMaster.h"
 
+typedef struct Node {
+	struct Node* parent;
+	double gCost, fCost;
+	short x, y;
+
+	Node(short x = 0, short y = 0, double g = 0, double h = 0, struct Node* parent = nullptr);
+	bool operator<(const Node& other) const;
+}Node;
+
 class Worker
 {
 protected:
@@ -53,22 +62,6 @@ public:
 		Talking
 	}activity=Idle;
 	short int activitycounter = 0;
-
-
-	struct Node {
-		short int x, y;
-		double gCost, hCost;
-		Node* parent;
-		Node(short int x,short int y, double g = 0, double h = 0, Node* p = nullptr)
-			: x(x), y(y), gCost(g), hCost(h), parent(p) {
-		}
-		double fCost() const {
-			return gCost + hCost;
-		}
-		bool operator<(const Node& other) const {
-			return fCost() > other.fCost();
-		}
-	};
 
 	//POSITION AND WORKSPACE
 	pair<short int, short int> pos;
