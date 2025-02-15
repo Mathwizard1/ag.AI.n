@@ -8,30 +8,6 @@ std::vector<Worker> receptionists;
 
 std::vector<std::pair<short, short>> directions = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, 1}, {-1, -1}, {1, -1}, {1, 1} };
 
-/////////////////////////////////////////////////////////////////
-
-Node::Node(short x, short y, double g, double h, struct Node* parent)
-{	
-	this->x = x;
-	this->y = y;
-
-	this->parent = parent;
-
-	this->gCost = g;
-	this->fCost = g + h;
-}
-
-bool Node::operator<(const Node& other) const
-{
-	if (fCost == other.fCost)
-	{
-		return gCost > other.gCost;
-	}
-
-	return fCost > other.fCost;
-}
-
-/////////////////////////////////////////////////////////////////
 
 Worker::Worker(short int x, short int y) {
 	this->gridnumber = chosengrid;
