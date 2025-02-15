@@ -1361,7 +1361,7 @@ void DrawHireTab()
 						workers[chosengrid].push_back(Worker(screenbuffer, gridheight / 2));
 						workers[chosengrid].back().grid = &grid;
 						workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
-						workers[chosengrid][workers[chosengrid].size() - 1].pathfind({x +screenbuffer ,y+screenbuffer});
+						workers[chosengrid].back().pathfind({x +screenbuffer ,y+screenbuffer});
 					}
 				}
 			}

@@ -6,14 +6,17 @@
 
 //#include "gameMaster.h"
 
-typedef struct Node {
-	struct Node* parent;
-	double gCost, fCost;
-	short x, y;
-
-	Node(short x = 0, short y = 0, double g = 0, double h = 0, struct Node* parent = nullptr);
-	bool operator<(const Node& other) const;
-}Node;
+struct Node {
+	short int x, y;
+	float fcost;
+	vector<pair<short int, short int>> path;
+};
+struct NodeComparison {
+	bool operator()(Node const& node1, Node const& node2)
+	{
+		return (node1.fcost > node2.fcost);
+	}
+};
 
 class Worker
 {
@@ -67,6 +70,7 @@ public:
 	}activity=Idle;
 	short int activitycounter = 0;
 
+
 	//POSITION AND WORKSPACE
 	pair<short int, short int> pos;
 	pair<short int, short int> workspace;
@@ -116,6 +120,9 @@ public:
 	//Functions
 	void eat();
 	void pathfind(pair<short int, short int> end);
+	vector<pair<short int, short int>> getneighbors(pair<short int, short int> node);
+	bool give(int index, int fid, int fq, int wid, int wq);
+	bool take(int index, int fid, int fq, int wid, int wq);
 	bool give(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	bool take(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	int buy(Food food, int q);
