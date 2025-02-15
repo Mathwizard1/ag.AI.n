@@ -1008,7 +1008,7 @@ void DrawMiscTab()
 						//Spawn Worker
 						if (chosenworkertype == 1)
 						{
-							workers[chosengrid].push_back(Worker(screenbuffer, gridheight / 2));
+							workers[chosengrid].push_back(Worker(screenbuffer + 10, gridheight / 2));
 							workers[chosengrid].back().grid = &grid;
 							workers[chosengrid].back().workspace = { x + screenbuffer,y + screenbuffer };
 							workers[chosengrid].back().pathfind({x + screenbuffer,y + screenbuffer});

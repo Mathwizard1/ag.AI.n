@@ -1,5 +1,7 @@
 #include "rand_walls.h"
 
+std::vector<std::vector<std::pair<short, short>>> gridPaths;
+
 MazeGenerator::orientation MazeGenerator::chooseOrientation(int width, int height)
 {
     if (width < height)
@@ -31,6 +33,7 @@ void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orie
     if (depth == 0)
     {
         maze.clear();
+        gridPath.clear();
         maze.resize(width, std::vector<short int>(height, 0));
     }
     else
@@ -72,6 +75,10 @@ void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orie
             {
                 maze[wx][wy] = -1;
             }
+            else
+            {
+                maze[wx][wy] = 1;
+            }
             wx += dx;
             wy += dy;
             length--;
@@ -90,6 +97,11 @@ void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orie
         w = (wallOrientation == orientation::Horizontal) ? width : x + width - wx - 1;
         h = (wallOrientation == orientation::Horizontal) ? y + height - wy - 1 : height;
         generateMaze(maze, chooseOrientation(w, h), maxDepth, w, h, nx, ny, depth + 1);
+    }
+    else
+    {
+        gridPaths.push_back(gridPath);
+        return;
     }
 }
 
