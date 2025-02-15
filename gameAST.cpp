@@ -22,9 +22,9 @@ std::unordered_map<std::string, gameGrammar> gameLanguage = {
     {"moveto", gameGrammar(gameLexers::generic)},
     {"eat", gameGrammar()},
     {"buy", gameGrammar(gameLexers::generic)},
-    {"give", gameGrammar(gameLexers::generic)},
-    {"take", gameGrammar(gameLexers::generic)},
-    {"talk", gameGrammar(gameLexers::generic)},
+    {"give", gameGrammar(gameLexers::generic, false, false)},
+    {"take", gameGrammar(gameLexers::generic, false, false)},
+    {"talk", gameGrammar(gameLexers::generic, false, false)},
 };
 
 

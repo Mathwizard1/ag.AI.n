@@ -280,50 +280,6 @@ int Worker::getExpression(const std::string& var, const std::string& atr)
 			}
 		}
 	}
-	else if (var == "work")
-	{
-		// check in work
-		for (int i = 0; i < workProp.size(); i++)
-		{
-			if (workProp[i] == atr)
-			{
-				foundValue = true;
-				foundIndex = i;
-				break;
-			}
-		}
-
-		if (foundValue)
-		{
-			switch (foundIndex)
-			{
-			case 0:
-				return work[0];
-			case 1:
-				return work[1];
-			default:
-				break;
-			}
-		}
-	}
-	else if (var == "zone")
-	{
-		// check in zone
-		for (int i = 0; i < zone.size(); i++)
-		{
-			if (zone[i] == atr)
-			{
-				foundValue = true;
-				foundIndex = i;
-				break;
-			}
-		}
-
-		if (foundValue)
-		{
-			return foundIndex;
-		}
-	}
 
 	return -1;
 }
@@ -351,14 +307,62 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
-	if (value == "inventory")
+	if (value == "food")
 	{
+		if (!attribute.empty())
+		{
+			attribute[0] = std::toupper(attribute[0]);
 
+			if(foods.find(attribute) != foods.end())
+			{
+
+				int i = std::distance(foods.begin(), foods.find(attribute));
+				return -(i + 1) * foodLimit;
+			}
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
-	if (value != "me" && value != "work" && value != "zone")
+	if (value == "work")
 	{
-		value[0] = toupper(value[0]);
+		if (attribute.empty())
+		{
+			if (lastTalkingto != -1)
+			{
+				return worker_types[workers[gridnumber][lastTalkingto].jobType];
+			}
+		}
+		else
+		{
+			if (attribute == "number")
+			{
+				return workVals.first;
+			}
+			else if (attribute == "pending")
+			{
+				return workVals.second;
+			}
+		}
+	}
+
+	if (value == "zone")
+	{
+		// check in zone
+		for (int i = 0; i < zone.size(); i++)
+		{
+			if (attribute == zone[i])
+			{
+				return i;
+			}
+		}
+	}
+
+	if (value != "me" && value != "zone" && value != "work")
+	{
+		value[0] = std::toupper(value[0]);
 		for (auto& worker : workers[gridnumber])
 		{
 			if (worker.name == value)
@@ -567,7 +571,7 @@ void Worker::callFunction()
 			if (tempVal == -1)
 			{
 				// idle call
-				std::cout << code[linecounter] << " error in expression\n";
+				std::cout << code[linecounter] << " :error in expression\n";
 				linecounter++;
 				return;
 			}
@@ -582,7 +586,7 @@ void Worker::callFunction()
 		{
 			std::pair<int, int> dir = pos;
 
-			if (tempVal < 0)
+			if (tempVal <= -zoneLimit)
 			{
 				//cout << tempVal << '\n';
 				tempVal = -(tempVal / zoneLimit + 1);
@@ -592,8 +596,7 @@ void Worker::callFunction()
 			{
 				switch (tempVal)
 				{
-				case 0:
-					dir = { 20, 20 };
+				case 1:
 					break;
 				default:
 					break;
@@ -659,12 +662,13 @@ void Worker::callFunction()
 				if (linecounter == codeSize)
 				{
 					std::cout << tcount << " No brackets found matching\n";
+					activity = Idle;
 				}
 			}
-			else
-			{
-				linecounter++;;
-			}
+			//else
+			//{
+			//	linecounter++;;
+			//}
 		}
 		else if (tokens[0] == "work")
 		{
@@ -674,7 +678,7 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "talk")
 		{
-			if (tempVal < 0)
+			if (tempVal <= -zoneLimit)
 			{
 				tempVal = -(tempVal / zoneLimit + 1);
 
@@ -691,7 +695,7 @@ void Worker::callFunction()
 					workers[gridnumber][tempVal].activitycounter = path.size()+ talkingtime;
 					activitycounter = path.size() + talkingtime;
 				}
-				
+				lastTalkingto = tempVal;
 
 				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal].pos.first, workers[gridnumber][tempVal].pos.second) <= sqrt(2))
 				{
@@ -727,17 +731,106 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "give")
 		{
-			std::cout << "give" << '\n';
+			inventory.display_inventory();
+			std::cout << tempVal << '\n';
+			if (lastTalkingto != -1)
+			{
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
+				{
+					activity = Giving;
+					std::cout << this->name << " giving " << workers[gridnumber][lastTalkingto].name << '\n';
+					if (tempVal <= -foodLimit)
+					{
+						tempVal = -(tempVal / foodLimit + 1);
+						std::cout << "food index " << tempVal << '\n';
+						give(lastTalkingto, tempVal, 1);
+					}
+					else if(tempVal < worker_types.size())
+					{
+						std::cout << "work type " << tempVal << '\n';
+						give(lastTalkingto, 0, 0, tempVal, 1);
+					}
+				}
+				inventory.display_inventory();
+			}
+			activitycounter = 1;
 		}
 		else if (tokens[0] == "take")
 		{
-			std::cout << "take" << '\n';
+			inventory.display_inventory();
+			std::cout << tempVal << '\n';
+			if (lastTalkingto != -1)
+			{
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
+				{
+					activity = Taking;
+					std::cout << this->name << " taking " << workers[gridnumber][lastTalkingto].name << '\n';
+					if (tempVal <= -foodLimit)
+					{
+						tempVal = -(tempVal / foodLimit + 1);
+						std::cout << "food index " << tempVal << '\n';
+						take(lastTalkingto, tempVal, 1);
+					}
+					else if (tempVal < worker_types.size())
+					{
+						std::cout << "work type " << tempVal << '\n';
+						take(lastTalkingto, 0, 0, tempVal, 1);
+					}
+				}
+				inventory.display_inventory();
+			}
+			activitycounter = 1;
+		}
+		else if (tokens[0] == "buy")
+		{
+			if (occupiedbench == -1)
+			{
+				for (int i = 0; i < lunchpositions.size(); i++)
+				{
+					if (lunchpositions[i].second == false)
+					{
+						lunchpositions[i].second = true;
+						pathfind(lunchpositions[i].first);
+						activitycounter = path.size();
+						occupiedbench = i;
+						activity = Moving;
+						break;
+					}
+				}
+			}
+			else
+			{
+				activitycounter = 2;
+				activity = Buying;
+				if (tempVal <= foodLimit)
+				{
+					std::cout << tempVal;
+					tempVal = -(tempVal / foodLimit + 1);
+					auto it = foods.begin();
+					std::advance(it, tempVal);
+
+					buy(it->second, 1);
+				}
+				inventory.display_inventory();
+				lunchpositions[occupiedbench].second = false;
+				occupiedbench = -1;
+			}
+
+			if (lag == -1)
+			{
+				lag = 2;
+			}
 		}
 		else if (tokens[0] == "jump")
 		{
 			std::cout << "jump" << '\n';
 			linecounter = tempVal;
 			return;
+		}
+
+		if (actionCheck)
+		{
+			lastTalkingto = -1;
 		}
 
 		// For repeated call functions
@@ -751,14 +844,22 @@ void Worker::callFunction()
 			lag = -1;
 		}
 
-		//linecounter++;
+		linecounter++;
 	}
 	//linecounter = 0;
 }
 
 void Worker::incSkills(int amt)
 {
-	std::cout << amt << "virtual function\n";
+	if (skills + amt >= 100) {
+		int reqd = 100 - skills;
+		skills = 100;
+		money -= 2 * reqd;
+		return;
+	}
+
+	skills += amt;
+	money -= 2 * amt;
 }
 
 void Worker::updateObedience()

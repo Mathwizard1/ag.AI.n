@@ -6,11 +6,15 @@ std::unordered_map<std::string, Food> foods = {
     {"Coffee", Food(60, 0.6, 50, 2)}
 };
 
+int foodLimit = foods.size();
+
 std::unordered_map<std::string, int> worker_types = {
-    {"Boss", 0},
-    {"Software_Engineer", 1},
-    {"Hardware_Engineer", 2},
-    {"Worker", 3}
+    {"Worker", 0},
+    {"Boss", 1},
+    {"Software_Engineer", 2},
+    {"Hardware_Engineer", 3},
+    {"Network_Engineer", 4},
+    {"Receptionist", 5},
 };
 
 // Food into-from

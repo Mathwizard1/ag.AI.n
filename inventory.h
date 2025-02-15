@@ -4,6 +4,7 @@
 
 extern std::unordered_map<string, Food> foods;
 extern std::unordered_map<string, int> worker_types;
+extern int foodLimit;
 
 class Inventory {
 public:

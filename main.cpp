@@ -108,6 +108,12 @@ const char* GetEnumEquivalent(Worker::activitytype act)
 		return "Idle";
 	case Worker::Talking:
 		return "Talking";
+	case Worker::Taking:
+		return "Taking";
+	case Worker::Giving:
+		return "Giving";
+	case Worker::Buying:
+		return "Buying";
 	default:
 		return "No Expression Found";
 	}
@@ -171,19 +177,20 @@ void WorkerCodeUpdate()
 						workers[i][j].energy += 60;
 						workers[i][j].productivity += 10;
 						lunchpositions[workers[i][j].occupiedbench].second =false ;
+						workers[i][j].occupiedbench = -1;
 						break;
 					case Worker::Moving:
 						break;
 					}
 
 					workers[i][j].activity = Worker::Idle;
-					workers[i][j].linecounter++;
+					//workers[i][j].linecounter++;
 				}
 
 			}
 			else
 			{
-				//Interpret Line
+				//Interpret Next Command
 				workers[i][j].callFunction();
 			}
 		}

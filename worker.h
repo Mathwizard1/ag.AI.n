@@ -34,7 +34,7 @@ protected:
 
 public:
 	std::unordered_map<std::string, int> labelMap;
-	//std::unordered_set<std::pair<int, int>> bracketMaps;
+	//std::unordered_set<int, int> bracketMaps;
 
 	int index;
 	int energy = 50;
@@ -42,6 +42,7 @@ public:
 	int mood = 80;
 	int health = 100;
 	int money = 100;
+	string jobType = "Worker";
 
 	Inventory inventory;
 
@@ -59,7 +60,10 @@ public:
 		Working,
 		Eating,
 		Moving,
-		Talking
+		Talking,
+		Taking,
+		Giving,
+		Buying,
 	}activity=Idle;
 	short int activitycounter = 0;
 
@@ -78,7 +82,7 @@ public:
 	vector<pair<short int, short int>> path;
 	vector<vector<short int>>* grid = nullptr;
 
-	int work[2] = {10, 0};
+	pair<int, int>workVals = {10, 10};
 
 	std::vector<std::string> me = {
 		"energy",
@@ -86,11 +90,6 @@ public:
 		"mood",
 		"health",
 		"money"
-	};
-
-	std::vector<std::string> workProp = {
-		"number",
-		"pending",
 	};
 
 	std::vector<std::string> zone = {
@@ -104,6 +103,7 @@ public:
 	bool gender;
 
 	int gridnumber;
+	int lastTalkingto = -1;
 
 	// Spec attr.
 	int skills = 50;
@@ -116,8 +116,8 @@ public:
 	//Functions
 	void eat();
 	void pathfind(pair<short int, short int> end);
-	bool give(int index, int fid, int fq, int wid, int wq);
-	bool take(int index, int fid, int fq, int wid, int wq);
+	bool give(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
+	bool take(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	int buy(Food food, int q);
 
 	void getCode();
@@ -133,7 +133,7 @@ public:
 
 	// Spec functions
 	virtual void incSkills(int amt);
-	virtual void updateObedience() ;
+	virtual void updateObedience();
 };
 
 extern std::vector<std::vector<Worker>> workers;
