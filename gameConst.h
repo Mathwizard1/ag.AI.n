@@ -50,6 +50,7 @@ constexpr int updatetime = 5;
 //Bank
 constexpr int fullreturn = 60;
 constexpr int forwarddeposittime = 20;
-constexpr int loaninteresttime = 120;
+constexpr int forwarddepositmaxterm = 200;
 constexpr int maxforwarddeposits = 5;
+constexpr int loaninteresttime = 120;
 constexpr int bankbuttonheight = 50;

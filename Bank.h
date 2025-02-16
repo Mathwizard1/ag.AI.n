@@ -46,6 +46,7 @@ public:
     int credit_score = 500;
 
     vector<float >forward_deposit_amount;
-    vector<int> forward_deposit_term;
+    vector<float> forward_deposit_term;
+    vector<float> forward_deposit_totalterm;
     vector<float >forward_deposit_rate;
 };
