@@ -405,12 +405,14 @@ int Worker::genericProcess(std::string genericVal)
 		}
 	}
 
+	//std::cout << value << '.' << attribute << '\n';
+
 	if (value == "food")
 	{
 		if (!attribute.empty())
 		{
 			attribute[0] = std::toupper(attribute[0]);
-			if(foods.find(attribute) != foods.end())
+			if (foods.find(attribute) != foods.end())
 			{
 
 				int i = std::distance(foods.begin(), foods.find(attribute));
@@ -459,6 +461,67 @@ int Worker::genericProcess(std::string genericVal)
 
 	if (value != "me" && value != "zone" && value != "work" && value != "food")
 	{
+		if (value == "worker")
+		{
+
+			if (!attribute.empty())
+			{
+				int workerIndex = 0;
+				float workerDist = 0;
+
+				if (attribute == "recent")
+				{
+					if (lastTalkingto != -1)
+					{
+						return -(lastTalkingto + 1) * zoneLimit;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+				else if (attribute == "near")
+				{
+					float minDist = 10.0 * (grid->size());
+					for (int w = 0, len = workers[gridnumber].size(); w < len; w++)
+					{
+						workerDist = heuristic(this->pos.first, this->pos.second, workers[gridnumber][w].pos.first, workers[gridnumber][w].pos.second);
+						//std::cout << w << ":dist = " << workerDist << '\n';
+						if (workerDist != 0 && workerDist < minDist)
+						{
+							minDist = workerDist;
+							workerIndex = w;
+						}
+					}
+
+					lastTalkingto = workerIndex;
+					return -(workerIndex + 1) * zoneLimit;
+				}
+				else if (attribute == "far")
+				{
+					float maxDist = -10.0 * (grid->size());
+					for (int w = 0, len = workers[gridnumber].size(); w < len; w++)
+					{
+						workerDist = heuristic(this->pos.first, this->pos.second, workers[gridnumber][w].pos.first, workers[gridnumber][w].pos.second);
+						//std::cout << w << ":dist = " << workerDist << '\n';
+						if (workerDist > maxDist)
+						{
+							maxDist = workerDist;
+							workerIndex = w;
+						}
+					}
+
+					lastTalkingto = workerIndex;
+					return -(workerIndex + 1) * zoneLimit;
+				}
+			}
+			else
+			{
+				return -1;
+			}
+		}
+
+
 		value[0] = std::toupper(value[0]);
 		for (auto& worker : workers[gridnumber])
 		{
@@ -493,7 +556,6 @@ int Worker::genericProcess(std::string genericVal)
 		return -1;
 	}
 
-	std::cout << value << '.' << attribute << '\n';
 	return getExpression(attribute);
 }
 
@@ -684,7 +746,7 @@ void Worker::callFunction()
 		{
 			std::pair<int, int> dir = pos;
 			int wSize = workers[gridnumber].size();
-			if (tempVal <= -zoneLimit && tempVal > -(wSize * zoneLimit + 1))
+			if (tempVal <= -zoneLimit && tempVal >= -(wSize + 1) * zoneLimit)
 			{
 				//cout << tempVal << '\n';
 				tempVal = -(tempVal / zoneLimit + 1);
@@ -720,8 +782,8 @@ void Worker::callFunction()
 		}
 		else if (tokens[0] == "if")
 		{
-			tcount = linecounter;
-			//std::cout << "if : " << tempVal << '\n';
+			//tcount = linecounter;
+			std::cout << "if : " << tempVal << '\n';
 
 			if (tempVal == 0)
 			{
@@ -737,7 +799,7 @@ void Worker::callFunction()
 		else if (tokens[0] == "talk")
 		{
 			int wSize = workers[gridnumber].size();
-			if (tempVal <= -zoneLimit && tempVal > -(wSize * zoneLimit + 1))
+			if (tempVal <= -zoneLimit && tempVal >= -(wSize + 1) * zoneLimit)
 			{
 				tempVal = -(tempVal / zoneLimit + 1);
 
@@ -798,7 +860,7 @@ void Worker::callFunction()
 				{
 					activity = Giving;
 					std::cout << this->name << " giving " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit && tempVal > -(foodLimit * foodLimit + 1))
+					if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
 					{
 						tempVal = -(tempVal / foodLimit + 1);
 						std::cout << "food index " << tempVal << '\n';
@@ -824,7 +886,7 @@ void Worker::callFunction()
 				{
 					activity = Taking;
 					std::cout << this->name << " taking " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit && tempVal > -(foodLimit * foodLimit + 1))
+					if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
 					{
 						tempVal = -(tempVal / foodLimit + 1);
 						std::cout << "food index " << tempVal << '\n';
@@ -861,7 +923,7 @@ void Worker::callFunction()
 			{
 				activitycounter = 2;
 				activity = Buying;
-				if (tempVal <= foodLimit && tempVal > -(foodLimit * foodLimit + 1))
+				if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
 				{
 					std::cout << tempVal;
 					tempVal = -(tempVal / foodLimit + 1);

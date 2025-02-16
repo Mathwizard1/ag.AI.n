@@ -16,11 +16,12 @@ MazeGenerator::orientation MazeGenerator::chooseOrientation(int width, int heigh
     return ((rand() % 2) ? orientation::Vertical : orientation::Horizontal);
 }
 
-MazeGenerator::MazeGenerator(short int fullWidth, short int fullHeight, short int fraq)
+MazeGenerator::MazeGenerator(short int fullWidth, short int fullHeight, short int fraq, short entrSize)
 {
     this->fullWidth = fullWidth;
     this->fullHeight = fullHeight;
     this->fraq = fraq;
+    this->entrSize = entrSize;
 }
 
 MazeGenerator::orientation MazeGenerator::randOrient()
@@ -44,25 +45,26 @@ void MazeGenerator::generateMaze(std::vector<std::vector<short int>> &maze, orie
     if (depth < maxDepth)
     {
         short int wx, wy, nx, ny, w, h;
-        short int dx, dy, rx, ry;
+        short int dx, dy, r;
 
         // the line filler
         dx = (wallOrientation == orientation::Horizontal) ? 1 : 0;
         dy = (wallOrientation == orientation::Horizontal) ? 0 : 1;
 
         // draw walls at wx,wy
-        rx = (width - 1) / 2 + (1 + -2 * (rand() % 2)) * ( rand() % ((width - 1) / 4 + 1));
-        ry = (height - 1) / 2 + (1 + -2 * (rand() % 2)) * ( rand() % ((height - 1) / 4 + 1));
+        r = (width - 1) / 2 + (1 + -2 * (rand() % 2)) * ( rand() % ((width - 1) / 4 + 1));
 
-        wx = x + ((wallOrientation == orientation::Horizontal) ? 0 : rx);
-        wy = y + ((wallOrientation == orientation::Horizontal) ? ry : 0);
+        wx = x + ((wallOrientation == orientation::Horizontal) ? 0 : r);
+        wy = y + ((wallOrientation == orientation::Horizontal) ? r : 0);
 
         // where will the passage through the wall
-        short int px, py;
-        px = wx + ((wallOrientation == orientation::Horizontal) ? 0 : 0);   // needs changes
-        py = wy + ((wallOrientation == orientation::Horizontal) ? 0 : 0);
+        short int px, py, entrSize;
 
-        int entrSize = 1;
+        //if(this->entrSize < width && )
+
+        px = wx + ((wallOrientation == orientation::Horizontal) ? 2 : 0);   // needs changes
+        py = wy + ((wallOrientation == orientation::Horizontal) ? 0 : 2);
+        entrSize = 2;
 
         short int length = (wallOrientation == orientation::Horizontal) ? width : height;
         while (length)
