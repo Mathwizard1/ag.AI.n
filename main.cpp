@@ -89,6 +89,7 @@ Colors:
 4->Boss (Red)
 5->Chef (Light Yellow)
 6->Boss (Maroon)
+7->Receptionist (Dark Blue)
 
 -1->Boundary
 -2->Workspace
@@ -685,7 +686,7 @@ void DrawMainScreen()
 					for (int m = 0; m < grid[0].size()-1 ; m += grid[0].size() / mapdims)
 					{
 						//UPDATE
-						vector<int> numarray(9);
+						vector<int> numarray(10);
 
 						for (int q = 0; q < grid.size() / mapdims; q++)
 						{
@@ -701,7 +702,7 @@ void DrawMainScreen()
 							min = 1;
 						else
 						{
-							for (int q = 0; q < 9; q++)
+							for (int q = 0; q < 10; q++)
 							{
 								if (numarray[q] > numarray[min])
 									min = q;
