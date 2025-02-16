@@ -6,11 +6,15 @@ std::unordered_map<std::string, Food> foods = {
     {"Coffee", Food(60, 0.6, 50, 2)}
 };
 
+int foodLimit = foods.size();
+
 std::unordered_map<std::string, int> worker_types = {
-    {"Boss", 0},
-    {"Software_Engineer", 1},
-    {"Hardware_Engineer", 2},
-    {"Worker", 3}
+    {"Worker", 0},
+    {"Boss", 1},
+    {"Software_Engineer", 2},
+    {"Hardware_Engineer", 3},
+    {"Network_Engineer", 4},
+    {"Receptionist", 5},
 };
 
 // Food into-from
@@ -45,7 +49,8 @@ bool Inventory::work_from_inventory(int id, int q) {
 
 // Utility display-reset
 // Display ka dekh lena , if you want to change the display format
-void Inventory::display_inventory() {
+void Inventory::display_inventory(std::string name) {
+    std::cout << name << '\n';
     std::cout << "Food Inventory:\n";
     for (auto it = foods.begin(); it != foods.end(); ++it) {
         const std::string& name = it->first;
