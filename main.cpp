@@ -89,6 +89,7 @@ Colors:
 4->Boss (Red)
 5->Chef (Light Yellow)
 6->Boss (Maroon)
+7->Receptionist (Dark Blue)
 
 -1->Boundary
 -2->Workspace
@@ -119,6 +120,11 @@ const char* GetEnumEquivalent(Worker::activitytype act)
 	}
 }
 
+vector<float> GetFDStats(float input)
+{
+	return { 4+4*(input/quota),(input / quota) * forwarddepositmaxterm};
+}
+
 void BankUpdate()
 {
 	//Interest
@@ -130,9 +136,9 @@ void BankUpdate()
 	//Forward Deposits
 	for (int x = 0; x < bank.forward_deposit_amount.size(); x++)
 	{
-		if (--bank.forward_deposit_term[x] <= 0)
+		if (bank.forward_deposit_term[x] > 0)
 		{
-			totalmoney += bank.mature_forward_deposits(x);
+			bank.forward_deposit_term[x]--;
 		}
 	}
 
@@ -680,7 +686,7 @@ void DrawMainScreen()
 					for (int m = 0; m < grid[0].size()-1 ; m += grid[0].size() / mapdims)
 					{
 						//UPDATE
-						vector<int> numarray(9);
+						vector<int> numarray(10);
 
 						for (int q = 0; q < grid.size() / mapdims; q++)
 						{
@@ -696,7 +702,7 @@ void DrawMainScreen()
 							min = 1;
 						else
 						{
-							for (int q = 0; q < 9; q++)
+							for (int q = 0; q < 10; q++)
 							{
 								if (numarray[q] > numarray[min])
 									min = q;
@@ -1420,6 +1426,76 @@ void DrawInvestTab()
 	}
 }
 
+void DrawFDTab()
+{
+	static int forwarddepositnum = 0;
+	static float inputamount = 0;
+	static float rate = 0;
+	static float term = 20;
+
+
+	//BOUNDARY
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), { 0,100,50,255 });
+	DrawRectangleLinesEx({ windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight) }, areashopboundarywidth, { 220,220,220,220 });
+
+
+	//Deposit Amount
+	DrawRectangle(windowwidth - sidebarwidth+areashopboundarywidth, windowheight * 0.77, sidebarwidth-2*areashopboundarywidth, windowheight * 0.23, { 0,80,50,255 });
+	DrawTextEx(codingfontbold, "Deposit:", { windowwidth - sidebarwidth * 0.65f ,windowheight * 0.81 }, 25, 1, WHITE);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", inputamount), { windowwidth - sidebarwidth * 0.43f ,windowheight * 0.81 }, 25, 1, GREEN);
+	DrawTextEx(codingfont, TextFormat("Rate:%0.f%%",rate), { windowwidth - sidebarwidth * 0.78f ,windowheight * 0.9 }, 22, 1, YELLOW);
+	DrawTextEx(codingfont, TextFormat("Term:%0.f ticks", term), { windowwidth - sidebarwidth * 0.45f ,windowheight * 0.9 }, 22, 1, YELLOW);
+	GuiSlider({ windowwidth - sidebarwidth * 0.8f ,windowheight * 0.85,sidebarwidth * 0.6f,30 }, "0", TextFormat("%0.f", totalmoney), &inputamount, 0, totalmoney);
+
+	vector<float> fdstats = GetFDStats(inputamount);
+	rate = fdstats[0];
+	term = fdstats[1];
+
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - bankbuttonheight,sidebarwidth,bankbuttonheight }, "Deposit"))
+	{
+		if (forwarddepositnum < maxforwarddeposits&&inputamount>0)
+		{
+			bank.add_forward_deposit(inputamount, term, rate);
+			forwarddepositnum++;
+			totalmoney -= inputamount;
+			inputamount = 0;
+		}
+	}
+
+	//Draw Deposits
+	for (int x = 0; x < forwarddepositnum; x++)
+	{
+		//Block
+		float blockheight = 10+shopbuttonheight + bankbuttonheight + x*(windowheight * 0.77 - shopbuttonheight - bankbuttonheight)/ (float)maxforwarddeposits;
+		Rectangle block = { windowwidth - sidebarwidth + areashopboundarywidth,blockheight,sidebarwidth - 2 * areashopboundarywidth,(windowheight * 0.77 - shopbuttonheight - bankbuttonheight) / (float)maxforwarddeposits };
+		DrawRectangleRec(block, {140,140,140,255});
+		DrawRectangle(block.x, block.y, block.width * 0.1f, block.height, {120,120,120,255});
+		DrawRectangleLinesEx(block, 5, {100,100,100,100});
+		DrawTextEx(codingfontbold, TextFormat("%d", x+1), { block.x + block.width * 0.03f ,block.y + block.height * 0.43f }, 20, 0, { 140,140,140,255 });
+
+		//Draw Text
+		if(bank.forward_deposit_term[x]>0)
+			DrawTextEx(codingfontbold, "MATURING", { block.x + block.width * 0.13f,block.y + block.height * 0.43f }, 25, 3, GOLD);
+		else
+			DrawTextEx(codingfontbold, "MATURED", { block.x + block.width * 0.13f,block.y + block.height * 0.43f }, 25, 3, GREEN);
+
+		//Draw Progress Bar
+		float val = bank.forward_deposit_totalterm[x] - bank.forward_deposit_term[x];
+		DrawTextEx(codingfontbold, TextFormat("$%0.f", bank.forward_deposit_amount[x]*(1+0.01*bank.forward_deposit_rate[x])), {block.x + block.width * 0.65f ,block.y + block.height * 0.4f}, 26, 1, GOLD);
+		//GuiProgressBar({ block.x + block.width * 0.5f,block.y + block.height * 0.45f,block.width * 0.25f,block.height * 0.1f }, "0", TextFormat("%0.f", bank.forward_deposit_totalterm[x]), &val, 0, bank.forward_deposit_totalterm[x]);
+		GuiProgressBar({ block.x + block.width * 0.1f,block.y + block.height * 0.9f,block.width * 0.8f,block.height * 0.1f }, "", "", &val, 0, bank.forward_deposit_totalterm[x]);
+
+		if (GuiButton({ block.x + block.width * 0.9f,block.y,block.width * 0.9f,block.height }, "")&& bank.forward_deposit_term[x]<=0.2)
+		{
+			totalmoney+=bank.mature_forward_deposits(x);
+			forwarddepositnum--;
+			break;
+		}
+		GuiDrawIcon(ICON_ARROW_DOWN_FILL, block.x + block.width * 0.935f, block.y+block.height*0.4, 2, WHITE);
+	}
+
+}
+
 void DrawBankTab()
 {
 	if (GuiButton({ windowwidth - sidebarwidth ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "Invest"))
@@ -1435,6 +1511,7 @@ void DrawBankTab()
 		DrawInvestTab();
 		break;
 	case FD:
+		DrawFDTab();
 		break;
 	case Loan:
 		break;
@@ -1523,8 +1600,8 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	ScreenMode = Map; //DEBUG
-	BankState = Invest;
+	ScreenMode = View; //DEBUG
+	BankState = FD;
 	SidebarState = Money;
 
 	//Add Competitors

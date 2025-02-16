@@ -22,16 +22,18 @@ void Bank::update_investment() {
 void Bank::add_forward_deposit(float amount, int term,float rate) {
     forward_deposit_amount.push_back(amount);
     forward_deposit_term.push_back(term);
+    forward_deposit_totalterm.push_back(term);
     forward_deposit_rate.push_back(rate);
     transaction_history.push_back("Forward Deposit: +" + to_string(amount) + " for " + to_string(term) + " months at " + to_string(rate) + "%");
 }
 
 float Bank::mature_forward_deposits(int i) 
 {
-    float matured_amount = forward_deposit_amount[i] * (1 + forward_deposit_rate[i] );
+    float matured_amount = forward_deposit_amount[i] * (1 + 0.01*forward_deposit_rate[i] );
     transaction_history.push_back("Forward Deposit Matured: +" + to_string(matured_amount));
     forward_deposit_amount.erase(forward_deposit_amount.begin()+i);
     forward_deposit_term.erase(forward_deposit_term.begin() + i);
+    forward_deposit_totalterm.erase(forward_deposit_totalterm.begin() + i);
     forward_deposit_rate.erase(forward_deposit_rate.begin() + i);
     return matured_amount;
 }
