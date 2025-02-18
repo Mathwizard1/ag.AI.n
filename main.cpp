@@ -890,11 +890,55 @@ void DrawCodeTab()
 	}
 
 	//DRAWING SAVE BUTTON
-	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth,textsavebuttonheight }, "SAVE"))
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth / 5,textsavebuttonheight }, "SAVE"))
 	{
 		workers[chosengrid][chosenperson].code = textboxes;
 		workers[chosengrid][chosenperson].linesize = textsizes;
 		workers[chosengrid][chosenperson].getCode();
+	}
+	//DRAWING TEMPLATE BUTTON
+	else if (GuiButton({ windowwidth - sidebarwidth * 2 / 5,windowheight - textinputheight - textsavebuttonheight,sidebarwidth * 2 / 5,textsavebuttonheight }, "TEMPLATE"))
+	{
+		// Clean up the textboxes // NEEDS SERIOUS CHECK AND REWORK
+		chosenblock = 0;
+		textsizes.clear();
+		textboxes.clear();
+
+		// hard coded system for now
+		std::cout << "template button\n";
+		std::ifstream tempFile(templateFolder + "/template.txt");
+
+		if (tempFile.is_open()) {
+			std::string tempLine;
+			while (std::getline(tempFile, tempLine)) {
+				int lineSize = tempLine.size() + 1; // include the '\0'
+
+				lineSize = (lineSize < textinputsize) ? lineSize : textinputsize;
+
+				char* lineBuffer = new char[lineSize];  // Dynamically allocate memory
+				std::memcpy(lineBuffer, tempLine.c_str(), lineSize);  // Copy line to char* buffer
+
+				textboxes.push_back(lineBuffer);  // Store in vector
+				textsizes.push_back(lineSize);
+			}
+			tempFile.close();  // Close the file
+		}
+	}
+	//DRAWING SAVE TEMPLATE BUTTON
+	else if (GuiButton({ windowwidth - sidebarwidth * 4 / 5,windowheight - textinputheight - textsavebuttonheight,sidebarwidth * 2 / 5,textsavebuttonheight }, "SAVE TEMPLATE"))
+	{
+		// hard coded system for now
+		std::cout << "save template button\n";
+		std::ofstream tempFile(templateFolder + "/template.txt");
+	
+		if (tempFile.is_open()) {
+			std::cout << "file opened for wrtiting\n";
+			for (const char *line : textboxes)
+			{
+				tempFile << line << '\n';
+			}
+			tempFile.close();
+		}
 	}
 
 	//DRAWING NAME BANNER
@@ -1588,6 +1632,9 @@ int main()
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
 	GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 1);
+
+	//Create folder dir
+	gameSetup();
 
 	//Set Font
 	codingfont = LoadFont("./fonts/dina10px.ttf");

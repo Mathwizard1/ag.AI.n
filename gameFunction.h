@@ -29,3 +29,6 @@ extern std::vector<std::vector<std::pair<short, short>>> gridPaths;
 
 pair<bool, char*> NameGenerator();
 
+bool fileCheck(std::string filename);
+
+void gameSetup();

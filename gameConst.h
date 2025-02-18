@@ -54,3 +54,5 @@ constexpr int forwarddepositmaxterm = 800;
 constexpr int maxforwarddeposits = 5;
 constexpr int loaninteresttime = 120;
 constexpr int bankbuttonheight = 50;
+
+const std::string templateFolder = "./template";

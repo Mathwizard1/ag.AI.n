@@ -4,8 +4,6 @@
 #include "inventory.h"
 #include "gameAST.h"
 
-//#include "gameMaster.h"
-
 struct Node {
 	short int x, y;
 	float fcost;
@@ -22,7 +20,6 @@ struct NodeComparison {
 class Worker
 {
 protected:
-	// gameMaster gM;
 	std::string genericIdentifier = "$";
 	std::string labelIdentifier = "!";
 
@@ -140,6 +137,8 @@ public:
 	// Spec functions
 	virtual void incSkills(int amt);
 	virtual void updateObedience();
+
+	~Worker();
 };
 
 extern std::vector<std::vector<Worker>> workers;
