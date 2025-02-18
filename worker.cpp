@@ -987,3 +987,9 @@ void Worker::updateObedience()
 {
 	std::cout << "virtual function\n";
 }
+
+Worker::~Worker()
+{
+	// TO DO
+	// clean up the workers own char * which was either malloced or new
+}
