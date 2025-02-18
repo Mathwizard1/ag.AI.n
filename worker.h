@@ -9,6 +9,7 @@
 struct Node {
 	short int x, y;
 	float fcost;
+	float gcost;
 	vector<pair<short int, short int>> path;
 };
 struct NodeComparison {

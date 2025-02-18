@@ -293,6 +293,7 @@ void InitializeGrid(short int width, short int height, int type)
 		int x = z % dims;
 		int y = z / dims;
 		int walldensity = abs(midx - x) + abs(midy - y);
+
 		generator.generateMaze(grid, generator.randOrient(), walldensity, width, height);
 
 		vector<char*> textboxes;
@@ -577,7 +578,7 @@ void DrawWorkers(float linewidth,float lineheight)
 
 void DrawProgressBar()
 {
-	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,800 };
+	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,windowheight-100 };
 	static Rectangle boundary = { windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight };
 	float fraction = totalmoney/ (float)quota;
 	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
@@ -1600,7 +1601,7 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	ScreenMode = View; //DEBUG
+	ScreenMode = Map; //DEBUG
 	BankState = FD;
 	SidebarState = Money;
 

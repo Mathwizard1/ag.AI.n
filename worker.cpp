@@ -86,13 +86,27 @@ void Worker::pathfind(pair<short int,short int> end)
 		neighbors = getneighbors({ node.x,node.y });
 		for (const auto& i : neighbors)
 		{
-			float f = heuristic(pos.first, pos.second, i.first, i.second) + heuristic(end.first, end.second, i.first, i.second);
+			float f = heuristic(pos.first, pos.second, i.first, i.second)+ heuristic(end.first, end.second, i.first, i.second);
 
 			bool contflag = false;
 			for (int j=0;j<closed.size();j++)
 			{
 				if (i.first == closed[j].x && i.second==closed[j].y)
 				{
+					if (f < closed[j].fcost)
+					{
+						Node n;
+						n.x = i.first;
+						n.y = i.second;
+						n.fcost = f;
+						n.gcost = node.gcost+1;
+						n.path = node.path;
+						n.path.push_back({ node.x,node.y });
+						open.push(n);
+						closed.erase(closed.begin() + j);
+						closed.push_back(n);
+
+					}
 					contflag = true;
 					break;
 					
@@ -105,6 +119,7 @@ void Worker::pathfind(pair<short int,short int> end)
 				n.x = i.first;
 				n.y = i.second;
 				n.fcost = f;
+				n.gcost = node.gcost +1;
 				n.path = node.path;
 				n.path.push_back({ node.x,node.y });
 				open.push(n);
