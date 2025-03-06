@@ -27,6 +27,11 @@ enum sidebarstate {
 	Money,
 } SidebarState;
 
+enum codestate {
+	MainCode,
+	Template
+} CodeState;
+
 enum shopstate {
 	Area,
 	Misc
@@ -772,7 +777,17 @@ void DrawMainScreen()
 
 }
 
-void DrawCodeTab()
+void DrawTemplateTab()
+{
+	//BOUNDARY
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), { 0,100,50,255 });
+	DrawRectangleLinesEx({ windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight) }, areashopboundarywidth, { 220,220,220,220 });
+
+	if (GuiButton({ windowwidth - sidebarwidth ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "Back"))
+		CodeState = MainCode;
+}
+
+void DrawMainCodeTab()
 {
 	if (workers[chosengrid].empty())
 	{
@@ -909,17 +924,11 @@ void DrawCodeTab()
 	for (int i = 0; i < codeblocks; i++)
 	{
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
-		if (i == interpreterblock)
-		{
-			if (workers[chosengrid][chosenperson].errorFound)
-			{
-				blockcolor = RED;
-			}
-			else
-			{
-				blockcolor = DARKBLUE;
-			}
-		}
+
+		if (startpos+i+1 == interpreterblock)
+			blockcolor = DARKBLUE;
+		if (startpos + i  == interpreterblock&& workers[chosengrid][chosenperson].errorFound)
+			blockcolor = RED;
 
 		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight +namebannersize+ i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);
@@ -950,6 +959,8 @@ void DrawCodeTab()
 	//DRAWING TEMPLATE BUTTON
 	else if (GuiButton({ windowwidth - sidebarwidth * 2 / 5,windowheight - textinputheight - textsavebuttonheight,sidebarwidth * 2 / 5,textsavebuttonheight }, "TEMPLATE"))
 	{
+		CodeState = Template;
+
 		// Clean up the textboxes // NEEDS SERIOUS CHECK AND REWORK
 		chosenblock = 0;
 		textsizes.clear();
@@ -1002,6 +1013,19 @@ void DrawCodeTab()
 	DrawTextEx(codingfontbold, TextFormat("P: %d", workers[chosengrid][chosenperson].productivity), { windowwidth - 0.85*sidebarwidth, sidebarbuttonheight + 10 }, 17, 1, YELLOW);
 
 
+}
+
+void DrawCodeTab()
+{
+	switch (CodeState)
+	{
+	case MainCode:
+		DrawMainCodeTab();
+		break;
+	case Template:
+		DrawTemplateTab();
+		break;
+	}
 }
 
 void DrawMiscTab()

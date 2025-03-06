@@ -550,11 +550,12 @@ void Worker::callFunction()
 		tokenizer(code[linecounter], linesize[linecounter], tokens);
 
 		// empty line skip
-		if (tokens.empty())
+		/*while (tokens.empty())
 		{
 			linecounter++;
-			return;
-		}
+			if (linecounter == codeSize)return;
+			tokenizer(code[linecounter], linesize[linecounter], tokens);
+		}*/
 
 		gameLexers expectToken = gameLexers::none;
 		bool bracketCheck = false;
@@ -666,6 +667,7 @@ void Worker::callFunction()
 
 				// If needed to stop the line counter
 				errorFound = true;
+				linecounter++;
 				return;
 			}
 		}
