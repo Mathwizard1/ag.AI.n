@@ -162,6 +162,8 @@ void Worker::getCode()
 
 	std::vector<std::string> tokens;
 	std::vector<int> paranIndex;
+
+	errorFound = false;
 	bool errorFlag = false;
 
 	int codeSize = code.size();
@@ -171,6 +173,9 @@ void Worker::getCode()
 		if (nonPairedEntity)
 		{
 			std::cout << "non paired brackets on " << i << '\n';
+			errorFound = true;
+			linecounter = i;
+			return;
 		}
 
 
@@ -187,6 +192,8 @@ void Worker::getCode()
 				{
 					// idle call
 					std::cout << code[i] << " common token\n";
+					errorFound = true;
+					linecounter = i;
 					return;
 				}
 			}
@@ -194,6 +201,7 @@ void Worker::getCode()
 			{
 				for (const std::string& t : tokens)
 				{
+					std::cout << t << '\n';
 					if (t == paranFlower.second)
 					{
 						if (! paranIndex.empty())
@@ -213,7 +221,6 @@ void Worker::getCode()
 						paranIndex.push_back(i);
 					}
 				}
-
 				if (errorFlag) break;
 			}
 		}
@@ -224,7 +231,9 @@ void Worker::getCode()
 	if (! paranIndex.empty())
 	{
 		std::cout << code[paranIndex.back()] << " non paired brackets in code" << '\n';
-		linecounter = codeSize;
+
+		errorFound = true;
+		linecounter = paranIndex.back();
 	}
 }
 
@@ -330,44 +339,44 @@ void Worker::tokenizer(char* instruction, short int instructionSize, std::vector
 	}
 }
 
-int Worker::getExpression(std::string& atr)
+std::pair<gameObjects, int> Worker::getExpression(std::string& atr)
 {
 	bool foundValue = false;
 	int foundIndex = -1;
 
 	if (atr.empty())
 	{
-		return -1;
+		return std::make_pair(gameObjects::None, -1);
 	}
 
 	// check in me
-	for (int i = 0; i < me.size(); i++)
-	{
-		if (me[i] == atr)
-		{
-			foundValue = true;
-			foundIndex = i;
-			break;
-		}
-	}
+	gameObjects gameObj = gameObjects::Me;
+	int gameVar = -1;
 
-	if (foundValue)
+	if (atr == "energy")
 	{
-		switch (foundIndex)
-		{
-		case 0:
-			return energy;
-		case 1:
-			return productivity;
-		case 2:
-			return mood;
-		case 3:
-			return health;
-		case 4:
-			return money;
-		default:
-			break;
-		}
+		gameVar = energy;
+		return std::make_pair(gameObj, gameVar);
+	}
+	else if (atr == "productivity")
+	{
+		gameVar = productivity;
+		return std::make_pair(gameObj, gameVar);
+	}
+	else if (atr == "mood")
+	{
+		gameVar = mood;
+		return std::make_pair(gameObj, gameVar);
+	}
+	else if (atr == "health")
+	{
+		gameVar = health;
+		return std::make_pair(gameObj, gameVar);
+	}
+	else if (atr == "money")
+	{
+		gameVar = money;
+		return std::make_pair(gameObj, gameVar);
 	}
 
 	atr[0] = std::toupper(atr[0]);
@@ -376,18 +385,20 @@ int Worker::getExpression(std::string& atr)
 		auto foodIt = inventory.foodinv.begin();
 		std::advance(foodIt, std::distance(foods.begin(), foods.find(atr)));
 		std::cout << (*foodIt) << " :food iterator\n";
-		return (*foodIt);
+
+		return std::make_pair(gameObjects::Food, *foodIt);
 	}
 
-	return -1;
+	return std::make_pair(gameObjects::None, -1);
 }
 
-int Worker::genericProcess(std::string genericVal)
+std::pair<gameObjects, int> Worker::genericProcess(std::string genericVal)
 {
 	std::string value = "";
 	std::string attribute = "";
 
 	bool attributePresent = false;
+	gameObjects gameObj = gameObjects::None;
 
 	for (int c = 0, len = genericVal.size(); c < len; c++)
 	{
@@ -414,35 +425,35 @@ int Worker::genericProcess(std::string genericVal)
 			attribute[0] = std::toupper(attribute[0]);
 			if (foods.find(attribute) != foods.end())
 			{
-
 				int i = std::distance(foods.begin(), foods.find(attribute));
-				return -(i + 1) * foodLimit;
+				return std::make_pair(gameObjects::Food, i);
 			}
 		}
 		else
 		{
-			return -1;
+			return std::make_pair(gameObjects::None, -1);
 		}
 	}
 
 	if (value == "work")
 	{
+		gameObj = gameObjects::Work;
 		if (attribute.empty())
 		{
 			if (lastTalkingto != -1)
 			{
-				return worker_types[workers[gridnumber][lastTalkingto].jobType];
+				return std::make_pair(gameObj, worker_types[workers[gridnumber][lastTalkingto].jobType]);
 			}
 		}
 		else
 		{
 			if (attribute == "number")
 			{
-				return workVals.first;
+				return std::make_pair(gameObj, workVals.first);
 			}
 			else if (attribute == "pending")
 			{
-				return workVals.second;
+				return std::make_pair(gameObj, workVals.second);
 			}
 		}
 	}
@@ -454,7 +465,8 @@ int Worker::genericProcess(std::string genericVal)
 		{
 			if (attribute == zone[i])
 			{
-				return i;
+				gameObj = gameObjects::Zone;
+				return std::make_pair(gameObj, i);
 			}
 		}
 	}
@@ -463,24 +475,12 @@ int Worker::genericProcess(std::string genericVal)
 	{
 		if (value == "worker")
 		{
-
 			if (!attribute.empty())
 			{
 				int workerIndex = 0;
 				float workerDist = 0;
 
-				if (attribute == "recent")
-				{
-					if (lastTalkingto != -1)
-					{
-						return -(lastTalkingto + 1) * zoneLimit;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-				else if (attribute == "near")
+				if (attribute == "near")
 				{
 					float minDist = 10.0 * (grid->size());
 					for (int w = 0, len = workers[gridnumber].size(); w < len; w++)
@@ -495,7 +495,6 @@ int Worker::genericProcess(std::string genericVal)
 					}
 
 					lastTalkingto = workerIndex;
-					return -(workerIndex + 1) * zoneLimit;
 				}
 				else if (attribute == "far")
 				{
@@ -512,12 +511,13 @@ int Worker::genericProcess(std::string genericVal)
 					}
 
 					lastTalkingto = workerIndex;
-					return -(workerIndex + 1) * zoneLimit;
 				}
+
+				return std::make_pair(gameObjects::Person, lastTalkingto);
 			}
 			else
 			{
-				return -1;
+				return std::make_pair(gameObjects::None, -1);
 			}
 		}
 
@@ -529,11 +529,13 @@ int Worker::genericProcess(std::string genericVal)
 			{
 				if (attribute.empty())
 				{
-					return -(worker.index + 1) * zoneLimit;
+					return std::make_pair(gameObjects::Person, worker.index);
 				}
 				else
 				{
-					return worker.getExpression(attribute);
+					std::pair<gameObjects, int> tempObj = worker.getExpression(attribute);
+					tempObj.first = gameObjects::Value;
+					return tempObj;
 				}
 			}
 		}
@@ -553,46 +555,46 @@ int Worker::genericProcess(std::string genericVal)
 		//	}
 		//}
 
-		return -1;
+		return std::make_pair(gameObjects::None, -1);
 	}
 
 	return getExpression(attribute);
 }
 
-int Worker::expressionProcess(int lhs, int rhs, std::string Opr)
+std::pair<gameObjects, int> Worker::expressionProcess(int lhs, int rhs, std::string Opr)
 {
 	if (lhs == -1 || rhs == -1)
 	{
-		return -1;
+		return std::make_pair(gameObjects::None, -1);
 	}
 
 
 	if (Opr == "==")
 	{
-		return (lhs == rhs);
+		return std::make_pair(gameObjects::Value, lhs == rhs);
 	}
 	else if (Opr == "!=")
 	{
-		return (lhs != rhs);
+		return std::make_pair(gameObjects::Value, lhs != rhs);
 	}
 	else if (Opr == "<=")
 	{
-		return (lhs <= rhs);
+		return std::make_pair(gameObjects::Value, lhs <= rhs);
 	}
 	else if (Opr == ">=")
 	{
-		return (lhs >= rhs);
+		return std::make_pair(gameObjects::Value, lhs >= rhs);
 	}
 	else if (Opr == "<")
 	{
-		return (lhs < rhs);
+		return std::make_pair(gameObjects::Value, lhs < rhs);
 	}
 	else if (Opr == ">")
 	{
-		return (lhs > rhs);
+		return std::make_pair(gameObjects::Value, lhs > rhs);
 	}
 
-	return -1;
+	return std::make_pair(gameObjects::None, -1);
 }
 
 int Worker::literalProcess(std::string intLiteral)
@@ -601,18 +603,18 @@ int Worker::literalProcess(std::string intLiteral)
 		size_t pos;
 		int num = std::stoi(intLiteral, &pos);  // Convert string to int
 
-		// Check if there are any leftover characters after the integer
-		if (pos != intLiteral.length()) {
-			throw std::invalid_argument("Extra characters after number");
+		// Check if there are no leftover characters after the integer
+		if (pos == intLiteral.length()) {
+			return num;
 		}
 
-		return num;
+		std::cerr << "Extra characters after number" << '\n';
 	}
 	catch (const std::invalid_argument& e) {
-		std::cerr << "Invalid input: " << e.what() << std::endl;
+		std::cerr << "Invalid input: " << e.what() << '\n';
 	}
 	catch (const std::out_of_range& e) {
-		std::cerr << "Out of range: " << e.what() << std::endl;
+		std::cerr << "Out of range: " << e.what() << '\n';
 	}
 
 	return -1;  // Return 0 or handle as needed
@@ -622,7 +624,7 @@ void Worker::callFunction()
 {
 	int codeSize = code.size();
 
-	if (linecounter < codeSize)
+	if (linecounter < codeSize and !errorFound)
 	{
 		std::vector<std::string> tokens;
 		tokenizer(code[linecounter], linesize[linecounter], tokens);
@@ -637,9 +639,11 @@ void Worker::callFunction()
 		gameLexers expectToken = gameLexers::none;
 		bool bracketCheck = false;
 		bool actionCheck = false;
+		std::unordered_set<gameObjects> gameObjs;
 
-		int tempVal = -1;
+		std::pair<gameObjects, int> tempVal = { gameObjects::None, -1 };
 		std::string tempToken = "";
+
 		int tcount = tokens.size();
 
 		// first token is keyword
@@ -648,10 +652,17 @@ void Worker::callFunction()
 			expectToken = gameLanguage[tokens[0]].expected;
 			bracketCheck = gameLanguage[tokens[0]].bracketd;
 			actionCheck = gameLanguage[tokens[0]].action;
+
+			gameObjs = gameLanguage[tokens[0]].gameObjs;
 		}
-		else if(tokens[0] == labelIdentifier)
+		else if(tokens[0] == labelIdentifier || tokens[0] == paranFlower.second)
 		{
 			linecounter++;
+			return;
+		}
+		else
+		{
+			errorFound = true;
 			return;
 		}
 
@@ -662,23 +673,21 @@ void Worker::callFunction()
 			{
 				tempVal = genericProcess(tokens[2]);
 			}
-			else if (expectToken == gameLexers::literal)
+			else if (expectToken == gameLexers::literal && tcount == 2)
 			{
-				tempVal = literalProcess(tokens[1]);
+				tempVal.first = gameObjects::Value;
+				tempVal.second = literalProcess(tokens[1]);
 			}
-			else if (expectToken == gameLexers::label || tokens[1] == labelIdentifier)
+			else if (expectToken == gameLexers::label && tokens[1] == labelIdentifier)
 			{
-				std::cout << "label found\n";
+				std::cout << "labelIdentifier found\n";
 				if (labelMap.find(tokens[2]) != labelMap.end())
 				{
-					tempVal = labelMap[tokens[2]];
-				}
-				else
-				{
-					tempVal = -1;
+					tempVal.first = gameObjects::Value;
+					tempVal.second = labelMap[tokens[2]];
 				}
 
-				std::cout << tempVal << '-' << tokens[2] << '\n';
+				std::cout << tempVal.second << '-' << tokens[2] << '\n';
 			}
 			else if (expectToken == gameLexers::expression)
 			{
@@ -700,7 +709,7 @@ void Worker::callFunction()
 					{
 						if (tokens[1] == genericIdentifier && tokens[4] != genericIdentifier)
 						{
-							lhs = genericProcess(tokens[2]);
+							lhs = genericProcess(tokens[2]).second;
 							tempToken = tokens[3];
 							rhs = literalProcess(tokens[4]);
 						}
@@ -708,13 +717,13 @@ void Worker::callFunction()
 						{
 							lhs = literalProcess(tokens[1]);
 							tempToken = tokens[2];
-							rhs = genericProcess(tokens[4]);
+							rhs = genericProcess(tokens[4]).second;
 						}
 						else if (tokens[1] == genericIdentifier && tokens[4] == genericIdentifier)
 						{
-							lhs = genericProcess(tokens[2]);
+							lhs = genericProcess(tokens[2]).second;
 							tempToken = tokens[3];
-							rhs = genericProcess(tokens[5]);
+							rhs = genericProcess(tokens[5]).second;
 						}
 					}
 				}
@@ -724,54 +733,58 @@ void Worker::callFunction()
 					lhs = rhs = -1;
 				}
 
+				std::cout << lhs << '_' << tempToken << '_' << rhs << '\n';
 				tempVal = expressionProcess(lhs, rhs, tempToken);
 			}
 
 			// some other method corrections
-			if (tempVal == -1)
+			if (gameObjs.find(tempVal.first) == gameObjs.end() || tempVal.second < 0)
 			{
 				// idle call
+				std::cout << tempVal.second << "<-value\n";
 				std::cout << code[linecounter] << " :error in expression\n";
-				linecounter++;
+
+				// If needed to stop the line counter
+				errorFound = true;
 				return;
 			}
-			else
-			{
-
-			}
 		}
 
-
-		if (tokens[0] == "moveto")
+		if (tokens[0] == "if")
 		{
-			std::pair<int, int> dir = pos;
-			int wSize = workers[gridnumber].size();
-			if (tempVal <= -zoneLimit && tempVal >= -(wSize + 1) * zoneLimit)
-			{
-				//cout << tempVal << '\n';
-				tempVal = -(tempVal / zoneLimit + 1);
-				dir = workers[gridnumber][tempVal].pos;
-			}
-			else
-			{
-				switch (tempVal)
-				{
-				case 1:
-					break;
-				default:
-					break;
-				}
-			}
+			//tcount = linecounter;
+			std::cout << "if : " << tempVal.second << '\n';
 
-			//Pathfind
-			pathfind(dir);
-			activitycounter = path.size();
-			activity = Moving;
+			if (tempVal.second == 0)
+			{
+				linecounter = bracketMaps[linecounter]; // start from end bracket
+			}
+		}
+		else if (tokens[0] == "jump")
+		{
+			std::cout << "jump" << '\n';
+			linecounter = tempVal.second;
+			return;
+		}
+
+		else if (tokens[0] == "submit")
+		{
 
 		}
+		else if (tokens[0] == "exit")
+		{
+			std::cout << "exit" << '\n';
+		}
+		else if (tokens[0] == "work")
+		{
+			pathfind(workspace);
+			activitycounter = path.size()+worktime;
+			activity = Working;
+		}
+
 		else if (tokens[0] == "break")
 		{
-			activitycounter = tempVal;
+			activitycounter = tempVal.second;
 			/*
 			if(lag == -1)
 			{
@@ -780,57 +793,44 @@ void Worker::callFunction()
 			}
 			*/
 		}
-		else if (tokens[0] == "if")
-		{
-			//tcount = linecounter;
-			std::cout << "if : " << tempVal << '\n';
 
-			if (tempVal == 0)
+		else if (tokens[0] == "moveto")
+		{
+			std::pair<int, int> dir = pos;
+
+			//Pathfind
+			if (tempVal.first == gameObjects::Person)
 			{
-				linecounter = bracketMaps[linecounter]; // start from end
+				//cout << tempVal.second << '\n';
+				dir = workers[gridnumber][tempVal.second].pos;
+
+				//Sync Conditions needed?
+				//if (workers[gridnumber][tempVal.second].path.size() > 0)
+				//{
+				//	pathfind(workers[gridnumber][tempVal.second].path.front());
+				//	workers[gridnumber][tempVal.second].activitycounter = max(path.size(), workers[gridnumber][tempVal.second].path.size()) + talkingtime;
+				//	activitycounter = max(path.size(), workers[gridnumber][tempVal.second].path.size()) + talkingtime;
+				//}
+				//else
+				//{
+				//	pathfind(workers[gridnumber][tempVal.second].pos);
+				//	workers[gridnumber][tempVal.second].activitycounter = path.size() + talkingtime;
+				//	activitycounter = path.size() + talkingtime;
+				//}
 			}
-		}
-		else if (tokens[0] == "work")
-		{
-			pathfind(workspace);
-			activitycounter = path.size()+worktime;
-			activity = Working;
-		}
-		else if (tokens[0] == "talk")
-		{
-			int wSize = workers[gridnumber].size();
-			if (tempVal <= -zoneLimit && tempVal >= -(wSize + 1) * zoneLimit)
+			else
 			{
-				tempVal = -(tempVal / zoneLimit + 1);
 
-				//TODO REPLACE THIS CODE
-				if (workers[gridnumber][tempVal].path.size() > 0)
-				{
-					pathfind(workers[gridnumber][tempVal].path.front());
-					workers[gridnumber][tempVal].activitycounter = max(path.size(), workers[gridnumber][tempVal].path.size()) + talkingtime;
-					activitycounter = max(path.size(), workers[gridnumber][tempVal].path.size()) + talkingtime;
-				}
-				else
-				{
-					pathfind(workers[gridnumber][tempVal].pos);
-					workers[gridnumber][tempVal].activitycounter = path.size()+ talkingtime;
-					activitycounter = path.size() + talkingtime;
-				}
-				lastTalkingto = tempVal;
-
-				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal].pos.first, workers[gridnumber][tempVal].pos.second) <= sqrt(2))
-				{
-					std::cout << this->name << " talking with " << workers[gridnumber][tempVal].name << '\n';
-					//workers[gridnumber][tempVal].activity = talking;
-					activity = Talking;
-				}
 			}
-			
-		}
-		else if (tokens[0] == "submit")
-		{
 
+
+			// Activity counter check
+			pathfind(dir);
+			activitycounter = path.size();
+			activity = Moving;
 		}
+
+
 		else if (tokens[0] == "eat")
 		{
 			for (int i = 0; i < lunchpositions.size(); i++)
@@ -846,62 +846,7 @@ void Worker::callFunction()
 				}
 			}
 		}
-		else if (tokens[0] == "exit")
-		{
-			std::cout << "exit" << '\n';
-		}
-		else if (tokens[0] == "give")
-		{
-			inventory.display_inventory(this->name);
-			std::cout << tempVal << '\n';
-			if (lastTalkingto != -1)
-			{
-				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
-				{
-					activity = Giving;
-					std::cout << this->name << " giving " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
-					{
-						tempVal = -(tempVal / foodLimit + 1);
-						std::cout << "food index " << tempVal << '\n';
-						give(lastTalkingto, tempVal, 1);
-					}
-					else if(tempVal < worker_types.size())
-					{
-						std::cout << "work type " << tempVal << '\n';
-						give(lastTalkingto, 0, 0, tempVal, 1);
-					}
-				}
-				inventory.display_inventory(this->name);
-			}
-			activitycounter = 1;
-		}
-		else if (tokens[0] == "take")
-		{
-			inventory.display_inventory(this->name);
-			std::cout << tempVal << '\n';
-			if (lastTalkingto != -1)
-			{
-				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
-				{
-					activity = Taking;
-					std::cout << this->name << " taking " << workers[gridnumber][lastTalkingto].name << '\n';
-					if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
-					{
-						tempVal = -(tempVal / foodLimit + 1);
-						std::cout << "food index " << tempVal << '\n';
-						take(lastTalkingto, tempVal, 1);
-					}
-					else if (tempVal < worker_types.size())
-					{
-						std::cout << "work type " << tempVal << '\n';
-						take(lastTalkingto, 0, 0, tempVal, 1);
-					}
-				}
-				inventory.display_inventory(this->name);
-			}
-			activitycounter = 1;
-		}
+
 		else if (tokens[0] == "buy")
 		{
 			if (occupiedbench == -1)
@@ -923,15 +868,12 @@ void Worker::callFunction()
 			{
 				activitycounter = 2;
 				activity = Buying;
-				if (tempVal <= -foodLimit && tempVal >= -(foodLimit + 1) * foodLimit)
-				{
-					std::cout << tempVal;
-					tempVal = -(tempVal / foodLimit + 1);
-					auto it = foods.begin();
-					std::advance(it, tempVal);
 
-					buy(it->second, 1);
-				}
+				auto it = foods.begin();
+				std::advance(it, tempVal.second);
+
+				buy(it->second, 1);
+
 				inventory.display_inventory(this->name);
 				lunchpositions[occupiedbench].second = false;
 				occupiedbench = -1;
@@ -942,16 +884,94 @@ void Worker::callFunction()
 				lag = 2;
 			}
 		}
-		else if (tokens[0] == "jump")
+
+		else if (tokens[0] == "give")
 		{
-			std::cout << "jump" << '\n';
-			linecounter = tempVal;
-			return;
+			//std::cout << tempVal << '\n';
+			if (lastTalkingto != index)
+			{
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
+				{
+					activity = Giving;
+					std::cout << this->name << " giving " << workers[gridnumber][lastTalkingto].name << '\n';
+					if (tempVal.first == gameObjects::Food)
+					{
+						std::cout << "food index " << tempVal.second << '\n';
+						give(lastTalkingto, tempVal.second, 1);
+					}
+					else if(tempVal.first == gameObjects::Work)
+					{
+						std::cout << "work type " << tempVal.second << '\n';
+						give(lastTalkingto, 0, 0, tempVal.second, 1);
+					}
+				}
+
+			}
+			inventory.display_inventory(this->name);
+			activitycounter = 1;
+		}
+		else if (tokens[0] == "take")
+		{
+			inventory.display_inventory(this->name);
+			//std::cout << tempVal << '\n';
+			if (lastTalkingto != index)
+			{
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][lastTalkingto].pos.first, workers[gridnumber][lastTalkingto].pos.second) <= sqrt(2))
+				{
+					activity = Giving;
+					std::cout << this->name << " taking " << workers[gridnumber][lastTalkingto].name << '\n';
+					if (tempVal.first == gameObjects::Food)
+					{
+						std::cout << "food index " << tempVal.second << '\n';
+						take(lastTalkingto, tempVal.second, 1);
+					}
+					else if (tempVal.first == gameObjects::Work)
+					{
+						std::cout << "work type " << tempVal.second << '\n';
+						take(lastTalkingto, 0, 0, tempVal.second, 1);
+					}
+				}
+
+			}
+			inventory.display_inventory(this->name);
+			activitycounter = 1;
+		}
+		else if (tokens[0] == "talk")
+		{
+			int wSize = workers[gridnumber].size();
+			if (lastTalkingto != index)
+			{
+				std::cout << name << " talking with " << workers[gridnumber][tempVal.second].name << '\n';
+				//TODO REPLACE THIS CODE
+				if (workers[gridnumber][tempVal.second].path.size() > 0)
+				{
+					pathfind(workers[gridnumber][tempVal.second].path.front());
+					workers[gridnumber][tempVal.second].activitycounter = max(path.size(), workers[gridnumber][tempVal.second].path.size()) + talkingtime;
+					activitycounter = max(path.size(), workers[gridnumber][tempVal.second].path.size()) + talkingtime;
+				}
+				else
+				{
+					pathfind(workers[gridnumber][tempVal.second].pos);
+					workers[gridnumber][tempVal.second].activitycounter = path.size() + talkingtime;
+					activitycounter = path.size() + talkingtime;
+				}
+				lastTalkingto = tempVal.second;
+
+				if (heuristic(this->pos.first, this->pos.second, workers[gridnumber][tempVal.second].pos.first, workers[gridnumber][tempVal.second].pos.second) <= sqrt(2))
+				{
+					std::cout << this->name << " talking with " << workers[gridnumber][tempVal.second].name << '\n';
+					//workers[gridnumber][tempVal].activity = talking;
+					activity = Talking;
+				}
+			}
+
 		}
 
+
+		// Cannot talk and perform action at same time
 		if (actionCheck)
 		{
-			lastTalkingto = -1;
+			lastTalkingto = index;
 		}
 
 		// For repeated call functions

@@ -41,7 +41,6 @@ constexpr int areashopboundarywidth = 10;
 
 //Map
 constexpr int mapdims = 10;
-constexpr int zoneLimit = 10;
 
 //Stocks
 constexpr int stockperiod = 20;

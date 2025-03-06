@@ -65,25 +65,26 @@ public:
 		Giving,
 		Buying,
 	}activity=Idle;
-	short int activitycounter = 0;
 
 
 	//POSITION AND WORKSPACE
-	pair<short int, short int> pos;
-	pair<short int, short int> workspace;
+	std::pair<short int, short int> pos;
+	std::pair<short int, short int> workspace;
 	short int occupiedbench = -1;
 
 	//ASSEMBLER STUFF
+	short int activitycounter = 0;
 	short int lag = -1;
 	int linecounter = 0;
+	bool errorFound = false;
 
 	//CODE STUFF
-	vector<char*> code;
-	vector<short int> linesize;
-	vector<pair<short int, short int>> path;
-	vector<vector<short int>>* grid = nullptr;
+	std::vector<char*> code;
+	std::vector<short int> linesize;
+	std::vector<std::pair<short int, short int>> path;
+	std::vector<std::vector<short int>>* grid = nullptr;
 
-	pair<int, int>workVals = {10, 10};
+	pair<int, int>workVals = {10, 10};	// Number, Pending
 
 	std::vector<std::string> me = {
 		"energy",
@@ -125,10 +126,10 @@ public:
 	void getCode();
 	void tokenizer(char* instruction, short int instructionSize, std::vector<std::string>& tokensList);
 
-	int getExpression(std::string& atr);
+	std::pair<gameObjects, int> getExpression(std::string& atr);
 
-	int genericProcess(std::string genericVal);
-	int expressionProcess(int lhs, int rhs, std::string Opr);
+	std::pair<gameObjects, int> genericProcess(std::string genericVal);
+	std::pair<gameObjects, int> expressionProcess(int lhs, int rhs, std::string Opr);
 	int literalProcess(std::string intLiteral);
 
 	void callFunction();

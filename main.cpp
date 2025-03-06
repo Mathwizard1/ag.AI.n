@@ -867,7 +867,16 @@ void DrawCodeTab()
 	{
 		Color blockcolor = (i == chosenblock) ? GREEN : Color{0,150,255,255};
 		if (i == interpreterblock)
-			blockcolor = DARKBLUE;
+		{
+			if (workers[chosengrid][chosenperson].errorFound)
+			{
+				blockcolor = RED;
+			}
+			else
+			{
+				blockcolor = DARKBLUE;
+			}
+		}
 
 		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight +namebannersize+ i * codeblockheight, sidebarwidth, codeblockheight };
 		DrawRectangleRec(codeblock,blockcolor);

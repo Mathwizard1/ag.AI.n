@@ -12,13 +12,25 @@ enum class gameLexers
 	literal,
 };
 
+enum class gameObjects
+{
+	None = -1,
+	Value,
+	Person,
+	Food,
+	Work,
+	Zone,
+	Me,
+};
+
 typedef struct gameGrammar
 {
 	gameLexers expected;
 	bool bracketd;
 	bool action;
+	std::unordered_set<gameObjects> gameObjs;
 
-	gameGrammar(gameLexers expected = gameLexers::none, bool bracketed = false, bool action = true);
+	gameGrammar(gameLexers expected = gameLexers::none, std::unordered_set<gameObjects> gameObjs = {gameObjects::None}, bool bracketed = false, bool action = true);
 }gameGrammar;
 
 // language
