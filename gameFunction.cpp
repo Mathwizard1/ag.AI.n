@@ -3,7 +3,7 @@
 #include <filesystem>
 
 float totalmoney = 0;
-float moneyincrement = 500;
+float moneyincrement = 5000;
 float frametime;
 
 short int chosengrid = 0;

@@ -3,19 +3,7 @@
 #include "food.h"
 #include "inventory.h"
 #include "gameAST.h"
-
-struct Node {
-	short int x, y;
-	float fcost;
-	float gcost;
-	vector<pair<short int, short int>> path;
-};
-struct NodeComparison {
-	bool operator()(Node const& node1, Node const& node2)
-	{
-		return (node1.fcost > node2.fcost);
-	}
-};
+#include "Pathfinding.h"
 
 class Worker
 {
@@ -37,6 +25,8 @@ public:
 	std::unordered_map<std::string, int> labelMap;
 	std::unordered_map<short, short> bracketMaps;
 
+	Pathfinding pathfinder;
+	
 	int index;
 	int energy = 50;
 	int productivity = 80;
@@ -118,7 +108,6 @@ public:
 	//Functions
 	void eat();
 	void pathfind(pair<short int, short int> end);
-	vector<pair<short int, short int>> getneighbors(pair<short int, short int> node);
 	bool give(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	bool take(int index, int fid = 0, int fq = 0, int wid = 0, int wq = 0);
 	int buy(Food food, int q);

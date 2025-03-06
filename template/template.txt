@@ -1,6 +1,4 @@
 !loop
 work
-if($energy<30){
 eat
-}
 jump !loop

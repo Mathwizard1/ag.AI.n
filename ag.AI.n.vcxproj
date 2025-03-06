@@ -140,6 +140,7 @@
     <ClCompile Include="garbage_maze.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="randgen.cpp" />
     <ClCompile Include="rand_walls.cpp" />
     <ClCompile Include="worker.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="gameFunction.h" />
     <ClInclude Include="garbage_maze.h" />
     <ClInclude Include="inventory.h" />
+    <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="randgen.h" />
     <ClInclude Include="rand_walls.h" />
     <ClInclude Include="Raygui.h" />
