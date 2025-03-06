@@ -16,12 +16,12 @@ constexpr short int eattime = 10;
 constexpr short int talkingtime = 5;
 
 //Window
-constexpr int windowwidth = 1700;
+constexpr int windowwidth = 1600;
 constexpr int windowheight = 900;
 
 //Screen
 constexpr int screenbuffer = 5;
-constexpr int sidebarwidth =550;
+constexpr int sidebarwidth =520;
 constexpr int sidebarbuttonheight = 50;
 
 //Moneybar
