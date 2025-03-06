@@ -44,6 +44,12 @@ enum screenmode {
 	Stock
 } ScreenMode;
 
+enum marketcondition {
+	Competitive,
+	Monopoly,
+	Oligopoly
+} MarketCondition;
+
 //Code Variables
 std::vector<vector<char*>> textboxesnetwork;
 std::vector<vector<short int>> textsizesnetwork;
@@ -80,6 +86,9 @@ Vector2 mousepos;
 
 Texture officetile;
 Texture bankicon;
+Texture stock_background;
+Texture screw_head;
+Texture sticky_note;
 
 /*
 Colors:
@@ -120,6 +129,19 @@ const char* GetEnumEquivalent(Worker::activitytype act)
 	}
 }
 
+const char* GetMarketEnumEquivalent()
+{
+	switch (MarketCondition)
+	{
+	case Monopoly:
+		return "Monopoly";
+	case Oligopoly:
+		return "Oligopoly";
+	case Competitive:
+		return "Competitive";
+	}
+}
+
 vector<float> GetFDStats(float input)
 {
 	return { 4+4*(input/quota),(input / quota) * forwarddepositmaxterm};
@@ -141,8 +163,6 @@ void BankUpdate()
 			bank.forward_deposit_term[x]--;
 		}
 	}
-
-	
 }
 
 void ChangeWorkerPositions()
@@ -207,6 +227,9 @@ void InitializeSprites()
 {
 	officetile = LoadTextureFromImage(LoadImage( "sprites/office_tile.png"));
 	bankicon = LoadTextureFromImage(LoadImage("sprites/Bank.png"));
+	stock_background= LoadTextureFromImage(LoadImage("sprites/stock_background.jpg"));
+	screw_head= LoadTextureFromImage(LoadImage("sprites/screw_head.png"));
+	sticky_note= LoadTextureFromImage(LoadImage("sprites/sticky_note.png"));
 }
 
 void InitializeHire()
@@ -293,6 +316,7 @@ void InitializeGrid(short int width, short int height, int type)
 		int x = z % dims;
 		int y = z / dims;
 		int walldensity = abs(midx - x) + abs(midy - y);
+
 		generator.generateMaze(grid, generator.randOrient(), walldensity, width, height);
 
 		vector<char*> textboxes;
@@ -350,16 +374,34 @@ void InitializeGrid(short int width, short int height, int type)
 
 void DrawStocks()
 {
-	static float rectx = windowwidth * 0.33;
+	static float rectx = windowwidth * 0.2;
 	static float recty = windowheight * 0.2;
+	static float axessize = 450;
+	Vector2 startpoint = { rectx + 100, windowheight * 0.8f - 50 };
 	int xstart = (totalticks/updatetime-stockperiod<0)?0:totalticks/updatetime - stockperiod;
 
 
-	//Draw Rectangle
-	DrawRectangleLinesEx({ 0,0,windowwidth,windowheight }, 20, DARKGRAY);
-	DrawRectangleRec({ 20,20,windowwidth - 40,windowheight - 40 }, GRAY);
-	DrawRectangle(rectx-80, recty, rectx+140, windowheight * 0.6+20, BLUE);
-	DrawRectangle(rectx -60, recty + 20, rectx+100 , windowheight * 0.6-20 , WHITE);
+	//Draw Background
+	DrawRectangleLinesEx({ 0,0,windowwidth,windowheight }, 20, GRAY);
+	DrawTextureEx(stock_background, { 0,0, }, 0, windowwidth / (double)1920, WHITE);
+
+	//Draw Screws
+	DrawTextureEx(screw_head, { windowwidth*0.12, windowheight*0.1 },0,0.2, WHITE);
+	DrawTextureEx(screw_head, { windowwidth*0.12, windowheight*0.8}, 0, 0.2, WHITE);
+	DrawTextureEx(screw_head, { windowwidth*0.85, windowheight*0.1 }, 0, 0.2, WHITE);
+	DrawTextureEx(screw_head, { windowwidth * 0.85, windowheight*0.8 }, 0, 0.2, WHITE);
+
+	//Draw Sticky Note
+	DrawTextureEx(sticky_note, {windowwidth*0.52,windowheight*0.27},-10,1.5, WHITE);
+	DrawTextEx(codingfontbold, "Competitors", { windowwidth * 0.7,windowheight * 0.34 }, 28, 1, BLACK);
+
+	//Draw Rectangles
+	DrawRectangle(rectx-20, recty, windowwidth*0.4, windowheight * 0.6+20, BLUE);
+	DrawRectangle(rectx, recty + 20, windowwidth*0.4-40 , windowheight * 0.6-20 , WHITE);
+
+	//Draw Market Condition
+	DrawTextEx(codingfontbold, TextFormat("Market Condition: "), { windowwidth*0.35,windowheight*0.14 }, 30, 1, BLACK);
+	DrawTextEx(codingfontbold, TextFormat("%s",GetMarketEnumEquivalent()), { windowwidth * 0.55,windowheight * 0.14 }, 30, 1, RED);
 
 	//Draw Competitors Stocks
 	for (int i = 0; i < competitors.size(); i++)
@@ -369,14 +411,14 @@ void DrawStocks()
 			for (int j = xstart; j < competitors[i].competitor.size() - 1; j++)
 			{
 				//STOCK LINES
-				DrawLineEx({ rectx + 40 + (j - xstart) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((competitors[i].competitor[j] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80) }, { rectx + 40 + (j - xstart + 1) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((competitors[i].competitor[j + 1] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80) }, 5, RED);
+				DrawLineEx({ startpoint.x + (j - xstart) * axessize / stockperiod,startpoint.y - (float)((competitors[i].competitor[j] - minstock) / (maxstock - minstock)) *axessize }, { startpoint.x + (j - xstart + 1) * (axessize) / stockperiod,startpoint.y - (float)((competitors[i].competitor[j + 1] - minstock) / (maxstock - minstock)) * axessize }, 5, RED);
 			}
 			if (competitors[i].competitor[competitors[i].competitor.size() - 1] > maxstock)
 			{
 				maxstock = competitors[i].competitor[competitors[i].competitor.size() - 1]*1.4;
 			}
 
-			DrawTextEx(codingfontbold, TextFormat("Competitor %d: $%0.f", i + 1, competitors[i].competitor[competitors[i].competitor.size() - 1]), { windowwidth * 0.75,windowheight * 0.1f * (i + 1) }, 30, 1, MAROON);
+			DrawTextEx(codingfontbold, TextFormat("Competitor %d: $%0.f", i + 1, competitors[i].competitor[competitors[i].competitor.size() - 1]), { windowwidth * 0.67,windowheight*0.35f+windowheight * 0.05f * (i + 1) }, 22, 1, BLACK);
 		}
 	}
 
@@ -385,20 +427,21 @@ void DrawStocks()
 	for (int j = xstart; j < playerstock.size() - 1; j++)
 	{
 		//STOCK LINES
-		DrawLineEx({ rectx + 40 + (j - xstart) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((playerstock[j] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80)}, {rectx + 40 + (j - xstart + 1) * (rectx - 80) / stockperiod,windowheight * 0.8f - 50 - (float)((playerstock[j+1] - minstock) / (maxstock - minstock)) * (windowheight * 0.6f - 80)}, 5, GREEN);
+		DrawLineEx({ startpoint.x + (j - xstart) * axessize / stockperiod,startpoint.y - (float)((playerstock[j] - minstock) / (maxstock - minstock)) * axessize}, {startpoint.x + (j - xstart + 1) * axessize / stockperiod,startpoint.y - (float)((playerstock[j+1] - minstock) / (maxstock - minstock)) * axessize}, 5, GREEN);
 	}
 
 	//Labels
-	DrawTextEx(codingfontbold, TextFormat("$%0.f", maxstock), { rectx-40 , recty + 50 }, 22,1, GREEN);
-	DrawTextEx(codingfontbold, TextFormat("$%0.f", minstock), { rectx - 40 , windowheight * 0.75f - 20 }, 22, 1, GREEN);
-	DrawTextEx(codingfont, "$", {rectx - 30 , windowheight * 0.5f - 20}, 50, 1, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", maxstock), { startpoint.x-80 , startpoint.y-axessize }, 22,1, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("$%0.f", minstock), {startpoint.x-80 , startpoint.y }, 22, 1, GREEN);
+	DrawTextEx(codingfont, "$", {startpoint.x-80, startpoint.y-axessize*0.6f}, 50, 1, GREEN);
 
 	//Draw Axes
-	DrawRectangleRounded({ rectx + 35,recty + 40 ,12, windowheight * 0.6 - 80 }, 6, 1, BLACK);
-	DrawRectangleRounded({ rectx + 35,windowheight * 0.8f - 50 , rectx - 70,12 }, 6, 1, BLACK);
-
-	GuiDrawIcon(ICON_ARROW_UP_FILL, rectx+18, recty+15, 3, BLACK);
-	GuiDrawIcon(ICON_ARROW_RIGHT_FILL, 2*rectx-60, windowheight * 0.8-69, 3, BLACK);
+	DrawCircle(startpoint.x, startpoint.y,10, BLACK);
+	DrawLineEx(startpoint, { startpoint.x,startpoint.y - axessize }, 10, BLACK);
+	DrawLineEx(startpoint, { startpoint.x+axessize,startpoint.y }, 10, BLACK);
+	
+	GuiDrawIcon(ICON_ARROW_UP_FILL, startpoint.x-22, startpoint.y - axessize-20, 3, BLACK);
+	GuiDrawIcon(ICON_ARROW_RIGHT_FILL, startpoint.x + axessize-20, startpoint.y-25, 3, BLACK);
 
 
 	//Draw Circle
@@ -577,7 +620,7 @@ void DrawWorkers(float linewidth,float lineheight)
 
 void DrawProgressBar()
 {
-	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,800 };
+	static Rectangle outerrect = { windowwidth - sidebarwidth - moneybarwidth+50, 50,50,windowheight-100 };
 	static Rectangle boundary = { windowwidth - sidebarwidth - moneybarwidth, 0, moneybarwidth, windowheight };
 	float fraction = totalmoney/ (float)quota;
 	Rectangle innerrect = {outerrect.x+10,outerrect.y+(outerrect.height*(1-fraction))+10,outerrect.width -20 ,outerrect.height*fraction-20 };
@@ -1656,11 +1699,13 @@ int main()
 	InitializeHire();
 	InitializeSprites();
 
-	ScreenMode = View; //DEBUG
+	ScreenMode = Map; //DEBUG
 	BankState = FD;
 	SidebarState = Money;
 
 	//Add Competitors
+	competitors.push_back(RandomGenerator());
+	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
