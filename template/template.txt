@@ -1,4 +1,6 @@
-!loop
+!workloop
 work
+if($me.energy<30){
 eat
-jump !loop
+}
+jump !workloop

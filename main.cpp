@@ -259,11 +259,12 @@ void WorkerCodeUpdate()
 
 void InitializeSkillTree()
 {
-	SkillTreeNode* node1 = new SkillTreeNode("Node1",20000,false,1,"Yap");
+	SkillTreeNode* node1 = new SkillTreeNode("No Hunger!",2000,false,1,"Worker Productivity +5");
 	SkillTreeNode* node2 = new SkillTreeNode("Node2", 20000, false, 2,"Yap1");
 	SkillTreeNode* node3 = new SkillTreeNode("Node3", 20000, false, 3,"Yap2");
 	SkillTreeNode* node4 = new SkillTreeNode("Node4", 20000, false, 4,"Yap3");
-	skilltreeroot.children = { node1,node2,node3,node4 };
+	SkillTreeNode* node9 = new SkillTreeNode("Node9", 80000, false, 9, "Yap7");
+	skilltreeroot.children = { node1,node2,node3,node9 };
 	skilltreenodedistances = { 50,50,50,50 };
 
 	SkillTreeNode* node5 = new SkillTreeNode("Node5", 50000, false, 5,"Yap4");
