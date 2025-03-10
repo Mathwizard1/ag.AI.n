@@ -1,0 +1,6 @@
+!workloop
+work
+if($me.energy<30){
+eat
+}
+jump !workloop

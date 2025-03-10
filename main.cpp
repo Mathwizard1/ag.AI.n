@@ -53,7 +53,8 @@ enum bankstate {
 enum screenmode {
 	View,
 	Map,
-	Stock
+	Stock,
+	SkillTree
 } ScreenMode;
 
 enum marketcondition {
@@ -61,6 +62,34 @@ enum marketcondition {
 	Monopoly,
 	Oligopoly
 } MarketCondition;
+
+typedef struct skilltreenode {
+	const char* name;
+	const char* description;
+	long long int cost;
+	bool unlocked;
+	int key;
+	vector<skilltreenode*> children;
+
+
+	skilltreenode(const char* iname, long int icost, bool iunlocked, int ikey,const char* idesc)
+	{
+		name = iname;
+		cost = icost;
+		unlocked = iunlocked;
+		key = ikey;
+		description = idesc;
+	}
+
+}SkillTreeNode;
+
+//Skill Tree
+SkillTreeNode dummynode{ "Dummy",0,true,-1,""};
+SkillTreeNode skilltreeroot{"New Beginnings",10000,false,0,"Unlock The Skill Tree"};
+SkillTreeNode* chosenskilltreenode = &skilltreeroot;
+vector<SkillTreeNode> skilltreenodes;
+vector<float> skilltreenodedistances;
+short int skilltreekey = 0;
 
 // gameTemplate
 gameTemplates gameTemplate;
@@ -236,6 +265,26 @@ void WorkerCodeUpdate()
 			}
 		}
 	}
+}
+
+void InitializeSkillTree()
+{
+	SkillTreeNode* node1 = new SkillTreeNode("No Hunger!",2000,false,1,"Worker Productivity +5");
+	SkillTreeNode* node2 = new SkillTreeNode("Node2", 20000, false, 2,"Yap1");
+	SkillTreeNode* node3 = new SkillTreeNode("Node3", 20000, false, 3,"Yap2");
+	SkillTreeNode* node4 = new SkillTreeNode("Node4", 20000, false, 4,"Yap3");
+	SkillTreeNode* node9 = new SkillTreeNode("Node9", 80000, false, 9, "Yap7");
+	skilltreeroot.children = { node1,node2,node3,node9 };
+	skilltreenodedistances = { 50,50,50,50 };
+
+	SkillTreeNode* node5 = new SkillTreeNode("Node5", 50000, false, 5,"Yap4");
+	SkillTreeNode* node6 = new SkillTreeNode("Node6", 50000, false, 6,"Yap5");
+	SkillTreeNode* node7 = new SkillTreeNode("Node7", 50000, false, 7,"Yap6");
+	SkillTreeNode* node8 = new SkillTreeNode("Node8", 80000, false, 8,"Yap7");
+	node1->children = { node5 };
+	node5->children = { node8 };
+	node2->children = { node6,node7};
+
 }
 
 void InitializeSprites()
@@ -500,6 +549,7 @@ void DrawMap()
 		DrawLineEx({ windowwidth / 6 + (float)(y) * (2 * windowwidth / 3) / (dims - 1),windowheight / 6 }, { windowwidth / 6 + (float)y * (2 * windowwidth / 3) / (dims - 1) ,5 * windowheight / 6 }, 8, DARKBLUE);
 	}
 
+	//Stock Button
 	DrawCircle(75, 75, 50, BLACK);
 	if (CheckCollisionPointCircle(mousepos, { 75,75 }, 45))
 	{
@@ -512,6 +562,20 @@ void DrawMap()
 	else
 	DrawCircle(75, 75, 45, { 0,151,241,255 });
 	GuiDrawIcon(ICON_WAVE_TRIANGULAR, 43, 43, 4, WHITE);
+
+	//Skill Tree Button
+	DrawCircle(75, 180, 50, BLACK);
+	if (CheckCollisionPointCircle(mousepos, { 75,180 }, 45))
+	{
+		DrawCircle(75, 180, 45, { 0,171,255,255 });
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			ScreenMode = SkillTree;
+		}
+	}
+	else
+		DrawCircle(75, 180, 45, { 0,151,241,255 });
+	GuiDrawIcon(ICON_ARROW_UP_FILL,45, 148, 4, GREEN);
 
 
 	float rad = (windowheight - 200) / (2 * dims);
@@ -610,6 +674,106 @@ void DrawMap()
 		}
 	}
 
+}
+
+void DrawSkillTreeNode(Vector2 pos, SkillTreeNode* node,SkillTreeNode* parent)
+{
+	DrawCircle(pos.x, pos.y, skilltreenoderadius, BLACK);
+	if(node->unlocked==true)
+		DrawCircle(pos.x, pos.y, skilltreenoderadius*0.8,GREEN);
+	else
+		DrawCircle(pos.x, pos.y, skilltreenoderadius * 0.8, RED);
+
+	if (CheckCollisionPointCircle(mousepos, pos, skilltreenoderadius))
+	{
+		chosenskilltreenode = node;
+		if (node->unlocked == false)
+		{
+			DrawCircle(pos.x, pos.y, skilltreenoderadius * 0.8, ORANGE);
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && node->cost < totalmoney&&parent->unlocked==true)
+			{
+				totalmoney -= node->cost;
+				node->unlocked = true;
+				skilltreekey = node->key;
+				return;
+			}
+		}
+		else
+			DrawCircle(pos.x, pos.y, skilltreenoderadius * 0.8, { 0,255,48,255 });
+	}
+}
+
+void TraverseTree(Vector2 pos,SkillTreeNode* node,float inputangle)
+{
+	if (node->children.empty())return;
+
+	float angleincrement = skilltreenodeangle/ ((node->children.size()+1)* 57.2958);
+	float angle = inputangle + angleincrement;
+
+	for (int i = 0; i < node->children.size(); i++)
+	{
+		float newx = pos.x + skilltreenodedistances[i] * cos(angle);
+		float newy = pos.y + skilltreenodedistances[i] * sin(angle);
+		angle += angleincrement;
+
+		DrawLineEx(pos, { newx,newy }, skilltreeedgethickness, BLACK);
+		TraverseTree({newx,newy}, node->children[i], inputangle);
+		DrawSkillTreeNode({ newx,newy }, node->children[i],node);
+	}
+}
+
+void DrawSkillTree()
+{
+	//Exit Button
+	DrawCircle(70, 70, 50, BLACK);
+	if (mousepos.x < 120 && mousepos.y < 120)
+	{
+		if (CheckCollisionPointCircle(mousepos, { 70,70 }, 50))
+		{
+			DrawCircle(70, 70, 45, { 0,171,255,255 });
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				ScreenMode = Map;
+			}
+		}
+		else
+			DrawCircle(70, 70, 45, { 0,151,241,255 });
+	}
+	else
+		DrawCircle(70, 70, 45, { 0,151,241,255 });
+	GuiDrawIcon(ICON_EXIT, 38, 38, 4, WHITE);
+
+	//Draw Tree
+	Vector2 rootnodepos = {windowwidth *0.5, windowheight*0.4};
+
+	float angle = 0;
+	float angleincrement = 360 / ((double)skilltreeroot.children.size() * 57.2958);
+	for (int i=0;i<skilltreeroot.children.size();i++)
+	{
+		float newx = rootnodepos.x+ skilltreenodedistances[i] * cos(angle);
+		float newy = rootnodepos.y+ skilltreenodedistances[i] * sin(angle);
+
+		DrawLineEx(rootnodepos, { newx,newy }, skilltreeedgethickness, BLACK);
+		TraverseTree({newx,newy}, skilltreeroot.children[i], (-90 + i * 90) / 57.2958);
+		DrawSkillTreeNode({ newx,newy }, skilltreeroot.children[i], &skilltreeroot);
+
+		angle += angleincrement;
+	}
+	DrawSkillTreeNode(rootnodepos,&skilltreeroot,&dummynode);
+
+	//Draw Description Box
+	DrawRectangle(0, windowheight * 0.85, windowwidth, windowheight * 0.15, RED);
+
+	//Draw Descriptions
+	DrawTextEx(codingfontbold, chosenskilltreenode->name, { windowwidth * 0.5-60,windowheight * 0.87 }, 28, 1, YELLOW);
+	DrawTextEx(codingfontbold, chosenskilltreenode->description, { windowwidth * 0.2,windowheight * 0.92 }, 24, 1, ORANGE);
+
+	//Draw Icon
+	GuiDrawIcon(ICON_ARROW_UP_FILL, windowwidth * 0.13, windowheight * 0.89, 5, GREEN);
+
+	//Draw Cost
+	DrawTextEx(codingfontbold, TextFormat("Cost: $%d", chosenskilltreenode->cost), { windowwidth * 0.7f,windowheight * 0.9f }, 27, 1, GREEN);
+	DrawTextEx(codingfontbold, TextFormat("Available Money: $%0.f", totalmoney), { windowwidth * 0.7f,windowheight * 0.94f }, 27, 1, GREEN);
 }
 
 void DrawWorkers(float linewidth,float lineheight)
@@ -1972,6 +2136,7 @@ int main()
 	InitializeShop();
 	InitializeHire();
 	InitializeSprites();
+	InitializeSkillTree();
 
 	ScreenMode = Map; //DEBUG
 	BankState = FD;
@@ -1983,7 +2148,7 @@ int main()
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
 	competitors.push_back(RandomGenerator());
-	
+
 	bool clockswitch = false;
 
 	while (!WindowShouldClose())
@@ -2002,6 +2167,8 @@ int main()
 			ChangeWorkerPositions();
 			BankUpdate();
 			WorkerCodeUpdate();
+
+
 			if (totalticks % updatetime == 0)
 			{
 				playerstock.push_back(totalmoney / 100);
@@ -2012,8 +2179,7 @@ int main()
 				UpdateStocks();
 			}
 		}
-		else if (gametime > 50 && clockswitch == true)
-			clockswitch = false;
+		else if (gametime > 50 && clockswitch == true)clockswitch = false;
 
 		//RAYLIB
 		BeginDrawing();
@@ -2028,6 +2194,7 @@ int main()
 				totalmoney += moneyincrement * frametime;
 		}
 		
+		//DRAWING
 		switch (ScreenMode)
 		{
 		case View:
@@ -2041,6 +2208,9 @@ int main()
 		case Stock:
 			DrawStocks();
 			break; 
+		case SkillTree:
+			DrawSkillTree();
+			break;
 		}
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
 

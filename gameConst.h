@@ -58,3 +58,12 @@ constexpr int forwarddepositmaxterm = 800;
 constexpr int maxforwarddeposits = 5;
 constexpr int loaninteresttime = 120;
 constexpr int bankbuttonheight = 50;
+
+//SkillTree
+constexpr int skilltreenoderadius = 20;
+constexpr float skilltreenodeangle = 180;
+constexpr float skilltreeedgethickness = 10;
+
+//Template
+const std::string templateFolder = "./template";
+constexpr int bankbuttonheight = 50;
