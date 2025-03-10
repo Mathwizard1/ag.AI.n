@@ -1,4 +1,0 @@
-!loop
-work
-eat
-jump !loop

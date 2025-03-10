@@ -1,7 +1,5 @@
 #include "gameFunction.h"
 
-#include <filesystem>
-
 float totalmoney = 0;
 float moneyincrement = 5000;
 float frametime;
@@ -48,24 +46,5 @@ pair<bool, char*> NameGenerator() {
 	{
 		int ind =rand()%malenames.size();
 		return { 0, strcpy(name, malenames[ind].c_str()) };
-	}
-}
-
-bool fileCheck(std::string filename)
-{
-	std::filesystem::path filePath = filename;
-	if (std::filesystem::exists(filePath))
-	{
-		return true;
-	}
-	return false;
-}
-
-void gameSetup()
-{
-	std::filesystem::path folderPath = templateFolder;
-	if (! std::filesystem::exists(folderPath))
-	{
-		std::filesystem::create_directory(folderPath);
 	}
 }

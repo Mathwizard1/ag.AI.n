@@ -22,7 +22,7 @@ constexpr int windowheight = 900;
 
 //Screen
 constexpr int screenbuffer = 5;
-constexpr int sidebarwidth =520;
+constexpr int sidebarwidth = 520;
 constexpr int sidebarbuttonheight = 50;
 
 //Moneybar
@@ -35,6 +35,10 @@ constexpr int codeblocks = 10;
 constexpr int textinputsize = 35;
 constexpr int textinputfontsize = 22;
 constexpr int textsavebuttonheight = 40;
+
+// Show Codes
+constexpr int showcodesnamebannersize = 45;
+constexpr int showcodescodeblocks = 9;
 
 //Shop
 constexpr int shopbuttonheight = 50;
@@ -54,5 +58,3 @@ constexpr int forwarddepositmaxterm = 800;
 constexpr int maxforwarddeposits = 5;
 constexpr int loaninteresttime = 120;
 constexpr int bankbuttonheight = 50;
-
-const std::string templateFolder = "./template";

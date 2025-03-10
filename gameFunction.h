@@ -28,7 +28,3 @@ extern vector<pair<pair<short int, short int>,bool>> lunchpositions;
 extern std::vector<std::vector<std::pair<short, short>>> gridPaths;
 
 pair<bool, char*> NameGenerator();
-
-bool fileCheck(std::string filename);
-
-void gameSetup();

@@ -6,6 +6,7 @@
 #include "Bank.h"
 #include "garbage_maze.h"
 #include "rand_walls.h"
+#include "gameTemplates.h"
 
 using namespace std;
 
@@ -28,9 +29,15 @@ enum sidebarstate {
 } SidebarState;
 
 enum codestate {
-	MainCode,
-	Template
+	Template,
+	MainCode
 } CodeState;
+
+enum templatetabstate
+{
+	ShowTemplates,
+	ShowCodes,
+}TemplateTabState;
 
 enum shopstate {
 	Area,
@@ -54,6 +61,9 @@ enum marketcondition {
 	Monopoly,
 	Oligopoly
 } MarketCondition;
+
+// gameTemplate
+gameTemplates gameTemplate;
 
 //Code Variables
 std::vector<vector<char*>> textboxesnetwork;
@@ -777,14 +787,298 @@ void DrawMainScreen()
 
 }
 
-void DrawTemplateTab()
+void DrawShowTemplatesTab()
 {
+	static bool fileWalked = false;
+
+	static short int startpos = 0;
+	static short int chosenblock = 0;
+	static double codeblockheight = (windowheight - sidebarbuttonheight - shopbuttonheight - textinputheight - 2 * textsavebuttonheight) / (double)templateblocks;
+	static std::vector<std::string> allTemplates;
+
 	//BOUNDARY
-	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), { 0,100,50,255 });
+	DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), { 0,121,181,255 });
 	DrawRectangleLinesEx({ windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight) }, areashopboundarywidth, { 220,220,220,220 });
 
-	if (GuiButton({ windowwidth - sidebarwidth ,sidebarbuttonheight,sidebarwidth / 3,shopbuttonheight }, "Back"))
+	// Name Updates
+	gameTemplate.NameBuffer[1] = '\0';
+	strcat(gameTemplate.NameBuffer, workers[chosengrid][chosenperson].name);
+
+	// Iterate Templates
+	if (!fileWalked)
+	{
+		allTemplates.clear();
+		allTemplates = gameTemplate.loadTemplateNames();
+
+		fileWalked = true;
+	}
+
+	//CHANGING CURRENT BLOCK
+	if (IsKeyPressed(KEY_UP) || (GetMouseWheelMove() > 0))
+	{
+		if (chosenblock == 0 && startpos > 0)
+		{
+			startpos -= 1;
+		}
+		else if (chosenblock > 0)
+		{
+			chosenblock--;
+		}
+	}
+	else if (IsKeyPressed(KEY_DOWN) || (GetMouseWheelMove() < 0))
+	{
+		if (chosenblock == templateblocks - 1)
+		{
+			startpos += 1;
+		}
+		else if(startpos + chosenblock + 1 < allTemplates.size())
+		{
+			chosenblock++;
+		}
+	}
+
+	//DRAWING TemplateBLOCKS
+	for (int i = 0; i < templateblocks; i++)
+	{
+		Color blockcolor = (i == chosenblock) ? GREEN : Color{ 0,150,255,255 };
+		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight + i * codeblockheight, sidebarwidth, codeblockheight };
+		
+		if (allTemplates.size() > startpos + i)
+		{
+			DrawRectangleRec(codeblock, blockcolor);
+			DrawRectangle(codeblock.x, codeblock.y, 55, codeblockheight, GRAY);
+			DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
+
+			DrawTextEx(codingfontbold, allTemplates[startpos + i].c_str(), {codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight * 0.4)}, 20, 3, WHITE);
+		}
+		else
+		{
+			break;
+		}
+
+		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 2.5) }, textinputfontsize - 5, 3, WHITE);
+
+		if (CheckCollisionPointRec(mousepos, codeblock) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			std::cout << allTemplates[startpos + chosenblock] << '\n';
+			gameTemplate.loadTemplate(allTemplates[startpos + chosenblock], textboxes, textsizes);
+			gameTemplate.updateFileName(allTemplates[startpos + chosenblock].c_str());
+
+			//fileWalked = false;
+			TemplateTabState = ShowCodes;
+		}
+	}
+
+	//FileNameChange SUBMISSION
+	if (GuiTextBox({ windowwidth - sidebarwidth + areashopboundarywidth, windowheight - 2 * textsavebuttonheight - textinputheight,sidebarwidth - 2 * areashopboundarywidth, textinputheight - areashopboundarywidth }, gameTemplate.c_filename, filenamesize, true))
+	{
+		if (gameTemplate.c_filename[0] == '\0')
+		{
+			std::cout << "Empty name cannot be saved\n";
+			gameTemplate.updateFileName();
+		}
+	}
+
+	// DRAWING TEMPLATE ASSIGNING BUTTON
+	if (GuiButton({ windowwidth - sidebarwidth + areashopboundarywidth,windowheight - areashopboundarywidth - 2 * textsavebuttonheight,sidebarwidth - 2 * areashopboundarywidth,textsavebuttonheight }, gameTemplate.NameBuffer))
+	{
+		//std::cout << workers[chosengrid][chosenperson].name << '\n';
+
+		// Update from template
+		workers[chosengrid][chosenperson].code = textboxes;
+		workers[chosengrid][chosenperson].linesize = textsizes;
+		workers[chosengrid][chosenperson].getCode();
+
+		fileWalked = false;
 		CodeState = MainCode;
+	}
+
+	// DRAWING BACK BUTTON
+	if (GuiButton({ windowwidth - sidebarwidth + areashopboundarywidth,windowheight - areashopboundarywidth - textsavebuttonheight,sidebarwidth - 2 * areashopboundarywidth,textsavebuttonheight }, "BACK"))
+	{
+		fileWalked = false;
+		CodeState = MainCode;
+	}
+}
+
+void DrawShowCodesTab()
+{
+	static bool editing = false;
+	static char text[textinputsize] = "";
+	static short int textsize = 0;
+	static short int startpos = 0;
+	static short int chosenblock = 0;
+	static short int chosentext = 0;
+	static short int chosencode = 0;
+	static double codeblockheight = (windowheight - sidebarbuttonheight - shopbuttonheight - showcodesnamebannersize - textinputheight - textsavebuttonheight) / (double)showcodescodeblocks;
+
+	//FILENAME
+	DrawTextEx(codingfontbold, gameTemplate.c_filename, { (float)(windowwidth - 2 * sidebarwidth / 3), (float)(sidebarbuttonheight + shopbuttonheight + namebannersize / 2)}, 20, 3, WHITE);
+
+	//CODE SUBMISSION
+	if (GuiTextBox({ windowwidth - sidebarwidth,windowheight - textinputheight,sidebarwidth, textinputheight }, text, textinputsize, true))
+	{
+		char* sendtext = (char*)malloc(sizeof(char) * textinputsize);
+
+		//Copy text to sendtext buffer
+		for (int x = 0; x < textinputsize; x++)
+		{
+			sendtext[x] = text[x];
+			if (text[x] == NULL)
+			{
+				textsize = x;
+				break;
+			}
+			text[x] = NULL;
+		}
+
+		//Choose to edit text or enter new text
+		if (chosentext < textboxes.size())
+		{
+			textboxes[chosentext] = sendtext;
+			textsizes[chosentext] = textsize;
+		}
+		else
+		{
+			for (int x = textboxes.size(); x <= chosentext; x++)
+			{
+				char* temptext = (char*)malloc(sizeof(char) * textinputsize);
+				temptext[0] = '\0';
+				textboxes.push_back(temptext);
+				textsizes.push_back(0);
+			}
+			textboxes[chosentext] = sendtext;
+			textsizes[chosentext] = textsize;
+		}
+
+		//Iterate Codeblocks
+		if (chosenblock < showcodescodeblocks - 1)
+		{
+			editing = false;
+			chosentext++;
+			chosenblock++;
+		}
+		else if (textboxes.size() + 1 > showcodescodeblocks)
+		{
+			editing = false;
+			chosentext++;
+			startpos++;
+		}
+	}
+
+	//EDITING MODE TOGGLE
+	if (editing == false)
+	{
+		if (chosentext < textboxes.size())
+		{
+			for (int x = 0; x < textinputsize; x++)
+			{
+				text[x] = textboxes[chosentext][x];
+			}
+			editing = true;
+		}
+	}
+
+	//CHANGING CURRENT BLOCK
+	if (IsKeyPressed(KEY_UP) || (GetMouseWheelMove() > 0))
+	{
+		if (chosenblock == 0 && startpos > 0)
+		{
+			text[0] = '\0';
+			editing = false;
+			startpos -= 1;
+			chosentext--;
+		}
+		else if (chosenblock > 0)
+		{
+			text[0] = '\0';
+			editing = false;
+			chosentext--;
+			chosenblock--;
+		}
+	}
+	else if (IsKeyPressed(KEY_DOWN) || (GetMouseWheelMove() < 0))
+	{
+		if (chosenblock == showcodescodeblocks - 1)
+		{
+			text[0] = '\0';
+			editing = false;
+			chosentext++;
+			startpos += 1;
+		}
+		else
+		{
+			text[0] = '\0';
+			editing = false;
+			chosentext++;
+			chosenblock++;
+		}
+	}
+
+	//DRAWING CODEBLOCKS
+	for (int i = 0; i < showcodescodeblocks; i++)
+	{
+		Color blockcolor = (i == chosenblock) ? GREEN : Color{ 0,150,255,255 };
+
+		Rectangle codeblock = { windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight + showcodesnamebannersize + i * codeblockheight, sidebarwidth, codeblockheight };
+		DrawRectangleRec(codeblock, blockcolor);
+		DrawRectangle(codeblock.x, codeblock.y, 55, codeblockheight, GRAY);
+		DrawRectangleLinesEx(codeblock, 2, DARKBLUE);
+		if (textboxes.size() > startpos + i)
+		{
+			DrawTextEx(codingfontbold, textboxes[startpos + i], { codeblock.x + sidebarwidth / 7, (float)(codeblock.y + codeblockheight * 0.4) }, textinputfontsize - 2 * (textsizes[startpos + i] / 12), 3, WHITE);
+		}
+		DrawTextEx(codingfontbold, TextFormat("%d", (startpos + i)), { (float)codeblock.x + 10, (float)(codeblock.y + codeblockheight / 2.5) }, textinputfontsize - 5, 3, WHITE);
+
+		if (CheckCollisionPointRec(mousepos, codeblock) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			text[0] = '\0';
+			chosenblock = i;
+			chosentext = i + startpos;
+			editing = false;
+		}
+	}
+
+	//DRAWING SAVE BUTTON
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth, textsavebuttonheight}, "SAVE TEMPLATE"))
+	{
+		gameTemplate.saveTemplate(textboxes);
+	}
+}
+
+void DrawTemplateTab()
+{
+	if (workers[chosengrid].empty())
+	{
+		DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), GRAY);
+		DrawRectangle(windowwidth - sidebarwidth + 80, windowheight * 0.43, sidebarwidth - 160, 130, BLACK);
+		DrawRectangle(windowwidth - sidebarwidth + 100, windowheight * 0.45, sidebarwidth - 200, 100, RED);
+		DrawTextEx(codingfontbold, "NO CODE SELECTED", { windowwidth - sidebarwidth + 120, windowheight * 0.5 }, 30, 2, WHITE);
+		return;
+	}
+
+	// SHOW TEMPLATES TAB
+	if (GuiButton({ windowwidth - sidebarwidth ,sidebarbuttonheight,sidebarwidth / 2,shopbuttonheight }, "Templates"))
+	{
+		TemplateTabState = ShowTemplates;
+	}
+	// SHOW CODES TAB
+	else if (GuiButton({ windowwidth - sidebarwidth / 2 ,sidebarbuttonheight,sidebarwidth / 2,shopbuttonheight }, "Codes"))
+	{
+		TemplateTabState = ShowCodes;
+	}
+
+	// SUB TEMPLATE TAB SYSTEM
+	switch (TemplateTabState)
+	{
+	case ShowCodes:
+		DrawShowCodesTab();
+		break;
+	case ShowTemplates:
+	default:
+		DrawShowTemplatesTab();
+		break;
+	}
 }
 
 void DrawMainCodeTab()
@@ -950,57 +1244,16 @@ void DrawMainCodeTab()
 	}
 
 	//DRAWING SAVE BUTTON
-	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth / 5,textsavebuttonheight }, "SAVE"))
+	if (GuiButton({ windowwidth - sidebarwidth,windowheight - textinputheight - textsavebuttonheight,sidebarwidth / 2,textsavebuttonheight }, "SAVE"))
 	{
 		workers[chosengrid][chosenperson].code = textboxes;
 		workers[chosengrid][chosenperson].linesize = textsizes;
 		workers[chosengrid][chosenperson].getCode();
 	}
 	//DRAWING TEMPLATE BUTTON
-	else if (GuiButton({ windowwidth - sidebarwidth * 2 / 5,windowheight - textinputheight - textsavebuttonheight,sidebarwidth * 2 / 5,textsavebuttonheight }, "TEMPLATE"))
+	else if (GuiButton({ windowwidth - sidebarwidth / 2,windowheight - textinputheight - textsavebuttonheight,sidebarwidth / 2,textsavebuttonheight }, "TEMPLATE"))
 	{
 		CodeState = Template;
-
-		// Clean up the textboxes // NEEDS SERIOUS CHECK AND REWORK
-		chosenblock = 0;
-		textsizes.clear();
-		textboxes.clear();
-
-		// hard coded system for now
-		std::cout << "template button\n";
-		std::ifstream tempFile(templateFolder + "/template.txt");
-
-		if (tempFile.is_open()) {
-			std::string tempLine;
-			while (std::getline(tempFile, tempLine)) {
-				int lineSize = tempLine.size() + 1; // include the '\0'
-
-				lineSize = (lineSize < textinputsize) ? lineSize : textinputsize;
-
-				char* lineBuffer = new char[lineSize];  // Dynamically allocate memory
-				std::memcpy(lineBuffer, tempLine.c_str(), lineSize);  // Copy line to char* buffer
-
-				textboxes.push_back(lineBuffer);  // Store in vector
-				textsizes.push_back(lineSize);
-			}
-			tempFile.close();  // Close the file
-		}
-	}
-	//DRAWING SAVE TEMPLATE BUTTON
-	else if (GuiButton({ windowwidth - sidebarwidth * 4 / 5,windowheight - textinputheight - textsavebuttonheight,sidebarwidth * 2 / 5,textsavebuttonheight }, "SAVE TEMPLATE"))
-	{
-		// hard coded system for now
-		std::cout << "save template button\n";
-		std::ofstream tempFile(templateFolder + "/template.txt");
-	
-		if (tempFile.is_open()) {
-			std::cout << "file opened for wrtiting\n";
-			for (const char *line : textboxes)
-			{
-				tempFile << line << '\n';
-			}
-			tempFile.close();
-		}
 	}
 
 	//DRAWING NAME BANNER
@@ -1707,9 +1960,6 @@ int main()
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	GuiSetStyle(DEFAULT, TEXT_SIZE, 25);
 	GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 1);
-
-	//Create folder dir
-	gameSetup();
 
 	//Set Font
 	codingfont = LoadFont("./fonts/dina10px.ttf");
