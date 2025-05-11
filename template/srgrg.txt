@@ -1,0 +1,4 @@
+!w
+eat
+work
+jump !w

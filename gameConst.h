@@ -65,5 +65,3 @@ constexpr float skilltreenodeangle = 180;
 constexpr float skilltreeedgethickness = 10;
 
 //Template
-const std::string templateFolder = "./template";
-constexpr int bankbuttonheight = 50;

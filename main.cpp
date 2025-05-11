@@ -7,6 +7,7 @@
 #include "garbage_maze.h"
 #include "rand_walls.h"
 #include "gameTemplates.h"
+#include "animationHandler.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ Font codingfontbold;
 //BANK
 Bank bank(0.06, 0.1);
 
+//Enums
 enum sidebarstate {
 	Code,
 	Shop,
@@ -51,10 +53,11 @@ enum bankstate {
 } BankState;
 
 enum screenmode {
+	All,
 	View,
 	Map,
 	Stock,
-	SkillTree
+	SkillTree,
 } ScreenMode;
 
 enum marketcondition {
@@ -133,6 +136,8 @@ Texture bankicon;
 Texture stock_background;
 Texture screw_head;
 Texture sticky_note;
+
+animationHandler AnimationHandler;
 
 /*
 Colors:
@@ -1217,7 +1222,7 @@ void DrawTemplateTab()
 		DrawRectangle(windowwidth - sidebarwidth, sidebarbuttonheight + shopbuttonheight, sidebarwidth, windowheight - (sidebarbuttonheight + shopbuttonheight), GRAY);
 		DrawRectangle(windowwidth - sidebarwidth + 80, windowheight * 0.43, sidebarwidth - 160, 130, BLACK);
 		DrawRectangle(windowwidth - sidebarwidth + 100, windowheight * 0.45, sidebarwidth - 200, 100, RED);
-		DrawTextEx(codingfontbold, "NO CODE SELECTED", { windowwidth - sidebarwidth + 120, windowheight * 0.5 }, 30, 2, WHITE);
+		DrawTextEx(codingfontbold, "NO CODE SELECTED", { windowwidth - sidebarwidth + 110, windowheight * 0.5-5 }, 30, 2, WHITE);
 		return;
 	}
 
@@ -2138,9 +2143,9 @@ int main()
 	InitializeSprites();
 	InitializeSkillTree();
 
-	ScreenMode = Map; //DEBUG
-	BankState = FD;
-	SidebarState = Money;
+	ScreenMode = View; //DEBUG
+	BankState = Invest;
+	SidebarState = Shop;
 
 	//Add Competitors
 	competitors.push_back(RandomGenerator());
@@ -2151,6 +2156,12 @@ int main()
 
 	bool clockswitch = false;
 
+	AnimationHandler.loadAnimation("sprites/Talking/women3","Talking_Woman",10);
+	AnimationHandler.playStaticAnimation("Talking_Woman", 1350, 600,0.5,0,true, screenmode::Map);
+
+	AnimationHandler.loadAnimation("sprites/Talking/women4", "Talking_Woman_2", 10);
+	AnimationHandler.playStaticAnimation("Talking_Woman_2", -30, 600, 0.5, 0, true, screenmode::Map);
+		
 	while (!WindowShouldClose())
 	{
 		mousepos = GetMousePosition();
@@ -2158,6 +2169,8 @@ int main()
 
 		//GAMETIME
 		gametime = std::chrono::duration_cast<std::chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count()%ticksize;
+
+		//TICK FUNCTIONS
 		if (gametime <= 20 && clockswitch == false)
 		{
 			clockswitch = true;
@@ -2213,6 +2226,8 @@ int main()
 			break;
 		}
 		DrawText(TextFormat("%d", GetFPS()), 10, 10, 25, BLACK);
+
+		AnimationHandler.update(std::chrono::duration_cast<std::chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count()/1000.0,ScreenMode);
 
 		EndDrawing();
 	}
